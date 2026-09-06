@@ -1,0 +1,13 @@
+{
+    "payload": {
+        "customer": "mihai95gabrieldev@gmail.com",
+        "licenseId": "CONTEST-0011",
+        "features": [
+            "FULL"
+        ],
+        "expiry": "2030-12-31",
+        "instances": "25"
+    },
+    "payloadRaw": "{\"customer\":\"mihai95gabrieldev@gmail.com\",\"licenseId\":\"CONTEST-0011\",\"features\":[\"FULL\"],\"expiry\":\"2030-12-31\",\"instances\":\"25\"}",
+    "signature": "rDJEi8X8ba/S4KsUQ/Vr8gVflaAOhBMpnaBCZIYtStgVk+VcwczRbj/vDfC7MEJIdclNE4nq70B+c3NjCShwm2UDeSd76lB+Q+mZtogLBx7DamPx0jIo+lKoYqUqRrq9DUykSlQ4wi/Jg/aLRnrw1Lo2yw//t6rN/LBS5A4xQxzGCMNrJ0oH2Pqf5I5Qz9IKwF5yynwQuF/K8IR0fHVzikip4UPbtBfl53zMjpHf6fQLTvrHwafhG3Wq8SO79TgzG5mdt0xYyqBLSzoUk5+fvjSjigfXYn5fqSyfQ2BWxSuiSUkKmvaB66mmnOpnUrHooejYDmB66Q147PAMphM+yg=="
+}

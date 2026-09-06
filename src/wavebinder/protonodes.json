@@ -1,0 +1,29 @@
+[
+  {
+    "name": "selectedMuscleGroupId",
+    "path": "/selectedMuscleGroupId",
+    "type": "SINGLE",
+    "dep": [],
+    "la": {
+      "type": "USER_SELECTION"
+    }
+  },
+  {
+    "name": "availableExercises",
+    "path": "/availableExercises",
+    "type": "MULTI",
+    "dep": [
+      {
+        "nodeName": "selectedMuscleGroupId",
+        "parameterName": "selectedMuscleGroupId",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "getExercisesForMuscleGroup"
+    }
+  }
+]

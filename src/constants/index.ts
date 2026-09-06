@@ -1,0 +1,1 @@
+export { LAYOUTS } from './layouts';

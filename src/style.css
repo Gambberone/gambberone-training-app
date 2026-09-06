@@ -1,0 +1,98 @@
+@import 'tailwindcss';
+
+@plugin "daisyui" {
+  themes:
+    training-light --default,
+    training-dark --prefersdark;
+}
+
+@plugin "daisyui/theme" {
+  name: 'training-light';
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: #f1f5f9;
+  --color-base-200: #e2e8f0;
+  --color-base-300: #cbd5e1;
+  --color-base-content: #0f172a;
+
+  --color-primary: #059669;
+  --color-primary-content: #ecfdf5;
+  --color-secondary: #475569;
+  --color-secondary-content: #f8fafc;
+  --color-accent: #34d399;
+  --color-accent-content: #064e3b;
+  --color-neutral: #1e293b;
+  --color-neutral-content: #f8fafc;
+
+  --color-info: #0284c7;
+  --color-info-content: #f0f9ff;
+  --color-success: #059669;
+  --color-success-content: #ecfdf5;
+  --color-warning: #d97706;
+  --color-warning-content: #fffbeb;
+  --color-error: #e11d48;
+  --color-error-content: #fff1f2;
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: 'training-dark';
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #334155;
+  --color-base-200: #1e293b;
+  --color-base-300: #0f172a;
+  --color-base-content: #f1f5f9;
+
+  --color-primary: #34d399;
+  --color-primary-content: #022c22;
+  --color-secondary: #cbd5e1;
+  --color-secondary-content: #0f172a;
+  --color-accent: #6ee7b7;
+  --color-accent-content: #022c22;
+  --color-neutral: #020617;
+  --color-neutral-content: #f8fafc;
+
+  --color-info: #7dd3fc;
+  --color-info-content: #082f49;
+  --color-success: #6ee7b7;
+  --color-success-content: #022c22;
+  --color-warning: #fcd34d;
+  --color-warning-content: #451a03;
+  --color-error: #fda4af;
+  --color-error-content: #4c0519;
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100dvh;
+}
