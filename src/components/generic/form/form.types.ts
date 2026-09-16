@@ -6,4 +6,7 @@ export interface FieldProps {
   disabled?: boolean;
   options?: any[];
   valueKey?: string;
+  error?: string;
+  required?: boolean;
+  compact?: boolean;
 }

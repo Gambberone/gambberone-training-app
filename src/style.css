@@ -96,3 +96,36 @@ body,
   width: 100%;
   min-height: 100dvh;
 }
+
+.workout-stepper {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.workout-stepper-item {
+  position: relative;
+  display: flex;
+  width: min(100%, 28rem);
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  border-width: 1px;
+  border-radius: var(--radius-box);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.workout-stepper-item--connected::after {
+  position: absolute;
+  top: calc(100% + 0.125rem);
+  left: 50%;
+  width: 8px;
+  height: 0.625rem;
+  content: '';
+  transform: translateX(-50%);
+  background-color: var(--color-base-200);
+}
