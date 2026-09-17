@@ -97,6 +97,16 @@ body,
   min-height: 100dvh;
 }
 
+.input:focus,
+.input:focus-within,
+.select:focus,
+.select:focus-within,
+.textarea:focus,
+.textarea:focus-within {
+  --input-color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
+  outline-color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
+}
+
 .workout-stepper {
   display: flex;
   width: 100%;

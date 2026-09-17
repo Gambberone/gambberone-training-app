@@ -22,7 +22,7 @@
         v-model="modelValue"
         type="number"
         min="0"
-        class="input input-bordered join-item flex-1 text-center focus:outline-none focus:ring-0 focus:border-base-300"
+        class="input join-item flex-1 text-2xl text-center text-primary font-semibold focus:outline-none focus:ring-0 focus:border-base-300 border-base-300 shadow-2xs"
       />
       <button
         class="btn join-item text-primary shadow-none"

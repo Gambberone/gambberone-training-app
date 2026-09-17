@@ -9,7 +9,7 @@
     }
   },
   {
-    "name": "availableExercises",
+    "name": "selectedExercise",
     "path": "/availableExercises",
     "type": "MULTI",
     "dep": [
@@ -25,5 +25,83 @@
       "type": "CUSTOM_FUNCTION",
       "functionName": "getExercisesForMuscleGroup"
     }
+  },
+  {
+    "name": "exerciseMode",
+    "path": "/exerciseMode",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": "repetitions",
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "exerciseValue",
+    "path": "/exerciseValue",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": 0,
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "sets",
+    "path": "/sets",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": 1,
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "hasSetPause",
+    "path": "/hasSetPause",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": false,
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "pauseBetweenSetsDuration",
+    "path": "/pauseBetweenSetsDuration",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": 0,
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "isPauseAvailable",
+    "path": "/isPauseAvailable",
+    "type": "SINGLE",
+    "dep": [{ "nodeName": "sets", "parameterName": "sets", "isOptional": false, "onUpdate": true, "type": "BODY" }],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "isPauseAvailable" }
+  },
+  {
+    "name": "effectivePauseDuration",
+    "path": "/effectivePauseDuration",
+    "type": "SINGLE",
+    "dep": [
+      { "nodeName": "isPauseAvailable", "parameterName": "isPauseAvailable", "isOptional": false, "onUpdate": true, "type": "BODY" },
+      { "nodeName": "hasSetPause", "parameterName": "hasSetPause", "isOptional": false, "onUpdate": true, "type": "BODY" },
+      { "nodeName": "pauseBetweenSetsDuration", "parameterName": "pauseBetweenSetsDuration", "isOptional": false, "onUpdate": true, "type": "BODY" }
+    ],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "effectivePauseDuration" }
+  },
+  {
+    "name": "validationErrors",
+    "path": "/validationErrors",
+    "type": "SINGLE",
+    "dep": [
+      { "nodeName": "selectedExercise", "parameterName": "selectedExercise", "isOptional": false, "onUpdate": true, "type": "BODY" },
+      { "nodeName": "exerciseValue", "parameterName": "exerciseValue", "isOptional": false, "onUpdate": true, "type": "BODY" },
+      { "nodeName": "sets", "parameterName": "sets", "isOptional": false, "onUpdate": true, "type": "BODY" },
+      { "nodeName": "hasSetPause", "parameterName": "hasSetPause", "isOptional": false, "onUpdate": true, "type": "BODY" },
+      { "nodeName": "effectivePauseDuration", "parameterName": "effectivePauseDuration", "isOptional": false, "onUpdate": true, "type": "BODY" }
+    ],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateExerciseStep" }
+  },
+  {
+    "name": "isStepValid",
+    "path": "/isStepValid",
+    "type": "SINGLE",
+    "dep": [{ "nodeName": "validationErrors", "parameterName": "validationErrors", "isOptional": false, "onUpdate": true, "type": "BODY" }],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "isStepValid" }
   }
 ]

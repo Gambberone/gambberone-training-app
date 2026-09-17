@@ -37,6 +37,7 @@
           :key="action.id"
           class="btn"
           type="button"
+          :disabled="action.disabled"
           @click="actionHandler(action.id)"
         >
           {{ action.label }}
@@ -54,6 +55,7 @@ interface ModalAction {
   id: string;
   label: string;
   color?: string;
+  disabled?: boolean;
 }
 
 interface ModalProps {

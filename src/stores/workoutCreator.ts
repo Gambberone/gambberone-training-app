@@ -7,6 +7,7 @@ import {
   type StretchingExercise,
   type WarmupExercise,
 } from '../constants';
+import { exerciseStepIsValid, exerciseStepToDraftChanges, resetExerciseStep } from '../wavebinder/exerciseStep';
 
 export interface WorkoutCreatorDraft {
   name: string;
@@ -17,6 +18,12 @@ export interface Workout {
   id: string;
   name: string;
   steps: WorkoutCreatorStep[];
+}
+
+export interface ScheduledWorkout {
+  id: string;
+  workoutId: string;
+  date: string;
 }
 
 export const createWarmupExercise = (): WarmupExercise => ({
@@ -49,11 +56,13 @@ const createStep = (type: WorkoutCreatorStepAction, step: number): WorkoutCreato
 });
 
 export const workoutsRef = localRef<Workout[]>('gtt:workouts', () => []);
+export const scheduledWorkoutsRef = localRef<ScheduledWorkout[]>('gtt:scheduled-workouts', () => []);
 export const workoutCreatorDraft = ref<WorkoutCreatorDraft>({ name: '', steps: [] });
 export const currentWorkoutCreatorStep = ref<WorkoutCreatorStep>();
 export const isCreatingWorkoutCreatorStep = ref(true);
 
 export const startWorkoutCreatorStep = (type: WorkoutCreatorStepAction) => {
+  if (type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) resetExerciseStep();
   currentWorkoutCreatorStep.value = createStep(type, workoutCreatorDraft.value.steps.length + 1);
 };
 
@@ -65,6 +74,10 @@ export const updateCurrentWorkoutCreatorStep = (changes: Partial<WorkoutCreatorS
 export const createWorkoutCreatorStep = () => {
   if (!currentWorkoutCreatorStep.value) return;
   const step = currentWorkoutCreatorStep.value;
+  if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
+    if (!exerciseStepIsValid()) return;
+    Object.assign(step, exerciseStepToDraftChanges());
+  }
   workoutCreatorDraft.value.steps.push(step);
 
   if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE && step.hasSetPause && step.sets > 1) {
@@ -90,6 +103,21 @@ export const createWorkout = () => {
     name,
     steps: JSON.parse(JSON.stringify(workoutCreatorDraft.value.steps)) as WorkoutCreatorStep[],
   });
+};
+
+export const scheduleWorkout = (workoutId: string, date: string) => {
+  scheduledWorkoutsRef.value.push({ id: crypto.randomUUID(), workoutId, date });
+};
+
+export const removeScheduledWorkout = (id: string) => {
+  scheduledWorkoutsRef.value = scheduledWorkoutsRef.value.filter((scheduledWorkout) => scheduledWorkout.id !== id);
+};
+
+export const removeWorkout = (id: string) => {
+  workoutsRef.value = workoutsRef.value.filter((workout) => workout.id !== id);
+  scheduledWorkoutsRef.value = scheduledWorkoutsRef.value.filter(
+    (scheduledWorkout) => scheduledWorkout.workoutId !== id,
+  );
 };
 
 export const resetWorkoutCreator = () => {

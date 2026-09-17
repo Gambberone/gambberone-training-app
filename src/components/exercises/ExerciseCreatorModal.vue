@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { muscleGroups, type Exercise } from '../../domain/exercises.ts';
+import { muscleGroups, type Exercise, type MuscleGroupType } from '../../domain/exercises.ts';
 import { exercisesRef } from '../../stores/exercises';
 import GttInputField from '../generic/form/GttInputField.vue';
 import GttSelectField from '../generic/form/GttSelectField.vue';
@@ -44,7 +44,7 @@ const props = defineProps<ExerciseCreatorEditorProps>();
 
 const exerciseName = ref('');
 const exerciseNameError = ref<string | undefined>(undefined);
-const selectedMuscleGroup = ref<string | undefined>(undefined);
+const selectedMuscleGroup = ref<MuscleGroupType | undefined>(undefined);
 const muscleGroupError = ref<string | undefined>(undefined);
 
 watch(isOpen, () => {

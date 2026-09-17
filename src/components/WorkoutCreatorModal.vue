@@ -22,8 +22,11 @@ import {
   resetWorkoutCreator,
   workoutCreatorDraft,
 } from '../stores/workoutCreator';
+import { getExerciseStepNode } from '../wavebinder/exerciseStep';
+import { useWaveBinderNode } from '../composables/useWaveBinderNode';
 
 const isOpen = defineModel<boolean>({ default: false });
+const isExerciseStepValid = useWaveBinderNode<boolean | null>(getExerciseStepNode('isStepValid'));
 
 watch(isOpen, (open, wasOpen) => {
   if (wasOpen && !open) {
@@ -34,7 +37,15 @@ watch(isOpen, (open, wasOpen) => {
 const modalTitle = computed(() => currentWorkoutCreatorStep.value?.type ?? 'Workout creator');
 const stepActions = computed(() => {
   if (currentWorkoutCreatorStep.value) {
-    return [{ id: 'create-step', label: 'Crea step', color: 'primary' }];
+    const isExerciseStep = currentWorkoutCreatorStep.value.type === 'EXERCISE';
+    return [
+      {
+        id: 'create-step',
+        label: 'Crea step',
+        color: 'primary',
+        disabled: isExerciseStep && !isExerciseStepValid.value,
+      },
+    ];
   }
 
   return workoutCreatorDraft.value.steps.length > 0 && workoutCreatorDraft.value.name.trim()
