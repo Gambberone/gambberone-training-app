@@ -6,6 +6,7 @@
     :actions="stepActions"
     :close-on-action="false"
     @action="handleAction"
+    enable-full-screen
   >
     <WorkoutCreator />
   </GttModal>
@@ -67,7 +68,11 @@ watch(isOpen, (open, wasOpen) => {
 
 onBeforeUnmount(cancelScheduledReset);
 
-const modalTitle = computed(() => currentWorkoutCreatorStep.value?.type ?? (props.workout ? 'Modifica workout' : 'Workout creator'));
+const modalTitle = computed(
+  () =>
+    currentWorkoutCreatorStep.value?.type ??
+    (props.workout ? 'Modifica workout' : 'Workout creator'),
+);
 const stepActions = computed(() => {
   if (currentWorkoutCreatorStep.value) {
     const isExerciseStep = currentWorkoutCreatorStep.value.type === 'EXERCISE';
@@ -82,7 +87,13 @@ const stepActions = computed(() => {
   }
 
   return workoutCreatorDraft.value.steps.length > 0 && workoutCreatorDraft.value.name.trim()
-    ? [{ id: 'save-workout', label: props.workout ? 'Salva workout' : 'Crea workout', color: 'primary' }]
+    ? [
+        {
+          id: 'save-workout',
+          label: props.workout ? 'Salva workout' : 'Crea workout',
+          color: 'primary',
+        },
+      ]
     : [];
 });
 
