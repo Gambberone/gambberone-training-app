@@ -1,6 +1,7 @@
 <template>
   <WorkoutCreatorFirstStep v-if="isCreatingWorkoutCreatorStep || currentWorkoutCreatorStep" />
   <section v-else class="flex flex-col items-center gap-6">
+    <GttInputField id="workout_name" label="Nome workout" compact v-model="workoutName" />
     <ol class="workout-stepper">
       <li
         v-for="step in visibleSteps"
@@ -61,6 +62,7 @@
 import { computed } from 'vue';
 import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
 import WorkoutCreatorFirstStep from './creator/WorkoutCreatorFirstStep.vue';
+import GttInputField from '../generic/form/GttInputField.vue';
 import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '../../constants';
 import {
   currentWorkoutCreatorStep,
@@ -72,6 +74,13 @@ import {
 const hasWarmup = computed(() =>
   workoutCreatorDraft.value.steps.some((step) => step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP),
 );
+
+const workoutName = computed({
+  get: () => workoutCreatorDraft.value.name,
+  set: (name: string) => {
+    workoutCreatorDraft.value.name = name;
+  },
+});
 
 const visibleSteps = computed(() =>
   workoutCreatorDraft.value.steps.filter(

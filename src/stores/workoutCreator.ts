@@ -105,6 +105,26 @@ export const createWorkout = () => {
   });
 };
 
+export const loadWorkoutCreator = (workout: Workout) => {
+  workoutCreatorDraft.value = {
+    name: workout.name,
+    steps: JSON.parse(JSON.stringify(workout.steps)) as WorkoutCreatorStep[],
+  };
+  currentWorkoutCreatorStep.value = undefined;
+  isCreatingWorkoutCreatorStep.value = workout.steps.length === 0;
+};
+
+export const updateWorkout = (id: Workout['id']) => {
+  const name = workoutCreatorDraft.value.name.trim();
+  if (!name || workoutCreatorDraft.value.steps.length === 0) return;
+
+  const workout = workoutsRef.value.find((item) => item.id === id);
+  if (!workout) return;
+
+  workout.name = name;
+  workout.steps = JSON.parse(JSON.stringify(workoutCreatorDraft.value.steps)) as WorkoutCreatorStep[];
+};
+
 export const scheduleWorkout = (workoutId: string, date: string) => {
   scheduledWorkoutsRef.value.push({ id: crypto.randomUUID(), workoutId, date });
 };

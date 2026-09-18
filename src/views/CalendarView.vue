@@ -144,7 +144,7 @@ function openDay(date: string) {
 }
 .calendar-day {
   display: flex;
-  min-height: 10rem;
+  min-height: 9rem;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -203,7 +203,7 @@ function openDay(date: string) {
 }
 @media (max-width: 480px) {
   .calendar-day {
-    min-height: 7rem;
+    min-height: 6.5rem;
     padding: 0.25rem;
   }
   .calendar-weekdays span {

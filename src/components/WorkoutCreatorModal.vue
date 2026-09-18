@@ -12,29 +12,62 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, onBeforeUnmount, watch } from 'vue';
 import GttModal from './generic/GttModal.vue';
 import WorkoutCreator from './workouts/WorkoutCreator.vue';
 import {
   createWorkoutCreatorStep,
   createWorkout,
   currentWorkoutCreatorStep,
+  loadWorkoutCreator,
   resetWorkoutCreator,
+  type Workout,
+  updateWorkout,
   workoutCreatorDraft,
 } from '../stores/workoutCreator';
 import { getExerciseStepNode } from '../wavebinder/exerciseStep';
 import { useWaveBinderNode } from '../composables/useWaveBinderNode';
 
 const isOpen = defineModel<boolean>({ default: false });
+const props = defineProps<{
+  workout?: Workout;
+}>();
 const isExerciseStepValid = useWaveBinderNode<boolean | null>(getExerciseStepNode('isStepValid'));
+const resetDelayMs = 250;
+let resetTimeout: ReturnType<typeof setTimeout> | undefined;
+
+const cancelScheduledReset = () => {
+  if (resetTimeout === undefined) return;
+  clearTimeout(resetTimeout);
+  resetTimeout = undefined;
+};
+
+const resetAfterClose = () => {
+  cancelScheduledReset();
+  resetTimeout = setTimeout(() => {
+    resetWorkoutCreator();
+    resetTimeout = undefined;
+  }, resetDelayMs);
+};
 
 watch(isOpen, (open, wasOpen) => {
+  if (open && !wasOpen) {
+    cancelScheduledReset();
+    if (props.workout) {
+      loadWorkoutCreator(props.workout);
+    } else {
+      resetWorkoutCreator();
+    }
+  }
+
   if (wasOpen && !open) {
-    resetWorkoutCreator();
+    resetAfterClose();
   }
 });
 
-const modalTitle = computed(() => currentWorkoutCreatorStep.value?.type ?? 'Workout creator');
+onBeforeUnmount(cancelScheduledReset);
+
+const modalTitle = computed(() => currentWorkoutCreatorStep.value?.type ?? (props.workout ? 'Modifica workout' : 'Workout creator'));
 const stepActions = computed(() => {
   if (currentWorkoutCreatorStep.value) {
     const isExerciseStep = currentWorkoutCreatorStep.value.type === 'EXERCISE';
@@ -49,14 +82,18 @@ const stepActions = computed(() => {
   }
 
   return workoutCreatorDraft.value.steps.length > 0 && workoutCreatorDraft.value.name.trim()
-    ? [{ id: 'create-workout', label: 'Crea workout', color: 'primary' }]
+    ? [{ id: 'save-workout', label: props.workout ? 'Salva workout' : 'Crea workout', color: 'primary' }]
     : [];
 });
 
 const handleAction = (actionId: string) => {
   if (actionId === 'create-step') createWorkoutCreatorStep();
-  if (actionId === 'create-workout') {
-    createWorkout();
+  if (actionId === 'save-workout') {
+    if (props.workout) {
+      updateWorkout(props.workout.id);
+    } else {
+      createWorkout();
+    }
     isOpen.value = false;
   }
 };

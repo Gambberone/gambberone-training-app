@@ -1,6 +1,12 @@
 <template>
   <dialog ref="dialog" class="modal" @close="isOpen = false" @click.self="closeModal">
-    <div class="modal-box flex flex-col" :class="{ 'w-[95dvw] h-[95dvh]': props.full }">
+    <div
+      class="modal-box flex max-h-[calc(100dvh-2rem)] flex-col"
+      :class="{
+        'w-[95dvw] h-[95dvh]': props.full,
+        'w-screen! h-screen! max-w-none! max-h-none! rounded-none': isFullScreen,
+      }"
+    >
       <div class="modal-top flex items-center">
         <div class="flex-1">
           <span class="text-xl" v-if="props.title">{{ props.title }}</span>
@@ -10,8 +16,11 @@
             class="btn btn-ghost btn-sm btn-circle top-4 right-4"
             type="button"
             v-if="enableFullScreen"
+            :aria-label="isFullScreen ? 'Riduci modal' : 'Espandi modal a schermo intero'"
+            @click="toggleFullScreen"
           >
-            <Maximize :size="20" />
+            <Minimize v-if="isFullScreen" :size="20" />
+            <Maximize v-else :size="20" />
           </button>
           <button
             class="btn btn-ghost btn-sm btn-circle top-4 right-4"
@@ -23,14 +32,14 @@
           </button>
         </div>
       </div>
-      <div class="mt-5 flex-1 min-h-0">
+      <div class="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <slot>
           <p v-if="props.message" class="text-md">
             {{ props.message }}
           </p>
         </slot>
       </div>
-      <div class="modal-action" v-if="props.actions && props.actions.length > 0">
+      <div class="modal-action shrink-0" v-if="props.actions && props.actions.length > 0">
         <button
           v-for="action in props.actions"
           :class="[action.color && `btn-${action.color}`]"
@@ -48,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { X as Close, Maximize } from '@lucide/vue';
+import { X as Close, Maximize, Minimize } from '@lucide/vue';
 import { ref, watch } from 'vue';
 
 interface ModalAction {
@@ -78,6 +87,7 @@ const emit = defineEmits<{
 
 const isOpen = defineModel<boolean>({ default: false });
 const dialog = ref<HTMLDialogElement | null>(null);
+const isFullScreen = ref(false);
 
 watch(isOpen, (open) => {
   if (open && !dialog.value?.open) dialog.value?.showModal();
@@ -87,6 +97,10 @@ watch(isOpen, (open) => {
 const closeModal = () => {
   dialog.value?.close();
   emit('action', 'close');
+};
+
+const toggleFullScreen = () => {
+  isFullScreen.value = !isFullScreen.value;
 };
 
 const actionHandler = (actionId: string) => {
