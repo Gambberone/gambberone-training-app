@@ -7,7 +7,14 @@ import {
   type StretchingExercise,
   type WarmupExercise,
 } from '../constants';
-import { exerciseStepIsValid, exerciseStepToDraftChanges, resetExerciseStep } from '../wavebinder/exerciseStep';
+import {
+  exerciseStepToDraftChanges,
+  exerciseStepValidationErrors,
+  getExerciseStepNode,
+  resetExerciseStep,
+  selectedExerciseNode,
+} from '../wavebinder/exerciseStep';
+import { exercisesRef } from './exercises';
 
 export interface WorkoutCreatorDraft {
   name: string;
@@ -61,10 +68,47 @@ export const scheduledWorkoutsRef = localRef<ScheduledWorkout[]>('gtt:scheduled-
 export const workoutCreatorDraft = ref<WorkoutCreatorDraft>({ name: '', steps: [] });
 export const currentWorkoutCreatorStep = ref<WorkoutCreatorStep>();
 export const isCreatingWorkoutCreatorStep = ref(true);
+export const editingWorkoutCreatorStepIndex = ref<number>();
+
+const cloneStep = (step: WorkoutCreatorStep) =>
+  JSON.parse(JSON.stringify(step)) as WorkoutCreatorStep;
+
+const normalizeStepNumbers = () => {
+  workoutCreatorDraft.value.steps.forEach((step, index) => {
+    step.step = index + 1;
+  });
+};
+
+const loadExerciseStep = (step: WorkoutCreatorStep) => {
+  const exercise = exercisesRef.value.find((item) => item.id === step.exerciseId) ?? null;
+  getExerciseStepNode('selectedMuscleGroupId').next(exercise?.muscleGroupId ?? null);
+  const selectedExerciseIndex = selectedExerciseNode().choices.findIndex(
+    (choice) => choice.id === exercise?.id,
+  );
+  if (selectedExerciseIndex >= 0) selectedExerciseNode().setSelection(selectedExerciseIndex);
+  else selectedExerciseNode().next(null);
+  getExerciseStepNode('exerciseMode').next(step.exerciseModeType ?? 'repetitions');
+  getExerciseStepNode('exerciseValue').next(
+    step.exerciseModeType === 'duration' ? (step.exerciseDuration ?? 0) : (step.exerciseRepetitions ?? 0),
+  );
+  getExerciseStepNode('sets').next(step.sets);
+  getExerciseStepNode('hasSetPause').next(Boolean(step.hasSetPause));
+  getExerciseStepNode('pauseBetweenSetsDuration').next(step.pauseBetweenSetsDuration);
+};
 
 export const startWorkoutCreatorStep = (type: WorkoutCreatorStepAction) => {
+  editingWorkoutCreatorStepIndex.value = undefined;
   if (type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) resetExerciseStep();
   currentWorkoutCreatorStep.value = createStep(type, workoutCreatorDraft.value.steps.length + 1);
+};
+
+export const editWorkoutCreatorStep = (index: number) => {
+  const step = workoutCreatorDraft.value.steps[index];
+  if (!step || step.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE) return;
+
+  editingWorkoutCreatorStepIndex.value = index;
+  currentWorkoutCreatorStep.value = cloneStep(step);
+  if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) loadExerciseStep(step);
 };
 
 export const updateCurrentWorkoutCreatorStep = (changes: Partial<WorkoutCreatorStep>) => {
@@ -72,26 +116,104 @@ export const updateCurrentWorkoutCreatorStep = (changes: Partial<WorkoutCreatorS
   Object.assign(currentWorkoutCreatorStep.value, changes);
 };
 
+export const currentWorkoutCreatorStepValidationErrors = () => {
+  const step = currentWorkoutCreatorStep.value;
+  if (!step) return [];
+
+  if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) return exerciseStepValidationErrors();
+
+  if (step.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE) {
+    return Number(step.pauseDuration) > 0 ? [] : ['Inserisci una durata della pausa maggiore di zero.'];
+  }
+
+  const exercises =
+    step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP
+      ? step.warmupExercises
+      : step.stretchingExercises;
+  const stepLabel = step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP ? 'warm-up' : 'stretching';
+  const errors: string[] = [];
+  if (!exercises?.every((exercise) => exercise.exerciseId)) {
+    errors.push(`Seleziona un esercizio per ogni elemento di ${stepLabel}.`);
+  }
+  const hasValidValues =
+    step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP
+      ? step.warmupExercises?.every((exercise) =>
+          Number(exercise.modeType === 'repetitions' ? exercise.repetitions : exercise.duration) > 0,
+        )
+      : step.stretchingExercises?.every((exercise) => Number(exercise.duration) > 0);
+  if (!hasValidValues) {
+    errors.push(`Inserisci una durata o un numero di ripetizioni maggiore di zero per ogni elemento di ${stepLabel}.`);
+  }
+  return errors;
+};
+
+export const isCurrentWorkoutCreatorStepValid = () =>
+  currentWorkoutCreatorStepValidationErrors().length === 0;
+
 export const createWorkoutCreatorStep = () => {
   if (!currentWorkoutCreatorStep.value) return;
   const step = currentWorkoutCreatorStep.value;
+  if (!isCurrentWorkoutCreatorStepValid()) return;
   if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
-    if (!exerciseStepIsValid()) return;
     Object.assign(step, exerciseStepToDraftChanges());
   }
-  workoutCreatorDraft.value.steps.push(step);
-
-  if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE && step.hasSetPause && step.sets > 1) {
-    workoutCreatorDraft.value.steps.push({
-      step: step.step + 1,
-      type: WORKOUT_CREATOR_STEP_ACTION.SETPAUSE,
-      pauseDuration: step.pauseBetweenSetsDuration,
-      sets: 1,
-      pauseBetweenSetsDuration: 0,
-    });
+  const editingIndex = editingWorkoutCreatorStepIndex.value;
+  if (editingIndex === undefined) {
+    workoutCreatorDraft.value.steps.push(step);
+  } else {
+    workoutCreatorDraft.value.steps.splice(editingIndex, 1, step);
   }
 
+  if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
+    const setPauseIndex = (editingIndex ?? workoutCreatorDraft.value.steps.length - 1) + 1;
+    const hasSetPause = step.hasSetPause && step.sets > 1;
+    const existingSetPause = workoutCreatorDraft.value.steps[setPauseIndex];
+
+    if (hasSetPause) {
+      const setPauseStep: WorkoutCreatorStep = {
+        step: step.step + 1,
+        type: WORKOUT_CREATOR_STEP_ACTION.SETPAUSE,
+        pauseDuration: step.pauseBetweenSetsDuration,
+        sets: 1,
+        pauseBetweenSetsDuration: 0,
+      };
+      if (existingSetPause?.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE) {
+        workoutCreatorDraft.value.steps.splice(setPauseIndex, 1, setPauseStep);
+      } else {
+        workoutCreatorDraft.value.steps.splice(setPauseIndex, 0, setPauseStep);
+      }
+    } else if (existingSetPause?.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE) {
+      workoutCreatorDraft.value.steps.splice(setPauseIndex, 1);
+    }
+  }
+
+  normalizeStepNumbers();
   currentWorkoutCreatorStep.value = undefined;
+  editingWorkoutCreatorStepIndex.value = undefined;
+  isCreatingWorkoutCreatorStep.value = false;
+};
+
+export const removeWorkoutCreatorStep = () => {
+  const editingIndex = editingWorkoutCreatorStepIndex.value;
+  if (editingIndex === undefined) return;
+
+  const step = workoutCreatorDraft.value.steps[editingIndex];
+  if (!step) return;
+  const count =
+    step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE &&
+    workoutCreatorDraft.value.steps[editingIndex + 1]?.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE
+      ? 2
+      : 1;
+  workoutCreatorDraft.value.steps.splice(editingIndex, count);
+  normalizeStepNumbers();
+  currentWorkoutCreatorStep.value = undefined;
+  editingWorkoutCreatorStepIndex.value = undefined;
+  isCreatingWorkoutCreatorStep.value = false;
+};
+
+export const returnToWorkoutCreatorOverview = () => {
+  currentWorkoutCreatorStep.value = undefined;
+  editingWorkoutCreatorStepIndex.value = undefined;
   isCreatingWorkoutCreatorStep.value = false;
 };
 
@@ -114,6 +236,7 @@ export const loadWorkoutCreator = (workout: Workout) => {
     steps: JSON.parse(JSON.stringify(workout.steps)) as WorkoutCreatorStep[],
   };
   currentWorkoutCreatorStep.value = undefined;
+  editingWorkoutCreatorStepIndex.value = undefined;
   isCreatingWorkoutCreatorStep.value = workout.steps.length === 0;
 };
 
@@ -151,5 +274,6 @@ export const removeWorkout = (id: string) => {
 export const resetWorkoutCreator = () => {
   workoutCreatorDraft.value = { name: '', steps: [] };
   currentWorkoutCreatorStep.value = undefined;
+  editingWorkoutCreatorStepIndex.value = undefined;
   isCreatingWorkoutCreatorStep.value = true;
 };

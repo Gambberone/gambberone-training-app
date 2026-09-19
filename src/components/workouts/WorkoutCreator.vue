@@ -5,9 +5,14 @@
     <ol class="workout-stepper">
       <li
         v-for="step in visibleSteps"
-        :key="step.step"
-        class="workout-stepper-item"
+        :key="step.index"
+        class="workout-stepper-item cursor-pointer transition hover:brightness-95"
         :class="stepColorClass(step.type)"
+        role="button"
+        tabindex="0"
+        @click="editStep(step.index)"
+        @keydown.enter="editStep(step.index)"
+        @keydown.space.prevent="editStep(step.index)"
       >
         <Flame v-if="step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP" :size="20" />
         <Dumbbell v-else-if="step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE" :size="20" />
@@ -66,6 +71,7 @@ import GttInputField from '../generic/form/GttInputField.vue';
 import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '../../constants';
 import {
   currentWorkoutCreatorStep,
+  editWorkoutCreatorStep,
   isCreatingWorkoutCreatorStep,
   startWorkoutCreatorStep,
   workoutCreatorDraft,
@@ -83,13 +89,17 @@ const workoutName = computed({
 });
 
 const visibleSteps = computed(() =>
-  workoutCreatorDraft.value.steps.filter(
-    (step) => step.type !== WORKOUT_CREATOR_STEP_ACTION.SETPAUSE,
-  ),
+  workoutCreatorDraft.value.steps
+    .map((step, index) => ({ ...step, index }))
+    .filter((step) => step.type !== WORKOUT_CREATOR_STEP_ACTION.SETPAUSE),
 );
 
 const addStep = (type: WorkoutCreatorStepAction) => {
   startWorkoutCreatorStep(type);
+};
+
+const editStep = (index: number) => {
+  editWorkoutCreatorStep(index);
 };
 
 const stepLabel = (type: WorkoutCreatorStepAction) =>

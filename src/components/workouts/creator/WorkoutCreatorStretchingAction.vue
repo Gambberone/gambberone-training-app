@@ -6,6 +6,8 @@
     >
       <WorkoutCreatorStretchingExercise
         v-model="stretchingExercises[stretchingExerciseIndex]"
+        :show-remove="stretchingExercises.length > 1"
+        @remove="removeStretchingExercise(stretchingExerciseIndex)"
       />
     </div>
     <button class="btn" type="button" @click="addStretchingExercise">Aggiungi esercizio</button>
@@ -24,5 +26,9 @@ const stretchingExercises = computed(() => currentWorkoutCreatorStep.value?.stre
 
 const addStretchingExercise = () => {
   currentWorkoutCreatorStep.value?.stretchingExercises?.push(createStretchingExercise());
+};
+
+const removeStretchingExercise = (index: number) => {
+  currentWorkoutCreatorStep.value?.stretchingExercises?.splice(index, 1);
 };
 </script>

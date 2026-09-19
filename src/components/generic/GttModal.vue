@@ -1,5 +1,11 @@
 <template>
-  <dialog ref="dialog" class="modal" @close="isOpen = false" @click.self="closeModal">
+  <dialog
+    ref="dialog"
+    class="modal"
+    @cancel.prevent="closeModal"
+    @close="isOpen = false"
+    @click.self="closeModal"
+  >
     <div
       class="modal-box flex max-h-[calc(100dvh-2rem)] flex-col"
       :class="{
@@ -8,7 +14,16 @@
       }"
     >
       <div class="modal-top relative z-10 flex items-center bg-base-100/85 backdrop-blur-sm">
-        <div class="flex-1">
+        <div class="flex flex-1 items-center">
+          <button
+            v-if="props.goBack"
+            class="btn btn-ghost btn-sm btn-circle mr-2 text-primary"
+            type="button"
+            aria-label="Torna indietro"
+            @click="emit('goBack')"
+          >
+            <ChevronLeft :size="25" />
+          </button>
           <span class="text-xl" v-if="props.title">{{ props.title }}</span>
         </div>
         <div class="flex-0 flex">
@@ -23,7 +38,7 @@
             <Maximize v-else :size="20" />
           </button>
           <button
-            class="btn btn-ghost btn-sm btn-circle top-4 right-4"
+            class="btn btn-ghost btn-sm btn-circle top-4 right-4 text-error"
             type="button"
             aria-label="Chiudi modal"
             @click="closeModal"
@@ -33,7 +48,7 @@
         </div>
       </div>
       <div
-        class="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-3 mask-[linear-gradient(to_bottom,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)]"
+        class="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 py-3 mask-[linear-gradient(to_bottom,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)]"
       >
         <slot>
           <p v-if="props.message" class="text-md">
@@ -62,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { X as Close, Maximize, Minimize } from '@lucide/vue';
+import { ChevronLeft, X as Close, Maximize, Minimize } from '@lucide/vue';
 import { ref, watch } from 'vue';
 
 interface ModalAction {
@@ -79,6 +94,8 @@ interface ModalProps {
   message?: string;
   actions?: ModalAction[];
   enableFullScreen?: boolean;
+  beforeClose?: () => boolean;
+  goBack?: boolean;
 }
 
 const props = withDefaults(defineProps<ModalProps>(), {
@@ -88,6 +105,7 @@ const props = withDefaults(defineProps<ModalProps>(), {
 
 const emit = defineEmits<{
   action: [id: string];
+  goBack: [];
 }>();
 
 const isOpen = defineModel<boolean>({ default: false });
@@ -100,6 +118,7 @@ watch(isOpen, (open) => {
 });
 
 const closeModal = () => {
+  if (props.beforeClose?.() === false) return;
   dialog.value?.close();
   emit('action', 'close');
 };

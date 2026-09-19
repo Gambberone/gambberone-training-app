@@ -7,6 +7,7 @@
       label="Macrogruppo"
       placeholder="Scegli un macrogruppo"
       required
+      compact
     />
     <GttSelectField
       id="exercise"
@@ -17,6 +18,7 @@
       placeholder="Scegli un esercizio"
       :disabled="!selectedMuscleGroupId"
       required
+      compact
     />
     <div class="flex flex-col gap-1">
       <WorkoutCreatorDurationRepetitionField
@@ -48,16 +50,13 @@
         label="Durata pausa (secondi)"
       />
     </div>
-    <ul v-if="validationErrors.length" class="text-sm text-error list-disc pl-5" aria-live="polite">
-      <li v-for="error in validationErrors" :key="error">{{ error }}</li>
-    </ul>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { muscleGroups } from '../../../domain/exercises';
 import { useWaveBinderMultiNode, useWaveBinderNode } from '../../../composables/useWaveBinderNode';
+import { muscleGroups } from '../../../domain/exercises';
 import { getExerciseStepNode, selectedExerciseNode } from '../../../wavebinder/exerciseStep';
 import GttSelectField from '../../generic/form/GttSelectField.vue';
 import WorkoutCreatorDurationRepetitionField from './WorkoutCreatorDurationRepetitionField.vue';
@@ -65,16 +64,16 @@ import WorkoutCreatorDurationRepetitionField from './WorkoutCreatorDurationRepet
 const selectedMuscleGroupIdNode = useWaveBinderNode<string | null>(
   getExerciseStepNode('selectedMuscleGroupId'),
 );
-const { selectedId: selectedExerciseId, choices: availableExercises } = useWaveBinderMultiNode(
-  selectedExerciseNode(),
-);
+const { selectedId: selectedExerciseId, choices: availableExercises } =
+  useWaveBinderMultiNode(selectedExerciseNode());
 const mode = useWaveBinderNode<'duration' | 'repetitions'>(getExerciseStepNode('exerciseMode'));
 const exerciseValueNumber = useWaveBinderNode<number>(getExerciseStepNode('exerciseValue'));
 const setsNumber = useWaveBinderNode<number>(getExerciseStepNode('sets'));
 const hasSetPause = useWaveBinderNode<boolean>(getExerciseStepNode('hasSetPause'));
-const pauseDurationNumber = useWaveBinderNode<number>(getExerciseStepNode('pauseBetweenSetsDuration'));
+const pauseDurationNumber = useWaveBinderNode<number>(
+  getExerciseStepNode('pauseBetweenSetsDuration'),
+);
 const isPauseAvailable = useWaveBinderNode<boolean>(getExerciseStepNode('isPauseAvailable'));
-const validationErrorsNode = useWaveBinderNode<string[] | null>(getExerciseStepNode('validationErrors'));
 
 const trainingMuscleGroups = muscleGroups
   .filter(({ id }) => id !== 'WARMUP' && id !== 'STRETCHING')
@@ -109,8 +108,6 @@ const pauseBetweenSetsDuration = computed({
     pauseDurationNumber.value = Math.max(0, Number(value));
   },
 });
-const validationErrors = computed(() => validationErrorsNode.value ?? []);
-
 watch(isPauseAvailable, (available) => {
   if (!available) hasSetPause.value = false;
 });

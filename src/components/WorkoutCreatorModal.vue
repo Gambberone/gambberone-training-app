@@ -5,15 +5,40 @@
     :title="modalTitle"
     :actions="stepActions"
     :close-on-action="false"
+    :before-close="requestClose"
+    :go-back="Boolean(currentWorkoutCreatorStep)"
     @action="handleAction"
+    @go-back="requestGoBack"
     enable-full-screen
   >
     <WorkoutCreator />
   </GttModal>
+  <GttModal
+    v-model="isDiscardStepConfirmationOpen"
+    title="Modifiche non salvate"
+    :actions="[
+      { id: 'keep-editing', label: 'Continua' },
+      { id: 'discard', label: 'Abbandona', color: 'error' },
+    ]"
+    @action="handleDiscardStepConfirmation"
+  >
+    <p class="text-md">Vuoi tornare alla lista degli step senza salvare le modifiche?</p>
+  </GttModal>
+  <GttModal
+    v-model="isDiscardConfirmationOpen"
+    title="Modifiche non salvate"
+    :actions="[
+      { id: 'keep-editing', label: 'Continua' },
+      { id: 'discard', label: 'Abbandona', color: 'error' },
+    ]"
+    @action="handleDiscardConfirmation"
+  >
+    <p class="text-md">Hai modifiche non salvate. Vuoi davvero chiudere il workout creator?</p>
+  </GttModal>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GttModal from './generic/GttModal.vue';
 import WorkoutCreator from './workouts/WorkoutCreator.vue';
@@ -21,13 +46,18 @@ import {
   createWorkoutCreatorStep,
   createWorkout,
   currentWorkoutCreatorStep,
+  editingWorkoutCreatorStepIndex,
+  isCurrentWorkoutCreatorStepValid,
+  isCreatingWorkoutCreatorStep,
   loadWorkoutCreator,
   resetWorkoutCreator,
+  removeWorkoutCreatorStep,
+  returnToWorkoutCreatorOverview,
   type Workout,
   updateWorkout,
   workoutCreatorDraft,
 } from '../stores/workoutCreator';
-import { getExerciseStepNode } from '../wavebinder/exerciseStep';
+import { getExerciseStepNode, selectedExerciseNode } from '../wavebinder/exerciseStep';
 import { useWaveBinderNode } from '../composables/useWaveBinderNode';
 import { showToast } from '../composables/toast';
 
@@ -39,6 +69,40 @@ const isExerciseStepValid = useWaveBinderNode<boolean | null>(getExerciseStepNod
 const router = useRouter();
 const resetDelayMs = 250;
 let resetTimeout: ReturnType<typeof setTimeout> | undefined;
+const isDiscardConfirmationOpen = ref(false);
+const isDiscardStepConfirmationOpen = ref(false);
+let initialCreatorState: string | undefined;
+let initialStepState: string | undefined;
+
+const creatorState = () =>
+  JSON.stringify({
+    draft: workoutCreatorDraft.value,
+    currentStep: currentWorkoutCreatorStep.value,
+    isCreatingStep: isCreatingWorkoutCreatorStep.value,
+  });
+
+const hasUnsavedChanges = () =>
+  initialCreatorState !== undefined && creatorState() !== initialCreatorState;
+
+const currentStepState = () => {
+  const step = currentWorkoutCreatorStep.value;
+  return JSON.stringify({
+    step,
+    ...(step?.type === 'EXERCISE'
+      ? {
+          exercise: {
+            selectedMuscleGroupId: getExerciseStepNode('selectedMuscleGroupId').getNodeValue(),
+            selectedExerciseId: selectedExerciseNode().getNodeValue()?.id,
+            mode: getExerciseStepNode('exerciseMode').getNodeValue(),
+            value: getExerciseStepNode('exerciseValue').getNodeValue(),
+            sets: getExerciseStepNode('sets').getNodeValue(),
+            hasSetPause: getExerciseStepNode('hasSetPause').getNodeValue(),
+            pauseDuration: getExerciseStepNode('pauseBetweenSetsDuration').getNodeValue(),
+          },
+        }
+      : {}),
+  });
+};
 
 const cancelScheduledReset = () => {
   if (resetTimeout === undefined) return;
@@ -62,12 +126,40 @@ watch(isOpen, (open, wasOpen) => {
     } else {
       resetWorkoutCreator();
     }
+    initialCreatorState = creatorState();
   }
 
   if (wasOpen && !open) {
     resetAfterClose();
   }
 });
+
+watch(currentWorkoutCreatorStep, (step) => {
+  initialStepState = step ? currentStepState() : undefined;
+});
+
+const requestClose = () => {
+  if (!hasUnsavedChanges()) return true;
+
+  isDiscardConfirmationOpen.value = true;
+  return false;
+};
+
+const handleDiscardConfirmation = (actionId: string) => {
+  if (actionId === 'discard') isOpen.value = false;
+};
+
+const requestGoBack = () => {
+  if (initialStepState === currentStepState()) {
+    returnToWorkoutCreatorOverview();
+    return;
+  }
+  isDiscardStepConfirmationOpen.value = true;
+};
+
+const handleDiscardStepConfirmation = (actionId: string) => {
+  if (actionId === 'discard') returnToWorkoutCreatorOverview();
+};
 
 onBeforeUnmount(() => {
   cancelScheduledReset();
@@ -82,11 +174,16 @@ const stepActions = computed(() => {
   if (currentWorkoutCreatorStep.value) {
     const isExerciseStep = currentWorkoutCreatorStep.value.type === 'EXERCISE';
     return [
+      ...(editingWorkoutCreatorStepIndex.value === undefined
+        ? []
+        : [{ id: 'delete-step', label: 'Elimina step', color: 'error' as const }]),
       {
         id: 'create-step',
-        label: 'Crea step',
+        label: editingWorkoutCreatorStepIndex.value === undefined ? 'Crea step' : 'Salva step',
         color: 'primary',
-        disabled: isExerciseStep && !isExerciseStepValid.value,
+        disabled:
+          !isCurrentWorkoutCreatorStepValid() ||
+          (isExerciseStep && !isExerciseStepValid.value),
       },
     ];
   }
@@ -104,6 +201,7 @@ const stepActions = computed(() => {
 
 const handleAction = (actionId: string) => {
   if (actionId === 'create-step') createWorkoutCreatorStep();
+  if (actionId === 'delete-step') removeWorkoutCreatorStep();
   if (actionId === 'save-workout') {
     if (props.workout) {
       updateWorkout(props.workout.id);
