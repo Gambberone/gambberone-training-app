@@ -50,7 +50,7 @@
               class="calendar-event"
               @click.stop="openDay(day.key)"
             >
-              {{ workoutName(scheduledWorkout.workoutId) }}
+              {{ workoutName(scheduledWorkout.workoutId) }}{{ scheduledWorkout.time ? ` · ${scheduledWorkout.time}` : '' }}
             </div>
             <span v-if="workoutsForDate(day.key).length > 2" class="calendar-more">
               +{{ workoutsForDate(day.key).length - 2 }} altri
@@ -60,27 +60,45 @@
       </div>
     </div>
 
-    <CalendarDayModal v-model="isDayModalOpen" :date="selectedDate" />
+    <CalendarDayModal
+      v-model="isDayModalOpen"
+      :date="selectedDate"
+      :preselected-workout-id="workoutForSelectedDay"
+      @update:model-value="onDayModalUpdate"
+    />
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ChevronLeft, ChevronRight } from '@lucide/vue';
+import { useRoute, useRouter } from 'vue-router';
 import CalendarDayModal from '../components/calendar/CalendarDayModal.vue';
 import { scheduledWorkoutsRef, workoutsRef } from '../stores/workoutCreator';
 
 type CalendarDay = { date: Date; key: string; isCurrentMonth: boolean; isToday: boolean };
 
 const weekdays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+const route = useRoute();
+const router = useRouter();
 const currentMonth = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 const selectedDate = ref<string>();
+const pendingWorkoutId = ref<string>();
+const workoutForSelectedDay = ref<string>();
 const isDayModalOpen = ref(false);
 
 const pad = (value: number) => String(value).padStart(2, '0');
 const dateKey = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 const todayKey = dateKey(new Date());
+
+watch(
+  () => route.query.workout,
+  (workout) => {
+    pendingWorkoutId.value = typeof workout === 'string' ? workout : undefined;
+  },
+  { immediate: true },
+);
 
 const monthLabel = computed(() =>
   new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(currentMonth.value),
@@ -119,7 +137,14 @@ function goToToday() {
 }
 function openDay(date: string) {
   selectedDate.value = date;
+  workoutForSelectedDay.value = pendingWorkoutId.value;
+  pendingWorkoutId.value = undefined;
   isDayModalOpen.value = true;
+  if (route.query.workout) router.replace({ name: 'calendar' });
+}
+function onDayModalUpdate(isOpen: boolean) {
+  isDayModalOpen.value = isOpen;
+  if (!isOpen) workoutForSelectedDay.value = undefined;
 }
 </script>
 

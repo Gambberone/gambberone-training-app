@@ -7,7 +7,7 @@
         'w-screen! h-screen! max-w-none! max-h-none! rounded-none': isFullScreen,
       }"
     >
-      <div class="modal-top flex items-center">
+      <div class="modal-top relative z-10 flex items-center bg-base-100/85 backdrop-blur-sm">
         <div class="flex-1">
           <span class="text-xl" v-if="props.title">{{ props.title }}</span>
         </div>
@@ -32,14 +32,19 @@
           </button>
         </div>
       </div>
-      <div class="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div
+        class="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-3 mask-[linear-gradient(to_bottom,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)]"
+      >
         <slot>
           <p v-if="props.message" class="text-md">
             {{ props.message }}
           </p>
         </slot>
       </div>
-      <div class="modal-action shrink-0" v-if="props.actions && props.actions.length > 0">
+      <div
+        class="modal-action relative z-10 shrink-0 bg-base-100/85 backdrop-blur-sm"
+        v-if="props.actions && props.actions.length > 0"
+      >
         <button
           v-for="action in props.actions"
           :class="[action.color && `btn-${action.color}`]"
