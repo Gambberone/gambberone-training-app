@@ -10,6 +10,10 @@
         >
           <Dumbbell :size="17" class="text-primary" />
           <span class="flex-1 font-medium">{{ workoutName(scheduledWorkout.workoutId) }}</span>
+          <span v-if="scheduledWorkout.time" class="flex items-center gap-1 text-sm text-base-content/60">
+            <Clock3 :size="15" />
+            {{ scheduledWorkout.time }}
+          </span>
           <button
             class="btn btn-ghost btn-xs btn-circle"
             type="button"
@@ -22,6 +26,12 @@
       </div>
 
       <div v-if="workoutsRef.length">
+        <GttTimeField
+          v-model="scheduledTime"
+          id="workout-scheduled-time"
+          label="Orario (facoltativo)"
+          compact
+        />
         <GttSelectField
           v-model="workoutToSchedule"
           id="workout-to-schedule"
@@ -44,7 +54,8 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { Dumbbell, Plus, Trash2 } from '@lucide/vue';
+import { Clock3, Dumbbell, Plus, Trash2 } from '@lucide/vue';
+import GttTimeField from '../generic/form/GttTimeField.vue';
 import GttSelectField from '../generic/form/GttSelectField.vue';
 import GttModal from '../generic/GttModal.vue';
 import {
@@ -54,9 +65,10 @@ import {
   workoutsRef,
 } from '../../stores/workoutCreator';
 
-const props = defineProps<{ date?: string }>();
+const props = defineProps<{ date?: string; preselectedWorkoutId?: string }>();
 const isOpen = defineModel<boolean>({ default: false });
 const workoutToSchedule = ref<string | undefined>();
+const scheduledTime = ref('');
 
 const dayLabel = computed(() =>
   props.date
@@ -73,7 +85,10 @@ const workoutOptions = computed(() =>
 );
 
 watch(isOpen, (open) => {
-  if (open) workoutToSchedule.value = undefined;
+  if (open) {
+    workoutToSchedule.value = props.preselectedWorkoutId;
+    scheduledTime.value = '';
+  }
 });
 
 function workoutName(workoutId: string) {
@@ -81,7 +96,8 @@ function workoutName(workoutId: string) {
 }
 function addWorkoutToDay() {
   if (!props.date || !workoutToSchedule.value) return;
-  scheduleWorkout(workoutToSchedule.value, props.date);
+  scheduleWorkout(workoutToSchedule.value, props.date, scheduledTime.value || undefined);
   workoutToSchedule.value = undefined;
+  scheduledTime.value = '';
 }
 </script>

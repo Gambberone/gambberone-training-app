@@ -24,6 +24,7 @@ export interface ScheduledWorkout {
   id: string;
   workoutId: string;
   date: string;
+  time?: string;
 }
 
 export const createWarmupExercise = (): WarmupExercise => ({
@@ -96,13 +97,15 @@ export const createWorkoutCreatorStep = () => {
 
 export const createWorkout = () => {
   const name = workoutCreatorDraft.value.name.trim();
-  if (!name || workoutCreatorDraft.value.steps.length === 0) return;
+  if (!name || workoutCreatorDraft.value.steps.length === 0) return undefined;
 
-  workoutsRef.value.push({
+  const workout: Workout = {
     id: crypto.randomUUID(),
     name,
     steps: JSON.parse(JSON.stringify(workoutCreatorDraft.value.steps)) as WorkoutCreatorStep[],
-  });
+  };
+  workoutsRef.value.push(workout);
+  return workout;
 };
 
 export const loadWorkoutCreator = (workout: Workout) => {
@@ -125,8 +128,13 @@ export const updateWorkout = (id: Workout['id']) => {
   workout.steps = JSON.parse(JSON.stringify(workoutCreatorDraft.value.steps)) as WorkoutCreatorStep[];
 };
 
-export const scheduleWorkout = (workoutId: string, date: string) => {
-  scheduledWorkoutsRef.value.push({ id: crypto.randomUUID(), workoutId, date });
+export const scheduleWorkout = (workoutId: string, date: string, time?: string) => {
+  scheduledWorkoutsRef.value.push({
+    id: crypto.randomUUID(),
+    workoutId,
+    date,
+    ...(time ? { time } : {}),
+  });
 };
 
 export const removeScheduledWorkout = (id: string) => {
