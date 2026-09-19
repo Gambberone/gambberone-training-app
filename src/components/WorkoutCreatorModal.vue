@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import GttModal from './generic/GttModal.vue';
 import WorkoutCreator from './workouts/WorkoutCreator.vue';
 import {
@@ -28,12 +29,14 @@ import {
 } from '../stores/workoutCreator';
 import { getExerciseStepNode } from '../wavebinder/exerciseStep';
 import { useWaveBinderNode } from '../composables/useWaveBinderNode';
+import { showToast } from '../composables/toast';
 
 const isOpen = defineModel<boolean>({ default: false });
 const props = defineProps<{
   workout?: Workout;
 }>();
 const isExerciseStepValid = useWaveBinderNode<boolean | null>(getExerciseStepNode('isStepValid'));
+const router = useRouter();
 const resetDelayMs = 250;
 let resetTimeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -66,7 +69,9 @@ watch(isOpen, (open, wasOpen) => {
   }
 });
 
-onBeforeUnmount(cancelScheduledReset);
+onBeforeUnmount(() => {
+  cancelScheduledReset();
+});
 
 const modalTitle = computed(
   () =>
@@ -103,9 +108,23 @@ const handleAction = (actionId: string) => {
     if (props.workout) {
       updateWorkout(props.workout.id);
     } else {
-      createWorkout();
+      const workout = createWorkout();
+      if (workout) {
+        showToast({
+          title: 'Workout creato con successo!',
+          message: 'Vuoi programmarlo nel calendario?',
+          actions: [
+            { label: 'Non ora', color: 'secondary' },
+            { label: 'Programma', color: 'primary', onClick: () => goToCalendar(workout.id) },
+          ],
+        });
+      }
     }
     isOpen.value = false;
   }
+};
+
+const goToCalendar = (workoutId: string) => {
+  router.push({ name: 'calendar', query: { workout: workoutId } });
 };
 </script>
