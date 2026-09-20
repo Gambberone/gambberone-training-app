@@ -4,17 +4,21 @@ import {
   WORKOUT_CREATOR_STEP_ACTION,
   type WorkoutCreatorStep,
   type WorkoutCreatorStepAction,
+  type WorkoutSession,
   type StretchingExercise,
   type WarmupExercise,
 } from '../constants';
 import {
+  collectionValidationErrors,
   exerciseStepToDraftChanges,
   exerciseStepValidationErrors,
   getExerciseStepNode,
   resetExerciseStep,
   selectedExerciseNode,
+  setCollectionValue,
 } from '../wavebinder/exerciseStep';
 import { exercisesRef } from './exercises';
+import { wb } from '../wavebinder';
 
 export interface WorkoutCreatorDraft {
   name: string;
@@ -64,7 +68,15 @@ const createStep = (type: WorkoutCreatorStepAction, step: number): WorkoutCreato
 });
 
 export const workoutsRef = localRef<Workout[]>('gtt:workouts', () => []);
-export const scheduledWorkoutsRef = localRef<ScheduledWorkout[]>('gtt:scheduled-workouts', () => []);
+export const scheduledWorkoutsRef = localRef<ScheduledWorkout[]>(
+  'gtt:scheduled-workouts',
+  () => [],
+);
+export const workoutSessionsRef = localRef<WorkoutSession[]>('gtt:workout-sessions', () => []);
+export const activeWorkoutSessionRef = localRef<WorkoutSession | null>(
+  'gtt:active-workout-session',
+  () => null,
+);
 export const workoutCreatorDraft = ref<WorkoutCreatorDraft>({ name: '', steps: [] });
 export const currentWorkoutCreatorStep = ref<WorkoutCreatorStep>();
 export const isCreatingWorkoutCreatorStep = ref(true);
@@ -89,7 +101,9 @@ const loadExerciseStep = (step: WorkoutCreatorStep) => {
   else selectedExerciseNode().next(null);
   getExerciseStepNode('exerciseMode').next(step.exerciseModeType ?? 'repetitions');
   getExerciseStepNode('exerciseValue').next(
-    step.exerciseModeType === 'duration' ? (step.exerciseDuration ?? 0) : (step.exerciseRepetitions ?? 0),
+    step.exerciseModeType === 'duration'
+      ? (step.exerciseDuration ?? 0)
+      : (step.exerciseRepetitions ?? 0),
   );
   getExerciseStepNode('sets').next(step.sets);
   getExerciseStepNode('hasSetPause').next(Boolean(step.hasSetPause));
@@ -123,28 +137,18 @@ export const currentWorkoutCreatorStepValidationErrors = () => {
   if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) return exerciseStepValidationErrors();
 
   if (step.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE) {
-    return Number(step.pauseDuration) > 0 ? [] : ['Inserisci una durata della pausa maggiore di zero.'];
+    const durationNode = wb.getNodeByName('pauseDuration');
+    durationNode.next(step.pauseDuration ?? 0);
+    return (wb.getNodeByName('pauseValidationErrors').getNodeValue() as string[] | null) ?? [];
   }
 
-  const exercises =
-    step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP
-      ? step.warmupExercises
-      : step.stretchingExercises;
-  const stepLabel = step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP ? 'warm-up' : 'stretching';
-  const errors: string[] = [];
-  if (!exercises?.every((exercise) => exercise.exerciseId)) {
-    errors.push(`Seleziona un esercizio per ogni elemento di ${stepLabel}.`);
+  if (step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP) {
+    setCollectionValue('warmupExercises', step.warmupExercises ?? []);
+    return collectionValidationErrors('warmupValidationErrors');
   }
-  const hasValidValues =
-    step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP
-      ? step.warmupExercises?.every((exercise) =>
-          Number(exercise.modeType === 'repetitions' ? exercise.repetitions : exercise.duration) > 0,
-        )
-      : step.stretchingExercises?.every((exercise) => Number(exercise.duration) > 0);
-  if (!hasValidValues) {
-    errors.push(`Inserisci una durata o un numero di ripetizioni maggiore di zero per ogni elemento di ${stepLabel}.`);
-  }
-  return errors;
+
+  setCollectionValue('stretchingExercises', step.stretchingExercises ?? []);
+  return collectionValidationErrors('stretchingValidationErrors');
 };
 
 export const isCurrentWorkoutCreatorStepValid = () =>
@@ -248,7 +252,9 @@ export const updateWorkout = (id: Workout['id']) => {
   if (!workout) return;
 
   workout.name = name;
-  workout.steps = JSON.parse(JSON.stringify(workoutCreatorDraft.value.steps)) as WorkoutCreatorStep[];
+  workout.steps = JSON.parse(
+    JSON.stringify(workoutCreatorDraft.value.steps),
+  ) as WorkoutCreatorStep[];
 };
 
 export const scheduleWorkout = (workoutId: string, date: string, time?: string) => {
@@ -261,7 +267,9 @@ export const scheduleWorkout = (workoutId: string, date: string, time?: string) 
 };
 
 export const removeScheduledWorkout = (id: string) => {
-  scheduledWorkoutsRef.value = scheduledWorkoutsRef.value.filter((scheduledWorkout) => scheduledWorkout.id !== id);
+  scheduledWorkoutsRef.value = scheduledWorkoutsRef.value.filter(
+    (scheduledWorkout) => scheduledWorkout.id !== id,
+  );
 };
 
 export const removeWorkout = (id: string) => {
@@ -269,6 +277,61 @@ export const removeWorkout = (id: string) => {
   scheduledWorkoutsRef.value = scheduledWorkoutsRef.value.filter(
     (scheduledWorkout) => scheduledWorkout.workoutId !== id,
   );
+};
+
+export const workoutVisibleSteps = (workout: Workout) =>
+  workout.steps.filter((step) => step.type !== WORKOUT_CREATOR_STEP_ACTION.SETPAUSE);
+
+export const workoutEstimatedDuration = (workout: Workout) =>
+  workout.steps.reduce((total, step) => {
+    if (
+      step.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE ||
+      step.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE
+    ) {
+      return total + Number(step.pauseDuration ?? 0);
+    }
+    if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
+      const value = step.exerciseModeType === 'duration' ? Number(step.exerciseDuration ?? 0) : 0;
+      return (
+        total +
+        value * Number(step.sets ?? 1) +
+        Number(step.pauseBetweenSetsDuration ?? 0) * Math.max(0, Number(step.sets ?? 1) - 1)
+      );
+    }
+    const exercises = step.warmupExercises ?? step.stretchingExercises ?? [];
+    return total + exercises.reduce((sum, exercise) => sum + Number(exercise.duration ?? 0), 0);
+  }, 0);
+
+export const startWorkoutSession = (workoutId: string) => {
+  const workout = workoutsRef.value.find((item) => item.id === workoutId);
+  if (!workout) return;
+  activeWorkoutSessionRef.value = {
+    id: crypto.randomUUID(),
+    workoutId,
+    startedAt: new Date().toISOString(),
+    currentStepIndex: 0,
+    completedStepIndexes: [],
+  };
+};
+
+export const advanceWorkoutSession = () => {
+  const session = activeWorkoutSessionRef.value;
+  const workout = session && workoutsRef.value.find((item) => item.id === session.workoutId);
+  if (!session || !workout) return;
+  if (!session.completedStepIndexes.includes(session.currentStepIndex)) {
+    session.completedStepIndexes.push(session.currentStepIndex);
+  }
+  if (session.currentStepIndex >= workout.steps.length - 1) {
+    const completed = { ...session, completedAt: new Date().toISOString() };
+    workoutSessionsRef.value.unshift(completed);
+    activeWorkoutSessionRef.value = null;
+    return;
+  }
+  session.currentStepIndex += 1;
+};
+
+export const abandonWorkoutSession = () => {
+  activeWorkoutSessionRef.value = null;
 };
 
 export const resetWorkoutCreator = () => {

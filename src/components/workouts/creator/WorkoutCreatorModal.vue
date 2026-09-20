@@ -40,8 +40,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import GttModal from './generic/GttModal.vue';
-import WorkoutCreator from './workouts/WorkoutCreator.vue';
+import GttModal from '../../generic/GttModal.vue';
+import WorkoutCreator from '../../workouts/WorkoutCreator.vue';
 import {
   createWorkoutCreatorStep,
   createWorkout,
@@ -56,10 +56,10 @@ import {
   type Workout,
   updateWorkout,
   workoutCreatorDraft,
-} from '../stores/workoutCreator';
-import { getExerciseStepNode, selectedExerciseNode } from '../wavebinder/exerciseStep';
-import { useWaveBinderNode } from '../composables/useWaveBinderNode';
-import { showToast } from '../composables/toast';
+} from '../../../stores/workoutCreator';
+import { getExerciseStepNode, selectedExerciseNode } from '../../../wavebinder/exerciseStep';
+import { useWaveBinderNode } from '../../../composables/useWaveBinderNode';
+import { showToast } from '../../../composables/toast';
 
 const isOpen = defineModel<boolean>({ default: false });
 const props = defineProps<{
@@ -182,8 +182,7 @@ const stepActions = computed(() => {
         label: editingWorkoutCreatorStepIndex.value === undefined ? 'Crea step' : 'Salva step',
         color: 'primary',
         disabled:
-          !isCurrentWorkoutCreatorStepValid() ||
-          (isExerciseStep && !isExerciseStepValid.value),
+          !isCurrentWorkoutCreatorStepValid() || (isExerciseStep && !isExerciseStepValid.value),
       },
     ];
   }

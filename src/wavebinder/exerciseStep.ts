@@ -1,6 +1,6 @@
 import type { Exercise } from '../domain/exercises';
 import type { ExerciseModeType, WorkoutCreatorStep } from '../constants';
-import { MultiNode, SingleNode } from 'wave-binder';
+import { ListNode, MultiNode, SingleNode } from 'wave-binder';
 import { wb } from './index';
 
 type ExerciseStepNodeName =
@@ -15,10 +15,21 @@ type ExerciseStepNodeName =
   | 'validationErrors'
   | 'isStepValid';
 
+type CollectionNodeName = 'warmupExercises' | 'stretchingExercises';
+type CollectionValidationNodeName = 'warmupValidationErrors' | 'stretchingValidationErrors';
+
 export const getExerciseStepNode = (name: ExerciseStepNodeName) =>
   wb.getNodeByName(name) as SingleNode;
 
 export const selectedExerciseNode = () => wb.getNodeByName('selectedExercise') as MultiNode;
+
+export const getCollectionNode = (name: CollectionNodeName) => wb.getNodeByName(name) as ListNode;
+
+export const setCollectionValue = (name: CollectionNodeName, value: unknown[]) =>
+  getCollectionNode(name).next(value);
+
+export const collectionValidationErrors = (name: CollectionValidationNodeName) =>
+  ((wb.getNodeByName(name) as SingleNode).getNodeValue() as string[] | null) ?? [];
 
 export const resetExerciseStep = () => {
   getExerciseStepNode('selectedMuscleGroupId').next(null);

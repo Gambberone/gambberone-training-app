@@ -6,4 +6,5 @@ export {
   type WarmupExercise,
   type StretchingExercise,
   type ExerciseModeType,
+  type WorkoutSession,
 } from './workout';

@@ -103,5 +103,90 @@
     "type": "SINGLE",
     "dep": [{ "nodeName": "validationErrors", "parameterName": "validationErrors", "isOptional": false, "onUpdate": true, "type": "BODY" }],
     "la": { "type": "CUSTOM_FUNCTION", "functionName": "isStepValid" }
+  },
+  {
+    "name": "warmupExercises",
+    "path": "/warmupExercises",
+    "type": "LIST",
+    "dep": [],
+    "proto": {
+      "name": "warmupExercise",
+      "path": "/warmupExercise",
+      "type": "SINGLE",
+      "dep": [],
+      "la": { "type": "USER_SELECTION" }
+    },
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "warmupValidationErrors",
+    "path": "/warmupValidationErrors",
+    "type": "SINGLE",
+    "dep": [{ "nodeName": "warmupExercises", "parameterName": "exercises", "isOptional": false, "onUpdate": true, "type": "BODY" }],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateWarmupExercises" }
+  },
+  {
+    "name": "stretchingExercises",
+    "path": "/stretchingExercises",
+    "type": "LIST",
+    "dep": [],
+    "proto": {
+      "name": "stretchingExercise",
+      "path": "/stretchingExercise",
+      "type": "SINGLE",
+      "dep": [],
+      "la": { "type": "USER_SELECTION" }
+    },
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "stretchingValidationErrors",
+    "path": "/stretchingValidationErrors",
+    "type": "SINGLE",
+    "dep": [{ "nodeName": "stretchingExercises", "parameterName": "exercises", "isOptional": false, "onUpdate": true, "type": "BODY" }],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateStretchingExercises" }
+  },
+  {
+    "name": "scheduleInput",
+    "path": "/scheduleInput",
+    "type": "SINGLE",
+    "dep": [],
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "pauseDuration",
+    "path": "/pauseDuration",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": 0,
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "pauseValidationErrors",
+    "path": "/pauseValidationErrors",
+    "type": "SINGLE",
+    "dep": [{ "nodeName": "pauseDuration", "parameterName": "duration", "isOptional": false, "onUpdate": true, "type": "BODY" }],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validatePause" }
+  },
+  {
+    "name": "scheduleValidationErrors",
+    "path": "/scheduleValidationErrors",
+    "type": "SINGLE",
+    "dep": [{ "nodeName": "scheduleInput", "parameterName": "input", "isOptional": false, "onUpdate": true, "type": "BODY" }],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateSchedule" }
+  },
+  {
+    "name": "sessionInput",
+    "path": "/sessionInput",
+    "type": "SINGLE",
+    "dep": [],
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
+    "name": "sessionProgress",
+    "path": "/sessionProgress",
+    "type": "SINGLE",
+    "dep": [{ "nodeName": "sessionInput", "parameterName": "input", "isOptional": false, "onUpdate": true, "type": "BODY" }],
+    "la": { "type": "CUSTOM_FUNCTION", "functionName": "getSessionProgress" }
   }
 ]

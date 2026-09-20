@@ -39,3 +39,12 @@ export interface WorkoutCreatorStep {
   sets: number;
   pauseBetweenSetsDuration: number;
 }
+
+export type WorkoutSession = {
+  id: string;
+  workoutId: string;
+  startedAt: string;
+  completedAt?: string;
+  currentStepIndex: number;
+  completedStepIndexes: number[];
+};

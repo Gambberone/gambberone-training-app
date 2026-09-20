@@ -10,9 +10,17 @@
         <div class="min-w-0">
           <div class="truncate">{{ workout.name }}</div>
           <div class="text-xs font-semibold uppercase opacity-60">
-            {{ visibleStepCount(workout) }} step
+            {{ visibleStepCount(workout) }} step · {{ estimatedDuration(workout) }}
           </div>
         </div>
+      </button>
+      <button
+        class="btn btn-square btn-ghost btn-sm text-success"
+        type="button"
+        :aria-label="`Avvia ${workout.name}`"
+        @click="startWorkout(workout.id)"
+      >
+        <Play class="size-5" aria-hidden="true" />
       </button>
       <button
         class="btn btn-square btn-ghost btn-sm text-error"
@@ -49,25 +57,43 @@
 </template>
 
 <script setup lang="ts">
-import { Dumbbell, Trash2 } from '@lucide/vue';
+import { Dumbbell, Play, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import { WORKOUT_CREATOR_STEP_ACTION } from '../../constants';
-import { removeWorkout, type Workout, workoutsRef } from '../../stores/workoutCreator.ts';
+import {
+  removeWorkout,
+  startWorkoutSession,
+  workoutEstimatedDuration,
+  type Workout,
+  workoutsRef,
+} from '../../stores/workoutCreator.ts';
+import { useRouter } from 'vue-router';
 import GttFab from '../generic/GttFab.vue';
 import GttModal from '../generic/GttModal.vue';
-import WorkoutCreatorModal from '../WorkoutCreatorModal.vue';
+import WorkoutCreatorModal from './creator/WorkoutCreatorModal.vue';
 
 const showWorkoutCreatorModal = ref(false);
 const selectedWorkoutForEdit = ref<Workout>();
 const isWorkoutEliminationModalOpen = ref(false);
 const workoutToRemove = ref<Workout>();
+const router = useRouter();
 
 const visibleStepCount = (workout: Workout) =>
   workout.steps.filter((step) => step.type !== WORKOUT_CREATOR_STEP_ACTION.SETPAUSE).length;
 
+const estimatedDuration = (workout: Workout) => {
+  const seconds = workoutEstimatedDuration(workout);
+  return seconds ? `~${Math.ceil(seconds / 60)} min` : 'durata libera';
+};
+
 const openWorkout = (workout: Workout) => {
   selectedWorkoutForEdit.value = workout;
   showWorkoutCreatorModal.value = true;
+};
+
+const startWorkout = (workoutId: string) => {
+  startWorkoutSession(workoutId);
+  router.push({ name: 'history' });
 };
 
 const onWorkoutCreatorModalUpdate = (isOpen: boolean) => {

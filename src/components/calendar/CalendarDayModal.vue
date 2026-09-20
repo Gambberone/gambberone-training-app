@@ -48,6 +48,7 @@
       <p v-else class="text-sm text-base-content/60">
         Crea prima un workout nella sezione Workouts.
       </p>
+      <p v-if="scheduleError" class="text-sm text-error" role="alert">{{ scheduleError }}</p>
     </div>
   </GttModal>
 </template>
@@ -64,11 +65,13 @@ import {
   scheduledWorkoutsRef,
   workoutsRef,
 } from '../../stores/workoutCreator';
+import { scheduleValidationErrors } from '../../wavebinder/schedule';
 
 const props = defineProps<{ date?: string; preselectedWorkoutId?: string }>();
 const isOpen = defineModel<boolean>({ default: false });
 const workoutToSchedule = ref<string | undefined>();
 const scheduledTime = ref('');
+const scheduleError = ref('');
 
 const dayLabel = computed(() =>
   props.date
@@ -88,6 +91,7 @@ watch(isOpen, (open) => {
   if (open) {
     workoutToSchedule.value = props.preselectedWorkoutId;
     scheduledTime.value = '';
+    scheduleError.value = '';
   }
 });
 
@@ -96,8 +100,19 @@ function workoutName(workoutId: string) {
 }
 function addWorkoutToDay() {
   if (!props.date || !workoutToSchedule.value) return;
+  const errors = scheduleValidationErrors({
+    date: props.date,
+    workoutId: workoutToSchedule.value,
+    time: scheduledTime.value || undefined,
+    scheduled: scheduledWorkoutsRef.value,
+  });
+  if (errors.length) {
+    scheduleError.value = errors[0];
+    return;
+  }
   scheduleWorkout(workoutToSchedule.value, props.date, scheduledTime.value || undefined);
   workoutToSchedule.value = undefined;
   scheduledTime.value = '';
+  scheduleError.value = '';
 }
 </script>

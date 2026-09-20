@@ -7,6 +7,8 @@ import LICENSE from './license.json';
 import PROTO_NODES from './protonodes.json';
 import { exercisesRef } from '../stores/exercises';
 import type { Exercise } from '../domain/exercises';
+import type { StretchingExercise, WarmupExercise, WorkoutCreatorStep, WorkoutSession } from '../constants';
+import type { ScheduledWorkout } from '../stores/workoutCreator';
 
 const extApis = new Map();
 
@@ -55,6 +57,57 @@ export const wb = new WaveBinder(
     {
       name: 'isStepValid',
       implementation: (validationErrors: string[]) => validationErrors.length === 0,
+    },
+    {
+      name: 'validateWarmupExercises',
+      implementation: (items: WarmupExercise[]) => {
+        if (!items?.length) return ['Aggiungi almeno un esercizio di warm-up.'];
+        return items.flatMap((item, index) => {
+          if (!item.exerciseId) return [`Seleziona l'esercizio ${index + 1} di warm-up.`];
+          const value = item.modeType === 'repetitions' ? item.repetitions : item.duration;
+          return Number(value) > 0 ? [] : [`Inserisci un valore maggiore di zero per il warm-up ${index + 1}.`];
+        });
+      },
+    },
+    {
+      name: 'validateStretchingExercises',
+      implementation: (items: StretchingExercise[]) => {
+        if (!items?.length) return ['Aggiungi almeno un esercizio di stretching.'];
+        return items.flatMap((item, index) => {
+          if (!item.exerciseId) return [`Seleziona l'esercizio ${index + 1} di stretching.`];
+          return Number(item.duration) > 0 ? [] : [`Inserisci una durata maggiore di zero per lo stretching ${index + 1}.`];
+        });
+      },
+    },
+    {
+      name: 'validateSchedule',
+      implementation: (input: {
+        date?: string;
+        workoutId?: string;
+        time?: string;
+        scheduled?: ScheduledWorkout[];
+      } | null) => {
+        if (!input?.date || !input.workoutId) return ['Scegli un workout da programmare.'];
+        const duplicate = input.scheduled?.some(
+          (item) => item.date === input.date && item.workoutId === input.workoutId && item.time === input.time,
+        );
+        return duplicate ? ['Questo workout è già programmato nello stesso orario.'] : [];
+      },
+    },
+    {
+      name: 'validatePause',
+      implementation: (duration: number) =>
+        Number(duration) > 0 ? [] : ['Inserisci una durata della pausa maggiore di zero.'],
+    },
+    {
+      name: 'getSessionProgress',
+      implementation: (input: { session?: WorkoutSession; steps?: WorkoutCreatorStep[] } | null) => {
+        const session = input?.session;
+        const steps = input?.steps ?? [];
+        const total = steps.filter((step) => step.type !== 'SETPAUSE').length;
+        const completed = session?.completedStepIndexes.filter((index) => steps[index]?.type !== 'SETPAUSE').length ?? 0;
+        return { total, completed, isComplete: Boolean(session?.completedAt) };
+      },
     },
   ],
 );
