@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { localRef } from '../composables/localRef';
+import { localRef } from '@/composables/localRef';
 import {
   WORKOUT_CREATOR_STEP_ACTION,
   type WorkoutCreatorStep,
@@ -7,7 +7,7 @@ import {
   type WorkoutSession,
   type StretchingExercise,
   type WarmupExercise,
-} from '../constants';
+} from '@/constants';
 import {
   collectionValidationErrors,
   exerciseStepToDraftChanges,
@@ -16,9 +16,9 @@ import {
   resetExerciseStep,
   selectedExerciseNode,
   setCollectionValue,
-} from '../wavebinder/exerciseStep';
+} from '@/wavebinder/exerciseStep';
 import { exercisesRef } from './exercises';
-import { wb } from '../wavebinder';
+import { wb } from '@/wavebinder';
 
 export interface WorkoutCreatorDraft {
   name: string;

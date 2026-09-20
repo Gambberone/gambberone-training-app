@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { CircleCheck } from '@lucide/vue';
-import { activeToast, hideToast, type ToastAction } from '../../composables/toast';
+import { activeToast, hideToast, type ToastAction } from '@/composables/toast';
 
 function runAction(action: ToastAction) {
   action.onClick?.();

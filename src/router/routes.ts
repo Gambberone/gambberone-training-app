@@ -1,15 +1,15 @@
 import type { RouteRecordRaw } from 'vue-router';
-import AppLayout from '../layouts/AppLayout.vue';
-import HomeView from '../views/HomeView.vue';
-import HistoryView from '../views/HistoryView.vue';
-import CalendarView from '../views/CalendarView.vue';
-import WorkoutsView from '../views/WorkoutsView.vue';
-import AccountView from '../views/AccountView.vue';
-import AuthLayout from '../layouts/AuthLayout.vue';
-import LoginView from '../views/LoginView.vue';
-import RegisterView from '../views/RegisterView.vue';
-import VerifyEmailView from '../views/VerifyEmailView.vue';
-import ForgotPasswordView from '../views/ForgotPasswordView.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import HomeView from '@/views/HomeView.vue';
+import HistoryView from '@/views/HistoryView.vue';
+import CalendarView from '@/views/CalendarView.vue';
+import WorkoutsView from '@/views/WorkoutsView.vue';
+import AccountView from '@/views/AccountView.vue';
+import AuthLayout from '@/layouts/AuthLayout.vue';
+import LoginView from '@/views/LoginView.vue';
+import RegisterView from '@/views/RegisterView.vue';
+import VerifyEmailView from '@/views/VerifyEmailView.vue';
+import ForgotPasswordView from '@/views/ForgotPasswordView.vue';
 
 const routes: RouteRecordRaw[] = [
   {

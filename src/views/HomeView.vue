@@ -67,8 +67,8 @@
 <script setup lang="ts">
 import { ArrowRight, CalendarPlus, Dumbbell, FaceGrinning } from '@lucide/vue';
 import { computed } from 'vue';
-import { useAuth } from '../composables/useAuth';
-import { scheduledWorkoutsRef, workoutsRef } from '../stores/workoutCreator';
+import { useAuth } from '@/composables/useAuth';
+import { scheduledWorkoutsRef, workoutsRef } from '@/stores/workoutCreator';
 
 const { currentUser } = useAuth();
 

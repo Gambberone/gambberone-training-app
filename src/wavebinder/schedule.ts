@@ -1,6 +1,6 @@
 import { wb } from './index';
 import type { SingleNode } from 'wave-binder';
-import type { ScheduledWorkout } from '../stores/workoutCreator';
+import type { ScheduledWorkout } from '@/stores/workoutCreator';
 
 type ScheduleInput = {
   date?: string;

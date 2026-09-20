@@ -23,12 +23,12 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { WORKOUT_CREATOR_STEP_ACTION } from '../../../../constants/workout.ts';
-import type { WarmupExercise } from '../../../../constants/workout.ts';
-import type { Exercise } from '../../../../domain/exercises.ts';
-import { exercisesRef } from '../../../../stores/exercises.ts';
-import GttSelectField from '../../../generic/form/GttSelectField.vue';
-import WorkoutCreatorDurationRepetitionField from '../WorkoutCreatorDurationRepetitionField.vue';
+import { WORKOUT_CREATOR_STEP_ACTION } from '@/constants/workout.ts';
+import type { WarmupExercise } from '@/constants/workout.ts';
+import type { Exercise } from '@/domain/exercises.ts';
+import { exercisesRef } from '@/stores/exercises.ts';
+import GttSelectField from '@/components/generic/form/GttSelectField.vue';
+import WorkoutCreatorDurationRepetitionField from '@/components/workouts/creator/WorkoutCreatorDurationRepetitionField.vue';
 
 const warmupExercise = defineModel<WarmupExercise>({ required: true });
 

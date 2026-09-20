@@ -5,10 +5,10 @@ import { watch } from 'vue';
 import EXT_API_CONFIG from './extapi.json';
 import LICENSE from './license.json';
 import PROTO_NODES from './protonodes.json';
-import { exercisesRef } from '../stores/exercises';
-import type { Exercise } from '../domain/exercises';
-import type { StretchingExercise, WarmupExercise, WorkoutCreatorStep, WorkoutSession } from '../constants';
-import type { ScheduledWorkout } from '../stores/workoutCreator';
+import { exercisesRef } from '@/stores/exercises';
+import type { Exercise } from '@/domain/exercises';
+import type { StretchingExercise, WarmupExercise, WorkoutCreatorStep, WorkoutSession } from '@/constants';
+import type { ScheduledWorkout } from '@/stores/workoutCreator';
 
 const extApis = new Map();
 

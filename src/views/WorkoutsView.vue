@@ -19,9 +19,9 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import ExercisesList from "../components/exercises/ExercisesList.vue";
-import GttTabs from "../components/generic/GttTabs.vue";
-import WorkoutList from "../components/workouts/WorkoutList.vue";
+import ExercisesList from "@/components/exercises/ExercisesList.vue";
+import GttTabs from "@/components/generic/GttTabs.vue";
+import WorkoutList from "@/components/workouts/WorkoutList.vue";
 
 const activeTab = ref<string>();
 </script>

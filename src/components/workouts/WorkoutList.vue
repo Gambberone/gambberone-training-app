@@ -59,17 +59,17 @@
 <script setup lang="ts">
 import { Dumbbell, Play, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
-import { WORKOUT_CREATOR_STEP_ACTION } from '../../constants';
+import { WORKOUT_CREATOR_STEP_ACTION } from '@/constants';
 import {
   removeWorkout,
   startWorkoutSession,
   workoutEstimatedDuration,
   type Workout,
   workoutsRef,
-} from '../../stores/workoutCreator.ts';
+} from '@/stores/workoutCreator.ts';
 import { useRouter } from 'vue-router';
-import GttFab from '../generic/GttFab.vue';
-import GttModal from '../generic/GttModal.vue';
+import GttFab from '@/components/generic/GttFab.vue';
+import GttModal from '@/components/generic/GttModal.vue';
 import WorkoutCreatorModal from './creator/WorkoutCreatorModal.vue';
 
 const showWorkoutCreatorModal = ref(false);

@@ -13,7 +13,7 @@ import WorkoutCreatorWarmupExercise from './WorkoutCreatorWarmupExercise.vue';
 import {
   createWarmupExercise,
   currentWorkoutCreatorStep,
-} from '../../../../stores/workoutCreator.ts';
+} from '@/stores/workoutCreator.ts';
 
 const warmupExercises = computed(() => currentWorkoutCreatorStep.value?.warmupExercises ?? []);
 

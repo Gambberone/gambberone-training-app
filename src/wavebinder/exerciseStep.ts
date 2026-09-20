@@ -1,5 +1,5 @@
-import type { Exercise } from '../domain/exercises';
-import type { ExerciseModeType, WorkoutCreatorStep } from '../constants';
+import type { Exercise } from '@/domain/exercises';
+import type { ExerciseModeType, WorkoutCreatorStep } from '@/constants';
 import { ListNode, MultiNode, SingleNode } from 'wave-binder';
 import { wb } from './index';
 

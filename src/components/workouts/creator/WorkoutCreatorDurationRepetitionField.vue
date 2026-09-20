@@ -46,8 +46,8 @@
 
 <script setup lang="ts">
 import { Minus, Plus } from '@lucide/vue';
-import GttFieldWrapper from '../../generic/form/GttFieldWrapper.vue';
-import { type FieldProps } from '../../generic/form/form.types.ts';
+import GttFieldWrapper from '@/components/generic/form/GttFieldWrapper.vue';
+import { type FieldProps } from '@/components/generic/form/form.types.ts';
 
 const props = defineProps<FieldProps>();
 const modelValue = defineModel<string>({ default: '0' });

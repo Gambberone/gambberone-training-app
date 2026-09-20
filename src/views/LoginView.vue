@@ -70,7 +70,7 @@
 import { Eye, EyeOff, LockKeyhole, Mail } from '@lucide/vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { authErrorMessage, useAuth } from '../composables/useAuth';
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
 
 const email = ref('');
 const password = ref('');

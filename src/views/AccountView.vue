@@ -37,8 +37,8 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { useAuth } from '../composables/useAuth';
-import { useTheme } from '../composables/useTheme';
+import { useAuth } from '@/composables/useAuth';
+import { useTheme } from '@/composables/useTheme';
 
 const { isDark } = useTheme();
 const { currentUser, signOut } = useAuth();

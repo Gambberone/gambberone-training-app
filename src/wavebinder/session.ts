@@ -1,5 +1,5 @@
 import type { SingleNode } from 'wave-binder';
-import type { WorkoutCreatorStep, WorkoutSession } from '../constants';
+import type { WorkoutCreatorStep, WorkoutSession } from '@/constants';
 import { wb } from './index';
 
 export type SessionProgress = { total: number; completed: number; isComplete: boolean };

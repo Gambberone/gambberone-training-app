@@ -81,9 +81,9 @@
 <script setup lang="ts">
 import { Dumbbell, Pencil, Plus, Trash } from '@lucide/vue';
 import { ref } from 'vue';
-import { muscleGroups, type Exercise, type MuscleGroup } from '../../domain/exercises.ts';
-import { exercisesRef } from '../../stores/exercises.ts';
-import GttModal from '../generic/GttModal.vue';
+import { muscleGroups, type Exercise, type MuscleGroup } from '@/domain/exercises.ts';
+import { exercisesRef } from '@/stores/exercises.ts';
+import GttModal from '@/components/generic/GttModal.vue';
 import ExerciseCreatorModal from './ExerciseCreatorModal.vue';
 
 const isExercisesCreatorEditorModalOpen = ref(false);

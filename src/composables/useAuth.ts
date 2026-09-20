@@ -8,7 +8,7 @@ import {
   type User,
 } from 'firebase/auth';
 import { computed, readonly, ref } from 'vue';
-import { auth } from '../firebase';
+import { auth } from '@/firebase';
 
 const currentUser = ref<User | null>(null);
 const isAuthReady = ref(false);

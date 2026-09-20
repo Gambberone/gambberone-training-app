@@ -19,8 +19,8 @@ import { computed } from 'vue';
 import WorkoutCreatorStretchingExercise from './stretching/WorkoutCreatorStretchingExercise.vue';
 import {
   currentWorkoutCreatorStep,
-} from '../../../stores/workoutCreator';
-import { createStretchingExercise } from '../../../stores/workoutCreator.ts';
+} from '@/stores/workoutCreator';
+import { createStretchingExercise } from '@/stores/workoutCreator.ts';
 
 const stretchingExercises = computed(() => currentWorkoutCreatorStep.value?.stretchingExercises ?? []);
 

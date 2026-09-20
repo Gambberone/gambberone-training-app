@@ -25,8 +25,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { abandonWorkoutSession, activeWorkoutSessionRef, advanceWorkoutSession, workoutSessionsRef, workoutsRef } from '../stores/workoutCreator';
-import { getSessionProgress } from '../wavebinder/session';
+import { abandonWorkoutSession, activeWorkoutSessionRef, advanceWorkoutSession, workoutSessionsRef, workoutsRef } from '@/stores/workoutCreator';
+import { getSessionProgress } from '@/wavebinder/session';
 
 const activeWorkout = computed(() => workoutsRef.value.find((workout) => workout.id === activeWorkoutSessionRef.value?.workoutId));
 const progress = computed(() => getSessionProgress(activeWorkoutSessionRef.value, activeWorkout.value?.steps ?? []));

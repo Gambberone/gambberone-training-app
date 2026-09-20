@@ -56,16 +56,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { Clock3, Dumbbell, Plus, Trash2 } from '@lucide/vue';
-import GttTimeField from '../generic/form/GttTimeField.vue';
-import GttSelectField from '../generic/form/GttSelectField.vue';
-import GttModal from '../generic/GttModal.vue';
+import GttTimeField from '@/components/generic/form/GttTimeField.vue';
+import GttSelectField from '@/components/generic/form/GttSelectField.vue';
+import GttModal from '@/components/generic/GttModal.vue';
 import {
   removeScheduledWorkout,
   scheduleWorkout,
   scheduledWorkoutsRef,
   workoutsRef,
-} from '../../stores/workoutCreator';
-import { scheduleValidationErrors } from '../../wavebinder/schedule';
+} from '@/stores/workoutCreator';
+import { scheduleValidationErrors } from '@/wavebinder/schedule';
 
 const props = defineProps<{ date?: string; preselectedWorkoutId?: string }>();
 const isOpen = defineModel<boolean>({ default: false });

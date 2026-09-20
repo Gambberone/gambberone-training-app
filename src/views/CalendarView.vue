@@ -129,8 +129,8 @@
 import { computed, ref, watch } from 'vue';
 import { ChevronLeft, ChevronRight } from '@lucide/vue';
 import { useRoute, useRouter } from 'vue-router';
-import CalendarDayModal from '../components/calendar/CalendarDayModal.vue';
-import { scheduledWorkoutsRef, workoutsRef } from '../stores/workoutCreator';
+import CalendarDayModal from '@/components/calendar/CalendarDayModal.vue';
+import { scheduledWorkoutsRef, workoutsRef } from '@/stores/workoutCreator';
 
 type CalendarDay = { date: Date; key: string; isCurrentMonth: boolean; isToday: boolean };
 

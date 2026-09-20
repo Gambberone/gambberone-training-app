@@ -39,8 +39,8 @@ import { applyActionCode } from 'firebase/auth';
 import { MailCheck } from '@lucide/vue';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { auth } from '../firebase';
-import { authErrorMessage, useAuth } from '../composables/useAuth';
+import { auth } from '@/firebase';
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
 
 const { currentUser, sendVerificationEmail, signOut } = useAuth();
 const router = useRouter();

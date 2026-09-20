@@ -11,7 +11,7 @@ import { computed } from 'vue';
 import {
   currentWorkoutCreatorStep,
   updateCurrentWorkoutCreatorStep,
-} from '../../../stores/workoutCreator.ts';
+} from '@/stores/workoutCreator.ts';
 import WorkoutCreatorDurationRepetitionField from './WorkoutCreatorDurationRepetitionField.vue';
 
 const pauseDuration = computed({

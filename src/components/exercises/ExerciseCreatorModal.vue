@@ -29,11 +29,11 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { muscleGroups, type Exercise, type MuscleGroupType } from '../../domain/exercises.ts';
-import { exercisesRef } from '../../stores/exercises';
-import GttInputField from '../generic/form/GttInputField.vue';
-import GttSelectField from '../generic/form/GttSelectField.vue';
-import GttModal from '../generic/GttModal.vue';
+import { muscleGroups, type Exercise, type MuscleGroupType } from '@/domain/exercises.ts';
+import { exercisesRef } from '@/stores/exercises';
+import GttInputField from '@/components/generic/form/GttInputField.vue';
+import GttSelectField from '@/components/generic/form/GttSelectField.vue';
+import GttModal from '@/components/generic/GttModal.vue';
 
 interface ExerciseCreatorEditorProps {
   exercise: Exercise | null;

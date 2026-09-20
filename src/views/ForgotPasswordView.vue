@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { Mail } from '@lucide/vue';
 import { ref } from 'vue';
-import { authErrorMessage, useAuth } from '../composables/useAuth';
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
 
 const email = ref('');
 const isSubmitting = ref(false);

@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
-import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '../../../constants';
+import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '@/constants';
 import WorkoutCreatorStretchingAction from './WorkoutCreatorStretchingAction.vue';
 import WorkoutCreatorExerciseAction from './WorkoutCreatorExerciseAction.vue';
 import WorkoutCreatorPauseAction from './WorkoutCreatorPauseAction.vue';
@@ -72,8 +72,8 @@ import {
   currentWorkoutCreatorStep,
   startWorkoutCreatorStep,
   workoutCreatorDraft,
-} from '../../../stores/workoutCreator';
-import GttInputField from '../../generic/form/GttInputField.vue';
+} from '@/stores/workoutCreator';
+import GttInputField from '@/components/generic/form/GttInputField.vue';
 import { computed } from 'vue';
 
 const workoutName = computed({

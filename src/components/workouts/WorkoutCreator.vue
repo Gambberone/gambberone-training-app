@@ -67,15 +67,15 @@
 import { computed } from 'vue';
 import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
 import WorkoutCreatorFirstStep from './creator/WorkoutCreatorFirstStep.vue';
-import GttInputField from '../generic/form/GttInputField.vue';
-import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '../../constants';
+import GttInputField from '@/components/generic/form/GttInputField.vue';
+import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '@/constants';
 import {
   currentWorkoutCreatorStep,
   editWorkoutCreatorStep,
   isCreatingWorkoutCreatorStep,
   startWorkoutCreatorStep,
   workoutCreatorDraft,
-} from '../../stores/workoutCreator';
+} from '@/stores/workoutCreator';
 
 const hasWarmup = computed(() =>
   workoutCreatorDraft.value.steps.some((step) => step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP),

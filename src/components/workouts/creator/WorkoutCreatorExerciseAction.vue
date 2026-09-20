@@ -55,10 +55,10 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { useWaveBinderMultiNode, useWaveBinderNode } from '../../../composables/useWaveBinderNode';
-import { muscleGroups } from '../../../domain/exercises';
-import { getExerciseStepNode, selectedExerciseNode } from '../../../wavebinder/exerciseStep';
-import GttSelectField from '../../generic/form/GttSelectField.vue';
+import { useWaveBinderMultiNode, useWaveBinderNode } from '@/composables/useWaveBinderNode';
+import { muscleGroups } from '@/domain/exercises';
+import { getExerciseStepNode, selectedExerciseNode } from '@/wavebinder/exerciseStep';
+import GttSelectField from '@/components/generic/form/GttSelectField.vue';
 import WorkoutCreatorDurationRepetitionField from './WorkoutCreatorDurationRepetitionField.vue';
 
 const selectedMuscleGroupIdNode = useWaveBinderNode<string | null>(
