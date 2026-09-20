@@ -1,10 +1,12 @@
 <template>
     <GttTabs
+        class="h-full min-h-0"
         :tabs="[
             { key: 'workouts', label: 'Workouts' },
             { key: 'exercises', label: 'Exercises' },
         ]"
         v-model="activeTab"
+        scroll-content
     >
         <template #workouts>
             <WorkoutList />

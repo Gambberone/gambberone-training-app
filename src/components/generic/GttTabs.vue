@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-2 w-full">
+  <div class="flex w-full flex-col gap-2" :class="{ 'h-full min-h-0': props.scrollContent }">
     <div class="w-full overflow-x-auto">
       <div role="tablist" class="tabs tabs-box min-w-full w-max flex-nowrap">
         <a
@@ -14,7 +14,11 @@
         </a>
       </div>
     </div>
-    <div v-for="tab in props.tabs" :key="tab.key">
+    <div
+      v-for="tab in props.tabs"
+      :key="tab.key"
+      :class="{ 'min-h-0 flex-1 overflow-y-auto': props.scrollContent && activeTab === tab.key }"
+    >
       <slot :name="tab.key" v-if="activeTab === tab.key"></slot>
     </div>
   </div>
@@ -31,6 +35,7 @@ interface Tab {
 interface TabsProps {
   tabs: Tab[];
   initialActiveTab?: string;
+  scrollContent?: boolean;
 }
 
 const props = defineProps<TabsProps>();
