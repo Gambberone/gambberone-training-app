@@ -8,6 +8,8 @@ import AccountView from '../views/AccountView.vue';
 import AuthLayout from '../layouts/AuthLayout.vue';
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
+import VerifyEmailView from '../views/VerifyEmailView.vue';
+import ForgotPasswordView from '../views/ForgotPasswordView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -24,11 +26,22 @@ const routes: RouteRecordRaw[] = [
         name: 'register',
         component: RegisterView,
       },
+      {
+        path: 'verify-email',
+        name: 'verify-email',
+        component: VerifyEmailView,
+      },
+      {
+        path: 'forgot-password',
+        name: 'forgot-password',
+        component: ForgotPasswordView,
+      },
     ],
   },
   {
     path: '/',
     component: AppLayout,
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',

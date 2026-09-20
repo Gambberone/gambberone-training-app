@@ -2,7 +2,10 @@
   <section class="mx-auto max-w-2xl">
     <header class="mb-7">
       <p class="mb-1 text-sm font-semibold text-primary">{{ todayLabel }}</p>
-      <h1 class="text-3xl font-bold tracking-tight text-base-content">{{ greeting }}</h1>
+      <h1 class="text-3xl font-bold tracking-tight text-base-content">
+        {{ greeting }}<span v-if="userName" class="text-primary">{{ userName }}</span
+        >!
+      </h1>
       <p class="mt-2 text-base-content/65">Ecco cosa ti aspetta oggi.</p>
     </header>
 
@@ -64,7 +67,10 @@
 <script setup lang="ts">
 import { ArrowRight, CalendarPlus, Dumbbell, FaceGrinning } from '@lucide/vue';
 import { computed } from 'vue';
+import { useAuth } from '../composables/useAuth';
 import { scheduledWorkoutsRef, workoutsRef } from '../stores/workoutCreator';
+
+const { currentUser } = useAuth();
 
 const pad = (value: number) => String(value).padStart(2, '0');
 const now = new Date();
@@ -78,9 +84,17 @@ const todayLabel = new Intl.DateTimeFormat('it-IT', {
 
 const greeting = computed(() => {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Buongiorno!';
-  if (hour < 18) return 'Buon pomeriggio!';
-  return 'Buonasera!';
+  if (hour < 12) return 'Buongiorno, ';
+  if (hour < 18) return 'Buon pomeriggio, ';
+  return 'Buonasera, ';
+});
+
+const userName = computed(() => {
+  if (!currentUser.value) return '';
+  if (currentUser.value.displayName) return currentUser.value.displayName;
+
+  const emailName = currentUser.value.email?.split('@')[0] ?? '';
+  return emailName.replace(/[._-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 });
 
 const todayWorkouts = computed(() =>
