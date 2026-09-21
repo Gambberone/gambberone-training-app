@@ -58,14 +58,28 @@ import {
   workoutCreatorDraft,
 } from '@/stores/workoutCreator';
 import { getExerciseStepNode, selectedExerciseNode } from '@/wavebinder/exerciseStep';
-import { useWaveBinderNode } from '@/composables/useWaveBinderNode';
+import { useWaveBinderMultiNode, useWaveBinderNode } from '@/composables/useWaveBinderNode';
 import { showToast } from '@/composables/toast';
 
 const isOpen = defineModel<boolean>({ default: false });
 const props = defineProps<{
   workout?: Workout;
 }>();
-const isExerciseStepValid = useWaveBinderNode<boolean | null>(getExerciseStepNode('isStepValid'));
+const { selectedId: selectedExerciseId } = useWaveBinderMultiNode(selectedExerciseNode());
+const exerciseValue = useWaveBinderNode<number>(getExerciseStepNode('exerciseValue'));
+const sets = useWaveBinderNode<number>(getExerciseStepNode('sets'));
+const hasSetPause = useWaveBinderNode<boolean>(getExerciseStepNode('hasSetPause'));
+const pauseBetweenSetsDuration = useWaveBinderNode<number>(
+  getExerciseStepNode('pauseBetweenSetsDuration'),
+);
+const isExerciseStepValid = computed(
+  () =>
+    Boolean(selectedExerciseId.value) &&
+    Number(exerciseValue.value) > 0 &&
+    Number.isInteger(Number(sets.value)) &&
+    Number(sets.value) >= 1 &&
+    (!hasSetPause.value || Number(sets.value) <= 1 || Number(pauseBetweenSetsDuration.value) > 0),
+);
 const router = useRouter();
 const resetDelayMs = 250;
 let resetTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -182,7 +196,7 @@ const stepActions = computed(() => {
         label: editingWorkoutCreatorStepIndex.value === undefined ? 'Crea step' : 'Salva step',
         color: 'primary',
         disabled:
-          !isCurrentWorkoutCreatorStepValid() || (isExerciseStep && !isExerciseStepValid.value),
+          isExerciseStep ? !isExerciseStepValid.value : !isCurrentWorkoutCreatorStepValid(),
       },
     ];
   }

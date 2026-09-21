@@ -93,7 +93,7 @@
       { "nodeName": "exerciseValue", "parameterName": "exerciseValue", "isOptional": false, "onUpdate": true, "type": "BODY" },
       { "nodeName": "sets", "parameterName": "sets", "isOptional": false, "onUpdate": true, "type": "BODY" },
       { "nodeName": "hasSetPause", "parameterName": "hasSetPause", "isOptional": false, "onUpdate": true, "type": "BODY" },
-      { "nodeName": "effectivePauseDuration", "parameterName": "effectivePauseDuration", "isOptional": false, "onUpdate": true, "type": "BODY" }
+      { "nodeName": "pauseBetweenSetsDuration", "parameterName": "pauseBetweenSetsDuration", "isOptional": false, "onUpdate": true, "type": "BODY" }
     ],
     "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateExerciseStep" }
   },

@@ -10,6 +10,13 @@ import type { Exercise } from '@/domain/exercises';
 import type { StretchingExercise, WarmupExercise, WorkoutCreatorStep, WorkoutSession } from '@/constants';
 import type { ScheduledWorkout } from '@/stores/workoutCreator';
 
+const licenseServerUrl = import.meta.env.VITE_WAVEBINDER_LICENSE_SERVER_URL?.replace(/\/$/, '');
+
+if (licenseServerUrl) {
+  (globalThis as typeof globalThis & { WAVEBINDER_LICENSE_SERVER_URL?: string })
+    .WAVEBINDER_LICENSE_SERVER_URL = licenseServerUrl;
+}
+
 const extApis = new Map();
 
 extApis.set('api', EXT_API_CONFIG);
@@ -40,7 +47,7 @@ export const wb = new WaveBinder(
         exerciseValue: number,
         sets: number,
         hasSetPause: boolean,
-        effectivePauseDuration: number,
+        pauseBetweenSetsDuration: number,
       ) => {
         const errors: string[] = [];
         if (!selectedExercise) errors.push('Seleziona un esercizio.');
@@ -48,7 +55,7 @@ export const wb = new WaveBinder(
           errors.push('Inserisci un valore maggiore di zero.');
         }
         if (!Number.isInteger(Number(sets)) || Number(sets) < 1) errors.push('I set devono essere almeno uno.');
-        if (hasSetPause && Number(sets) > 1 && Number(effectivePauseDuration) <= 0) {
+        if (hasSetPause && Number(sets) > 1 && Number(pauseBetweenSetsDuration) <= 0) {
           errors.push('Inserisci la durata della pausa tra i set.');
         }
         return errors;

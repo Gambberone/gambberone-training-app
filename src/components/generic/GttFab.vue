@@ -1,5 +1,8 @@
 <template>
-  <div class="fab bottom-[calc(4rem+env(safe-area-inset-bottom))]">
+  <div
+    class="fab"
+    style="bottom: calc(4.25rem + env(safe-area-inset-bottom) + max(env(safe-area-inset-bottom), 0.5rem))"
+  >
     <button class="btn btn-lg btn-circle btn-primary rounded-xl" @click="emit('click')">
       <Plus />
     </button>

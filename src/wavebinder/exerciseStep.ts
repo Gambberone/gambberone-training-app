@@ -44,7 +44,22 @@ export const resetExerciseStep = () => {
 export const exerciseStepIsValid = () => Boolean(getExerciseStepNode('isStepValid').getNodeValue());
 
 export const exerciseStepValidationErrors = () =>
-  (getExerciseStepNode('validationErrors').getNodeValue() as string[] | null) ?? [];
+  {
+    const errors: string[] = [];
+    const exercise = selectedExerciseNode().getNodeValue() as Exercise | null;
+    const value = Number(getExerciseStepNode('exerciseValue').getNodeValue());
+    const sets = Number(getExerciseStepNode('sets').getNodeValue());
+    const hasSetPause = Boolean(getExerciseStepNode('hasSetPause').getNodeValue());
+    const pauseDuration = Number(getExerciseStepNode('pauseBetweenSetsDuration').getNodeValue());
+
+    if (!exercise) errors.push('Seleziona un esercizio.');
+    if (!Number.isFinite(value) || value <= 0) errors.push('Inserisci un valore maggiore di zero.');
+    if (!Number.isInteger(sets) || sets < 1) errors.push('I set devono essere almeno uno.');
+    if (hasSetPause && sets > 1 && (!Number.isFinite(pauseDuration) || pauseDuration <= 0)) {
+      errors.push('Inserisci la durata della pausa tra i set.');
+    }
+    return errors;
+  };
 
 export const exerciseStepToDraftChanges = (): Partial<WorkoutCreatorStep> => {
   const exercise = selectedExerciseNode().getNodeValue() as Exercise | null;

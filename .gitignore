@@ -10,7 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.firebase
 *.local
+
+# Legacy Netlify WaveBinder proxy
+/archive/netlify-wavebinder-proxy/
 
 # Editor directories and files
 .vscode/*

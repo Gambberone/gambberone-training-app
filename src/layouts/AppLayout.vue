@@ -1,6 +1,9 @@
 <template>
   <div class="flex min-h-dvh flex-col">
-    <main class="h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] overflow-y-auto p-4">
+    <main
+      class="h-dvh overflow-y-auto p-4"
+      style="padding-bottom: calc(4.25rem + env(safe-area-inset-bottom) + max(env(safe-area-inset-bottom), 0.5rem))"
+    >
       <!-- <div class="w-full flex">
                 <span class="text-2xl font-semibold text-primary">{{ route.meta.title }}</span>
             </div> -->

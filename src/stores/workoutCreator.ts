@@ -330,6 +330,24 @@ export const advanceWorkoutSession = () => {
   session.currentStepIndex += 1;
 };
 
+export const updateWorkoutSessionStep = (stepIndex: number) => {
+  if (!activeWorkoutSessionRef.value) return;
+  activeWorkoutSessionRef.value.currentStepIndex = stepIndex;
+};
+
+export const completeWorkoutSession = () => {
+  const session = activeWorkoutSessionRef.value;
+  const workout = session && workoutsRef.value.find((item) => item.id === session.workoutId);
+  if (!session || !workout) return;
+  const completed = {
+    ...session,
+    completedAt: new Date().toISOString(),
+    completedStepIndexes: workout.steps.map((_, index) => index),
+  };
+  workoutSessionsRef.value.unshift(completed);
+  activeWorkoutSessionRef.value = null;
+};
+
 export const abandonWorkoutSession = () => {
   activeWorkoutSessionRef.value = null;
 };
