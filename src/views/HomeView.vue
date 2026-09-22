@@ -11,15 +11,24 @@
 
     <div v-if="todayWorkouts.length" class="space-y-3">
       <div class="flex items-center justify-between gap-3">
-        <h2 class="text-lg font-bold text-base-content">Allenamento di oggi</h2>
+        <h2 class="text-lg font-bold text-base-content">
+          {{ todayWorkouts.length === 1 ? 'Allenamento di oggi' : 'Allenamenti di oggi' }}
+        </h2>
         <span class="badge badge-primary badge-outline">{{ todayWorkouts.length }} workout</span>
       </div>
 
       <article
         v-for="(scheduledWorkout, index) in todayWorkouts"
         :key="scheduledWorkout.id"
-        class="card overflow-hidden border border-primary/20 bg-base-100 shadow-sm"
+        class="card relative overflow-hidden border border-primary/20 bg-base-100 shadow-sm"
       >
+        <span
+          v-if="scheduledWorkout.time"
+          class="badge badge-primary badge-outline absolute top-4 right-4 gap-1 px-2.5 py-3 text-sm"
+        >
+          <Clock3 :size="15" />
+          {{ scheduledWorkout.time }}
+        </span>
         <div class="card-body gap-4 p-5">
           <div class="flex items-start gap-4">
             <div
@@ -38,10 +47,20 @@
             </div>
           </div>
 
-          <RouterLink class="btn btn-primary btn-sm w-full" to="/calendar">
-            Vedi nel calendario
-            <ArrowRight :size="17" />
-          </RouterLink>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              class="btn btn-primary btn-sm"
+              type="button"
+              @click="startWorkout(scheduledWorkout.workoutId)"
+            >
+              <Play :size="17" />
+              Avvia ora
+            </button>
+            <RouterLink class="btn btn-outline btn-primary btn-sm" to="/calendar">
+              Calendario
+              <ArrowRight :size="17" />
+            </RouterLink>
+          </div>
         </div>
       </article>
     </div>
@@ -65,10 +84,10 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, CalendarPlus, Dumbbell, FaceGrinning } from '@lucide/vue';
+import { ArrowRight, CalendarPlus, Clock3, Dumbbell, FaceGrinning, Play } from '@lucide/vue';
 import { computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
-import { scheduledWorkoutsRef, workoutsRef } from '@/stores/workoutCreator';
+import { scheduledWorkoutsRef, startWorkoutSession, workoutsRef } from '@/stores/workoutCreator';
 
 const { currentUser } = useAuth();
 
@@ -113,5 +132,9 @@ function workoutSteps(workoutId: string) {
 
 function workoutLabel(index: number) {
   return index === 0 ? 'Il tuo focus di oggi' : `Workout ${index + 1}`;
+}
+
+function startWorkout(workoutId: string) {
+  startWorkoutSession(workoutId);
 }
 </script>

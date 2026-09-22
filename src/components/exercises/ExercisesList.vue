@@ -50,6 +50,7 @@
     </div>
   </div>
   <div
+    v-if="!isWorkoutPlayerOpenRef"
     class="fab"
     style="bottom: calc(4.25rem + env(safe-area-inset-bottom) + max(env(safe-area-inset-bottom), 0.5rem))"
   >
@@ -86,6 +87,7 @@ import { Dumbbell, Pencil, Plus, Trash } from '@lucide/vue';
 import { ref } from 'vue';
 import { muscleGroups, type Exercise, type MuscleGroup } from '@/domain/exercises.ts';
 import { exercisesRef } from '@/stores/exercises.ts';
+import { isWorkoutPlayerOpenRef } from '@/stores/workoutCreator';
 import GttModal from '@/components/generic/GttModal.vue';
 import ExerciseCreatorModal from './ExerciseCreatorModal.vue';
 

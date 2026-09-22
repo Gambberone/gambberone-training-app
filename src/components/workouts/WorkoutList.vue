@@ -67,7 +67,6 @@ import {
   type Workout,
   workoutsRef,
 } from '@/stores/workoutCreator.ts';
-import { useRouter } from 'vue-router';
 import GttFab from '@/components/generic/GttFab.vue';
 import GttModal from '@/components/generic/GttModal.vue';
 import WorkoutCreatorModal from './creator/WorkoutCreatorModal.vue';
@@ -76,7 +75,6 @@ const showWorkoutCreatorModal = ref(false);
 const selectedWorkoutForEdit = ref<Workout>();
 const isWorkoutEliminationModalOpen = ref(false);
 const workoutToRemove = ref<Workout>();
-const router = useRouter();
 
 const visibleStepCount = (workout: Workout) =>
   workout.steps.filter((step) => step.type !== WORKOUT_CREATOR_STEP_ACTION.SETPAUSE).length;
@@ -93,7 +91,6 @@ const openWorkout = (workout: Workout) => {
 
 const startWorkout = (workoutId: string) => {
   startWorkoutSession(workoutId);
-  router.push({ name: 'history' });
 };
 
 const onWorkoutCreatorModalUpdate = (isOpen: boolean) => {

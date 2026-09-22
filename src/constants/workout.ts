@@ -8,11 +8,14 @@ export const WORKOUT_CREATOR_STEP_ACTION = {
   STRETCHING: 'STRETCHING',
 } as const satisfies Record<WorkoutCreatorStepAction, WorkoutCreatorStepAction>;
 
+export const DEFAULT_REPETITION_INTERVAL_SECONDS = 3;
+
 export type WarmupExercise = {
   id: string;
   exerciseId?: string;
   duration: number;
   repetitions: number;
+  repetitionIntervalSeconds?: number;
   modeType: 'duration' | 'repetitions';
 };
 
@@ -31,6 +34,7 @@ export interface WorkoutCreatorStep {
   stretchingType?: string;
   pauseDuration?: number;
   exerciseRepetitions?: number;
+  repetitionIntervalSeconds?: number;
   exerciseDuration?: number;
   exerciseModeType?: ExerciseModeType;
   hasSetPause?: boolean;

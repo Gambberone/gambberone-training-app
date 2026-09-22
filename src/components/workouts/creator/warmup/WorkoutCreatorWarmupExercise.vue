@@ -20,10 +20,16 @@
       Ripetizioni
     </label>
   </div>
+  <WorkoutCreatorDurationRepetitionField
+    v-if="isRepetitions"
+    :id="`warmup_repetition_interval_${warmupExercise.id}`"
+    v-model="repetitionInterval"
+    label="Secondi per ripetizione"
+  />
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { WORKOUT_CREATOR_STEP_ACTION } from '@/constants/workout.ts';
+import { DEFAULT_REPETITION_INTERVAL_SECONDS, WORKOUT_CREATOR_STEP_ACTION } from '@/constants/workout.ts';
 import type { WarmupExercise } from '@/constants/workout.ts';
 import type { Exercise } from '@/domain/exercises.ts';
 import { exercisesRef } from '@/stores/exercises.ts';
@@ -68,6 +74,12 @@ const warmupValue = computed({
     warmupExercise.value = isRepetitions.value
       ? { ...warmupExercise.value, repetitions: numericValue }
       : { ...warmupExercise.value, duration: numericValue };
+  },
+});
+const repetitionInterval = computed({
+  get: () => String(warmupExercise.value.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS),
+  set: (value: string) => {
+    warmupExercise.value = { ...warmupExercise.value, repetitionIntervalSeconds: Number(value) };
   },
 });
 </script>

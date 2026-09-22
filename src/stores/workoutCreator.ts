@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { localRef } from '@/composables/localRef';
 import {
   WORKOUT_CREATOR_STEP_ACTION,
+  DEFAULT_REPETITION_INTERVAL_SECONDS,
   type WorkoutCreatorStep,
   type WorkoutCreatorStepAction,
   type WorkoutSession,
@@ -42,6 +43,7 @@ export const createWarmupExercise = (): WarmupExercise => ({
   id: crypto.randomUUID(),
   duration: 0,
   repetitions: 0,
+  repetitionIntervalSeconds: DEFAULT_REPETITION_INTERVAL_SECONDS,
   modeType: 'duration',
 });
 
@@ -62,7 +64,7 @@ const createStep = (type: WorkoutCreatorStepAction, step: number): WorkoutCreato
     ? { stretchingExercises: [createStretchingExercise()] }
     : {}),
   ...(type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE
-    ? { exerciseModeType: 'repetitions', exerciseRepetitions: 0 }
+    ? { exerciseModeType: 'repetitions', exerciseRepetitions: 0, repetitionIntervalSeconds: DEFAULT_REPETITION_INTERVAL_SECONDS }
     : {}),
   ...(type === WORKOUT_CREATOR_STEP_ACTION.PAUSE ? { pauseDuration: 0 } : {}),
 });
@@ -77,6 +79,14 @@ export const activeWorkoutSessionRef = localRef<WorkoutSession | null>(
   'gtt:active-workout-session',
   () => null,
 );
+// This is intentionally not persisted: it only controls whether the global player is expanded.
+export const isWorkoutPlayerOpenRef = ref(false);
+export const workoutPlayerStatusRef = ref<{ step: string; stepColorClass: string; remaining: string; paused: boolean } | null>(null);
+export const workoutPlayerPauseRequestRef = ref(0);
+
+export const toggleWorkoutPlayerPause = () => {
+  if (activeWorkoutSessionRef.value) workoutPlayerPauseRequestRef.value += 1;
+};
 export const workoutCreatorDraft = ref<WorkoutCreatorDraft>({ name: '', steps: [] });
 export const currentWorkoutCreatorStep = ref<WorkoutCreatorStep>();
 export const isCreatingWorkoutCreatorStep = ref(true);
@@ -104,6 +114,9 @@ const loadExerciseStep = (step: WorkoutCreatorStep) => {
     step.exerciseModeType === 'duration'
       ? (step.exerciseDuration ?? 0)
       : (step.exerciseRepetitions ?? 0),
+  );
+  getExerciseStepNode('repetitionIntervalSeconds').next(
+    step.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS,
   );
   getExerciseStepNode('sets').next(step.sets);
   getExerciseStepNode('hasSetPause').next(Boolean(step.hasSetPause));
@@ -291,15 +304,25 @@ export const workoutEstimatedDuration = (workout: Workout) =>
       return total + Number(step.pauseDuration ?? 0);
     }
     if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
-      const value = step.exerciseModeType === 'duration' ? Number(step.exerciseDuration ?? 0) : 0;
+      const value = step.exerciseModeType === 'duration'
+        ? Number(step.exerciseDuration ?? 0)
+        : Number(step.exerciseRepetitions ?? 0) * (step.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS);
       return (
         total +
         value * Number(step.sets ?? 1) +
         Number(step.pauseBetweenSetsDuration ?? 0) * Math.max(0, Number(step.sets ?? 1) - 1)
       );
     }
-    const exercises = step.warmupExercises ?? step.stretchingExercises ?? [];
-    return total + exercises.reduce((sum, exercise) => sum + Number(exercise.duration ?? 0), 0);
+    if (step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP) {
+      return total + (step.warmupExercises ?? []).reduce((sum, exercise) => sum + (
+        exercise.modeType === 'repetitions'
+          ? Number(exercise.repetitions ?? 0) * (exercise.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS)
+          : Number(exercise.duration ?? 0)
+      ), 0);
+    }
+    return total + (step.stretchingExercises ?? []).reduce(
+      (sum, exercise) => sum + Number(exercise.duration ?? 0), 0,
+    );
   }, 0);
 
 export const startWorkoutSession = (workoutId: string) => {
@@ -312,6 +335,15 @@ export const startWorkoutSession = (workoutId: string) => {
     currentStepIndex: 0,
     completedStepIndexes: [],
   };
+  isWorkoutPlayerOpenRef.value = true;
+};
+
+export const openWorkoutPlayer = () => {
+  if (activeWorkoutSessionRef.value) isWorkoutPlayerOpenRef.value = true;
+};
+
+export const minimizeWorkoutPlayer = () => {
+  isWorkoutPlayerOpenRef.value = false;
 };
 
 export const advanceWorkoutSession = () => {
@@ -325,6 +357,7 @@ export const advanceWorkoutSession = () => {
     const completed = { ...session, completedAt: new Date().toISOString() };
     workoutSessionsRef.value.unshift(completed);
     activeWorkoutSessionRef.value = null;
+    isWorkoutPlayerOpenRef.value = false;
     return;
   }
   session.currentStepIndex += 1;
@@ -346,10 +379,12 @@ export const completeWorkoutSession = () => {
   };
   workoutSessionsRef.value.unshift(completed);
   activeWorkoutSessionRef.value = null;
+  isWorkoutPlayerOpenRef.value = false;
 };
 
 export const abandonWorkoutSession = () => {
   activeWorkoutSessionRef.value = null;
+  isWorkoutPlayerOpenRef.value = false;
 };
 
 export const resetWorkoutCreator = () => {

@@ -43,6 +43,14 @@
     "la": { "type": "USER_SELECTION" }
   },
   {
+    "name": "repetitionIntervalSeconds",
+    "path": "/repetitionIntervalSeconds",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": 3,
+    "la": { "type": "USER_SELECTION" }
+  },
+  {
     "name": "sets",
     "path": "/sets",
     "type": "SINGLE",

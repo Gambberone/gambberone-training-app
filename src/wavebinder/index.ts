@@ -7,7 +7,7 @@ import LICENSE from './license.json';
 import PROTO_NODES from './protonodes.json';
 import { exercisesRef } from '@/stores/exercises';
 import type { Exercise } from '@/domain/exercises';
-import type { StretchingExercise, WarmupExercise, WorkoutCreatorStep, WorkoutSession } from '@/constants';
+import { DEFAULT_REPETITION_INTERVAL_SECONDS, type StretchingExercise, type WarmupExercise, type WorkoutCreatorStep, type WorkoutSession } from '@/constants';
 import type { ScheduledWorkout } from '@/stores/workoutCreator';
 
 const licenseServerUrl = import.meta.env.VITE_WAVEBINDER_LICENSE_SERVER_URL?.replace(/\/$/, '');
@@ -72,6 +72,10 @@ export const wb = new WaveBinder(
         return items.flatMap((item, index) => {
           if (!item.exerciseId) return [`Seleziona l'esercizio ${index + 1} di warm-up.`];
           const value = item.modeType === 'repetitions' ? item.repetitions : item.duration;
+          if (item.modeType === 'repetitions' &&
+            (!Number.isInteger(item.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS) || (item.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS) < 1)) {
+            return [`L’intervallo tra le ripetizioni del warm-up ${index + 1} deve essere di almeno un secondo.`];
+          }
           return Number(value) > 0 ? [] : [`Inserisci un valore maggiore di zero per il warm-up ${index + 1}.`];
         });
       },

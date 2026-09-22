@@ -256,7 +256,7 @@ function onDayModalUpdate(isOpen: boolean) {
 }
 .calendar-day {
   display: flex;
-  min-height: 9rem;
+  min-height: 7.5rem;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -278,8 +278,8 @@ function onDayModalUpdate(isOpen: boolean) {
 }
 .calendar-day-number {
   display: inline-grid;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
   place-items: center;
   border-radius: 999px;
   font-size: 0.875rem;
@@ -295,7 +295,7 @@ function onDayModalUpdate(isOpen: boolean) {
 .week-day-row {
   display: flex;
   width: 100%;
-  min-height: 4.5rem;
+  min-height: 3.75rem;
   align-items: center;
   gap: 1rem;
   border-bottom: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
@@ -381,7 +381,7 @@ function onDayModalUpdate(isOpen: boolean) {
 }
 @media (max-width: 480px) {
   .calendar-day {
-    min-height: 6.5rem;
+    min-height: 5.5rem;
     padding: 0.25rem;
   }
   .calendar-weekdays span {
