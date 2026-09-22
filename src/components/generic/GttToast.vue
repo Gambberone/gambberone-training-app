@@ -1,9 +1,13 @@
 <template>
-  <div v-if="activeToast" class="toast toast-bottom toast-center z-[1000] w-full px-4">
+  <div v-if="activeToast" class="toast toast-bottom toast-center z-[1000] w-full px-4" role="status" aria-live="polite">
     <article class="w-full max-w-sm overflow-hidden rounded-box bg-base-100 shadow-xl ring-1 ring-base-content/10">
       <div class="flex items-start gap-3 p-4">
-        <div class="grid size-10 shrink-0 place-items-center rounded-full bg-success/15 text-success">
-          <CircleCheck :size="22" />
+        <div
+          class="grid size-10 shrink-0 place-items-center rounded-full"
+          :class="activeToast.kind === 'update' ? 'bg-primary/15 text-primary' : 'bg-success/15 text-success'"
+        >
+          <RefreshCw v-if="activeToast.kind === 'update'" :size="22" aria-hidden="true" />
+          <CircleCheck v-else :size="22" aria-hidden="true" />
         </div>
         <div class="min-w-0 flex-1">
           <h2 class="font-bold text-base-content">{{ activeToast.title }}</h2>
@@ -30,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { CircleCheck } from '@lucide/vue';
+import { CircleCheck, RefreshCw } from '@lucide/vue';
 import { activeToast, hideToast, type ToastAction } from '@/composables/toast';
 
 function runAction(action: ToastAction) {

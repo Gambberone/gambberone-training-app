@@ -10,7 +10,8 @@ export type ToastOptions = {
   title: string;
   message?: string;
   actions?: ToastAction[];
-  duration?: number;
+  duration?: number | null;
+  kind?: 'success' | 'update';
 };
 
 export const activeToast = ref<ToastOptions>();
@@ -28,5 +29,7 @@ export const hideToast = () => {
 export const showToast = (options: ToastOptions) => {
   hideToast();
   activeToast.value = options;
-  dismissTimeout = setTimeout(hideToast, options.duration ?? 5000);
+  if (options.duration !== null) {
+    dismissTimeout = setTimeout(hideToast, options.duration ?? 5000);
+  }
 };

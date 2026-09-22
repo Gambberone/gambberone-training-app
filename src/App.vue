@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import GttToast from './components/generic/GttToast.vue';
 import WorkoutPlayer from './components/workouts/WorkoutPlayer.vue';
 import { useTheme } from './composables/useTheme';
+import { useAppUpdateNotice } from './composables/useAppUpdateNotice';
 import {
   activeWorkoutSessionRef,
   isWorkoutPlayerOpenRef,
@@ -12,6 +13,7 @@ import {
 } from './stores/workoutCreator';
 
 useTheme();
+useAppUpdateNotice();
 
 const route = useRoute();
 const activeWorkout = computed(() =>

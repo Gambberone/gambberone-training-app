@@ -84,6 +84,36 @@ export const isWorkoutPlayerOpenRef = ref(false);
 export const workoutPlayerStatusRef = ref<{ step: string; stepColorClass: string; remaining: string; paused: boolean } | null>(null);
 export const workoutPlayerPauseRequestRef = ref(0);
 
+export type WorkoutPlaybackCheckpoint = {
+  sessionId: string;
+  segmentIndex: number;
+  elapsedMilliseconds: number;
+  totalElapsedMilliseconds: number;
+  isStarting: boolean;
+  startCountdown: number;
+};
+
+const workoutPlaybackKey = 'gtt:workout-playback';
+
+export const getWorkoutPlaybackCheckpoint = (sessionId: string): WorkoutPlaybackCheckpoint | null => {
+  try {
+    const saved = localStorage.getItem(workoutPlaybackKey);
+    if (!saved) return null;
+    const checkpoint = JSON.parse(saved) as WorkoutPlaybackCheckpoint;
+    return checkpoint.sessionId === sessionId ? checkpoint : null;
+  } catch {
+    return null;
+  }
+};
+
+export const saveWorkoutPlaybackCheckpoint = (checkpoint: WorkoutPlaybackCheckpoint) => {
+  localStorage.setItem(workoutPlaybackKey, JSON.stringify(checkpoint));
+};
+
+export const clearWorkoutPlaybackCheckpoint = () => {
+  localStorage.removeItem(workoutPlaybackKey);
+};
+
 export const toggleWorkoutPlayerPause = () => {
   if (activeWorkoutSessionRef.value) workoutPlayerPauseRequestRef.value += 1;
 };
@@ -328,6 +358,7 @@ export const workoutEstimatedDuration = (workout: Workout) =>
 export const startWorkoutSession = (workoutId: string) => {
   const workout = workoutsRef.value.find((item) => item.id === workoutId);
   if (!workout) return;
+  clearWorkoutPlaybackCheckpoint();
   activeWorkoutSessionRef.value = {
     id: crypto.randomUUID(),
     workoutId,
@@ -358,6 +389,7 @@ export const advanceWorkoutSession = () => {
     workoutSessionsRef.value.unshift(completed);
     activeWorkoutSessionRef.value = null;
     isWorkoutPlayerOpenRef.value = false;
+    clearWorkoutPlaybackCheckpoint();
     return;
   }
   session.currentStepIndex += 1;
@@ -380,11 +412,13 @@ export const completeWorkoutSession = () => {
   workoutSessionsRef.value.unshift(completed);
   activeWorkoutSessionRef.value = null;
   isWorkoutPlayerOpenRef.value = false;
+  clearWorkoutPlaybackCheckpoint();
 };
 
 export const abandonWorkoutSession = () => {
   activeWorkoutSessionRef.value = null;
   isWorkoutPlayerOpenRef.value = false;
+  clearWorkoutPlaybackCheckpoint();
 };
 
 export const resetWorkoutCreator = () => {
