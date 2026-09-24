@@ -91,6 +91,7 @@ export type WorkoutPlaybackCheckpoint = {
   totalElapsedMilliseconds: number;
   isStarting: boolean;
   startCountdown: number;
+  pausedForBackground?: boolean;
 };
 
 const workoutPlaybackKey = 'gtt:workout-playback';

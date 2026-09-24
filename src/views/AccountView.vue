@@ -10,8 +10,26 @@
       <form class="card-body gap-4 p-5" @submit.prevent="saveName">
         <div>
           <h2 class="font-bold text-base-content">Profilo</h2>
-          <p class="mt-1 text-sm text-base-content/65">Scegli il nome da mostrare nella Home.</p>
+          <p class="mt-1 text-sm text-base-content/65">Scegli la foto e il nome da mostrare nell'app.</p>
         </div>
+        <div class="flex items-center gap-4">
+          <div class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-primary">
+            <img v-if="profilePhoto" :src="profilePhoto" alt="Foto del profilo" class="h-full w-full object-cover" />
+            <UserRound v-else class="size-8" aria-hidden="true" />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <label class="btn btn-outline btn-sm" :class="{ 'btn-disabled': isSavingPhoto }">
+              <span v-if="isSavingPhoto" class="loading loading-spinner loading-xs" />
+              {{ profilePhoto ? 'Cambia foto' : 'Carica foto' }}
+              <input class="sr-only" type="file" accept="image/jpeg,image/png,image/webp"
+                :disabled="isSavingPhoto" aria-label="Scegli una foto del profilo" @change="savePhoto" />
+            </label>
+            <button v-if="profilePhoto" class="btn btn-ghost btn-sm" type="button"
+              :disabled="isSavingPhoto" @click="removePhoto">Rimuovi foto</button>
+          </div>
+        </div>
+        <p class="text-xs text-base-content/60">JPG, PNG o WebP, massimo 5 MB.</p>
+        <p v-if="photoError" class="text-sm text-error" role="alert">{{ photoError }}</p>
         <label class="form-control w-full gap-2">
           <span class="label-text font-semibold text-base-content">Nome visualizzato</span>
           <input v-model="displayName" class="input input-bordered w-full" type="text"
@@ -83,6 +101,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { UserRound } from '@lucide/vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { useTheme } from '@/composables/useTheme';
@@ -91,11 +110,13 @@ import { showToast } from '@/composables/toast';
 
 const { themePreference } = useTheme();
 const { timerSounds, timerVibration, keepScreenAwake } = useWorkoutPreferences();
-const { currentUser, signOut, updateDisplayName } = useAuth();
+const { currentUser, profilePhoto, signOut, updateDisplayName, updateProfilePhoto, removeProfilePhoto } = useAuth();
 const router = useRouter();
 const displayName = ref(currentUser.value?.displayName ?? '');
 const isSavingName = ref(false);
 const nameError = ref('');
+const photoError = ref('');
+const isSavingPhoto = ref(false);
 
 watch(currentUser, (user) => {
   displayName.value = user?.displayName ?? '';
@@ -115,6 +136,47 @@ async function saveName() {
     nameError.value = 'Impossibile salvare il nome. Riprova.';
   } finally {
     isSavingName.value = false;
+  }
+}
+
+async function savePhoto(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file || isSavingPhoto.value) return;
+
+  photoError.value = '';
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    photoError.value = 'Scegli un file JPG, PNG o WebP.';
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    photoError.value = 'La foto non può superare 5 MB.';
+    return;
+  }
+
+  isSavingPhoto.value = true;
+  try {
+    await updateProfilePhoto(file);
+    showToast({ title: 'Foto aggiornata' });
+  } catch {
+    photoError.value = 'Impossibile salvare la foto. Riprova.';
+  } finally {
+    isSavingPhoto.value = false;
+  }
+}
+
+async function removePhoto() {
+  if (isSavingPhoto.value) return;
+  isSavingPhoto.value = true;
+  photoError.value = '';
+  try {
+    await removeProfilePhoto();
+    showToast({ title: 'Foto rimossa' });
+  } catch {
+    photoError.value = 'Impossibile rimuovere la foto. Riprova.';
+  } finally {
+    isSavingPhoto.value = false;
   }
 }
 

@@ -226,6 +226,7 @@ const totalElapsedMilliseconds = ref(0);
 const startCountdown = ref(3);
 const isStarting = ref(true);
 const isPaused = ref(false);
+let pausedForBackground = false;
 const playerElement = ref<HTMLElement>();
 const isFullscreen = ref(false);
 const { keepScreenAwake } = useWorkoutPreferences();
@@ -414,6 +415,7 @@ function savePlayback() {
     totalElapsedMilliseconds: totalElapsedMilliseconds.value,
     isStarting: isStarting.value,
     startCountdown: startCountdown.value,
+    pausedForBackground,
   });
   lastCheckpointAt = Date.now();
 }
@@ -445,6 +447,7 @@ function restorePlayback() {
     totalElapsedMilliseconds.value = checkpoint.totalElapsedMilliseconds;
     isStarting.value = checkpoint.isStarting;
     startCountdown.value = checkpoint.startCountdown;
+    pausedForBackground = checkpoint.pausedForBackground === true;
   } else {
     const savedStepIndex = activeWorkoutSessionRef.value?.currentStepIndex ?? 0;
     if (savedStepIndex === 0) return false;
@@ -465,15 +468,28 @@ function restorePlayback() {
 function checkpointAtExit() {
   if (!sessionId || activeWorkoutSessionRef.value?.id !== sessionId) return;
   if (isPaused.value) savePlayback();
-  else setPaused(true, false);
+  else {
+    pausedForBackground = true;
+    setPaused(true, false);
+  }
 }
 
 function checkpointWhenHidden() {
   if (document.visibilityState === 'hidden') {
     checkpointAtExit();
-  } else if (activeWorkoutSessionRef.value?.isPaused === false) {
+  } else {
+    resumeAfterBackground();
+  }
+}
+
+function resumeAfterBackground() {
+  if (!pausedForBackground || document.visibilityState !== 'visible') return;
+  pausedForBackground = false;
+  const session = activeWorkoutSessionRef.value;
+  if (session && session.id === sessionId && session.isPaused !== true) {
     setPaused(false, false);
   }
+  savePlayback();
 }
 
 function updateTotalElapsed() {
@@ -570,6 +586,7 @@ async function syncWakeLock() {
 watch(keepScreenAwake, () => void syncWakeLock());
 
 function setPaused(paused: boolean, syncSession = true) {
+  if (syncSession) pausedForBackground = false;
   if (isPaused.value === paused) return;
   if (!isPaused.value && !isStarting.value) updateTotalElapsed();
   if (isPaused.value && !isStarting.value) lastTotalTickAt = Date.now();
@@ -668,9 +685,12 @@ onMounted(() => {
   document.addEventListener('visibilitychange', checkpointWhenHidden);
   document.addEventListener('visibilitychange', syncWakeLock);
   window.addEventListener('pagehide', checkpointAtExit);
+  window.addEventListener('pageshow', resumeAfterBackground);
+  window.addEventListener('focus', resumeAfterBackground);
   if (!segments.value.length) return completeWorkoutSession();
   if (restorePlayback()) {
-    if (activeWorkoutSessionRef.value?.isPaused === false) setPaused(false, false);
+    if (pausedForBackground) resumeAfterBackground();
+    else if (activeWorkoutSessionRef.value?.isPaused === false) setPaused(false, false);
     return;
   }
   beginWorkout(activeWorkoutSessionRef.value?.isPaused === true);
@@ -687,6 +707,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('visibilitychange', checkpointWhenHidden);
   document.removeEventListener('visibilitychange', syncWakeLock);
   window.removeEventListener('pagehide', checkpointAtExit);
+  window.removeEventListener('pageshow', resumeAfterBackground);
+  window.removeEventListener('focus', resumeAfterBackground);
 });
 watch(
   () => props.workout.id,

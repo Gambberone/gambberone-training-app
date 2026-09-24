@@ -85,13 +85,9 @@
       </router-link>
 
       <router-link to="/account" :class="{ 'dock-active': route.name === 'account' }">
-        <div class="avatar">
-          <div class="w-7 rounded-full">
-            <img
-              src="https://img.daisyui.com/images/profile/demo/superperson@192.webp"
-              alt="Tailwind-CSS-Avatar-component"
-            />
-          </div>
+        <div class="grid size-7 place-items-center overflow-hidden rounded-full bg-primary/15 text-primary">
+          <img v-if="profilePhoto" :src="profilePhoto" alt="Foto del profilo" class="h-full w-full object-cover" />
+          <UserRound v-else class="size-5" aria-hidden="true" />
         </div>
       </router-link>
     </nav>
@@ -99,12 +95,14 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarDays, ChartSpline, Dumbbell, House, Pause, Play, Square } from '@lucide/vue';
+import { CalendarDays, ChartSpline, Dumbbell, House, Pause, Play, Square, UserRound } from '@lucide/vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { abandonWorkoutSession, activeWorkoutSessionRef, isWorkoutPlayerOpenRef, openWorkoutPlayer, toggleWorkoutPlayerPause, workoutPlayerStatusRef, workoutsRef } from '@/stores/workoutCreator';
+import { useAuth } from '@/composables/useAuth';
 
 const route = useRoute();
+const { profilePhoto } = useAuth();
 const activeWorkout = computed(() =>
   workoutsRef.value.find((workout) => workout.id === activeWorkoutSessionRef.value?.workoutId),
 );
