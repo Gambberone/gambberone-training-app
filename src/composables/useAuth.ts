@@ -5,9 +5,10 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updateProfile,
   type User,
 } from 'firebase/auth';
-import { computed, readonly, ref } from 'vue';
+import { computed, readonly, ref, triggerRef } from 'vue';
 import { auth } from '@/firebase';
 
 const currentUser = ref<User | null>(null);
@@ -39,6 +40,13 @@ export function useAuth() {
       sendPasswordResetEmail(auth, email, {
         url: `${window.location.origin}/auth/login`,
       }),
+    updateDisplayName: async (displayName: string) => {
+      const user = auth.currentUser;
+      if (!user) throw new Error('No authenticated user');
+      await updateProfile(user, { displayName });
+      currentUser.value = user;
+      triggerRef(currentUser);
+    },
     signOut: () => signOut(auth),
   };
 }

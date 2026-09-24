@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-dvh flex-col">
+  <div class="flex h-dvh flex-col overflow-hidden">
     <div v-if="activeWorkout && !isWorkoutPlayerOpenRef" class="shrink-0 px-4 pt-4">
       <div
         class="aura aura-lg mx-auto block w-full max-w-2xl bg-primary/10 text-primary"
@@ -24,7 +24,7 @@
               </span>
             </span>
             <span v-if="workoutPlayerStatusRef" class="shrink-0 font-mono text-2xl font-bold tabular-nums" :class="workoutPlayerStatusRef.stepColorClass">
-              {{ workoutPlayerStatusRef.remaining }}
+              {{ workoutPlayerStatusRef.counter }}
             </span>
           </button>
           <button
@@ -50,20 +50,22 @@
       </div>
     </div>
     <main
-      class="min-h-0 flex-1 overflow-y-auto p-4"
-      style="padding-bottom: calc(4.25rem + env(safe-area-inset-bottom) + max(env(safe-area-inset-bottom), 0.5rem))"
+      class="min-h-0 flex-1 p-4"
+      :class="route.name === 'workouts' ? 'overflow-hidden' : 'overflow-y-auto'"
     >
       <!-- <div class="w-full flex">
                 <span class="text-2xl font-semibold text-primary">{{ route.meta.title }}</span>
             </div> -->
-      <div class="h-full py-3">
+      <div class="pt-3" :class="route.name === 'workouts' ? 'h-full min-h-0' : 'min-h-full'">
         <router-view />
       </div>
     </main>
 
+    <div id="app-bottom-action" class="shrink-0 px-4 pb-4 empty:hidden" />
+
     <nav
-      class="dock dock-sm"
-      style="bottom: max(env(safe-area-inset-bottom), 0.5rem)"
+      class="dock dock-sm app-dock shrink-0"
+      style="position: relative; bottom: auto"
       aria-label="Navigazione principale"
     >
       <router-link to="/" :class="{ 'dock-active': route.name === 'home' }">

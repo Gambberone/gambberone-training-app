@@ -86,6 +86,11 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 
 html,
@@ -95,6 +100,21 @@ body,
   padding: 0;
   width: 100%;
   min-height: 100dvh;
+}
+
+.app-dock {
+  border-top: 0;
+}
+
+.app-dock::before {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  height: 1rem;
+  background: linear-gradient(to bottom, transparent, var(--color-base-100));
+  content: '';
+  pointer-events: none;
 }
 
 .input:focus,

@@ -1,26 +1,25 @@
-import { computed, watch } from 'vue';
+import { watch } from 'vue';
 import { localRef } from './localRef';
 
-type Theme = 'training-light' | 'training-dark';
+export type ThemePreference = 'auto' | 'light' | 'dark';
 
-const theme = localRef<Theme>('gtt-theme', () =>
-  window.matchMedia('(prefers-color-scheme: dark)').matches ? 'training-dark' : 'training-light',
-);
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+const preference = localRef<ThemePreference>('gtt-theme-preference', () => {
+  // Keep the explicit choice made with the previous light/dark switch.
+  const previousTheme = localStorage.getItem('gtt-theme');
+  if (previousTheme === '"training-light"') return 'light';
+  if (previousTheme === '"training-dark"') return 'dark';
+  return 'auto';
+});
 
-function applyTheme(value: Theme) {
-  document.documentElement.dataset.theme = value;
+function applyTheme() {
+  const dark = preference.value === 'dark' || (preference.value === 'auto' && systemDark.matches);
+  document.documentElement.dataset.theme = dark ? 'training-dark' : 'training-light';
 }
 
-applyTheme(theme.value);
-watch(theme, applyTheme, { immediate: true });
+watch(preference, applyTheme, { immediate: true });
+systemDark.addEventListener('change', applyTheme);
 
 export function useTheme() {
-  const isDark = computed({
-    get: () => theme.value === 'training-dark',
-    set: (value: boolean) => {
-      theme.value = value ? 'training-dark' : 'training-light';
-    },
-  });
-
-  return { isDark };
+  return { themePreference: preference };
 }

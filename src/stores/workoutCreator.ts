@@ -81,7 +81,7 @@ export const activeWorkoutSessionRef = localRef<WorkoutSession | null>(
 );
 // This is intentionally not persisted: it only controls whether the global player is expanded.
 export const isWorkoutPlayerOpenRef = ref(false);
-export const workoutPlayerStatusRef = ref<{ step: string; stepColorClass: string; remaining: string; paused: boolean } | null>(null);
+export const workoutPlayerStatusRef = ref<{ step: string; stepColorClass: string; counter: string; paused: boolean } | null>(null);
 export const workoutPlayerPauseRequestRef = ref(0);
 
 export type WorkoutPlaybackCheckpoint = {
@@ -363,6 +363,7 @@ export const startWorkoutSession = (workoutId: string) => {
     id: crypto.randomUUID(),
     workoutId,
     startedAt: new Date().toISOString(),
+    isPaused: false,
     currentStepIndex: 0,
     completedStepIndexes: [],
   };

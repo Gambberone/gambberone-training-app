@@ -1,8 +1,5 @@
 <template>
-  <article
-    ref="playerElement"
-    class="workout-player card bg-base-100 shadow-sm"
-  >
+  <article ref="playerElement" class="workout-player card bg-base-100 shadow-sm">
     <div class="card-body gap-5 p-5">
       <div class="flex items-center justify-between gap-3">
         <div>
@@ -44,7 +41,9 @@
         />
       </div>
 
-      <div class="flex min-h-80 flex-col justify-center rounded-box bg-base-200 p-3 text-center sm:p-8">
+      <div
+        class="flex min-h-80 flex-col justify-center rounded-box bg-base-200 p-3 text-center sm:p-8"
+      >
         <template v-if="isStarting">
           <p class="text-base font-semibold uppercase tracking-wider text-primary">Preparati</p>
           <p class="mt-3 text-8xl font-black text-primary sm:text-9xl" aria-live="assertive">
@@ -53,14 +52,20 @@
           <p class="mt-3 text-base text-base-content/60">Si parte tra un attimo</p>
         </template>
         <template v-else>
-          <p class="flex h-16 items-center justify-center text-2xl font-bold sm:h-20 sm:text-3xl" :class="currentSegment.colorClass">
+          <p
+            class="flex h-16 items-center justify-center text-2xl font-bold sm:h-20 sm:text-3xl"
+            :class="currentSegment.colorClass"
+          >
             <span class="line-clamp-2">{{ currentSegment.name }}</span>
           </p>
           <div
-            class="relative mt-3 grid aspect-square w-[calc(100%-1rem)] max-w-84 shrink-0 self-center place-items-center sm:max-w-[28rem] lg:max-w-[30rem]"
+            class="relative mt-3 grid aspect-square w-[calc(100%-1rem)] max-w-84 shrink-0 self-center place-items-center sm:max-w-md lg:max-w-120"
             :class="currentSegment.colorClass"
           >
-            <span v-if="currentSegment.setLabel" class="absolute top-6 text-base font-bold sm:text-lg">
+            <span
+              v-if="currentSegment.setLabel"
+              class="absolute top-6 text-base font-bold sm:text-lg"
+            >
               {{ currentSegment.setLabel }}
             </span>
             <svg
@@ -68,30 +73,51 @@
               viewBox="0 0 100 100"
               aria-hidden="true"
             >
-              <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-opacity="0.2" stroke-width="4.5" />
+              <circle
+                cx="50"
+                cy="50"
+                r="46"
+                fill="none"
+                stroke="currentColor"
+                stroke-opacity="0.2"
+                stroke-width="4.5"
+              />
               <circle
                 class="transition-[stroke-dashoffset] duration-100"
-                cx="50" cy="50" r="46" fill="none" stroke="currentColor"
-                stroke-width="4.5" stroke-linecap="round"
-                pathLength="100" stroke-dasharray="100"
+                cx="50"
+                cy="50"
+                r="46"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="4.5"
+                stroke-linecap="round"
+                pathLength="100"
+                stroke-dasharray="100"
                 :stroke-dashoffset="100 - segmentProgress"
                 transform="rotate(-90 50 50)"
               />
             </svg>
             <p
               class="relative font-black leading-none tracking-[-0.08em] tabular-nums"
-              :class="isRepetitions
-                ? 'text-[clamp(3.5rem,14vw,5rem)] sm:text-[clamp(5rem,10vw,7rem)]'
-                : 'text-[clamp(4.25rem,20vw,7rem)] sm:text-[clamp(7rem,11vw,9rem)]'"
+              :class="
+                isRepetitions
+                  ? 'text-[clamp(3.5rem,14vw,5rem)] sm:text-[clamp(5rem,10vw,7rem)]'
+                  : 'text-[clamp(4.25rem,20vw,7rem)] sm:text-[clamp(7rem,11vw,9rem)]'
+              "
             >
               <template v-if="isRepetitions">{{ counterLabel }}</template>
               <template v-else>
-                {{ counterLabel.split(':')[0] }}<span class="mx-[0.06em]">:</span>{{ counterLabel.split(':')[1] }}
+                {{ counterLabel.split(':')[0] }}<span class="mx-[0.06em]">:</span
+                >{{ counterLabel.split(':')[1] }}
               </template>
             </p>
           </div>
-          <p class="mt-2 flex h-10 items-center justify-center text-base text-base-content/60 sm:h-12 sm:text-lg">
-            <span v-if="isRepetitions">Una ripetizione ogni {{ repetitionIntervalSeconds }} secondi</span>
+          <p
+            class="mt-2 flex h-10 items-center justify-center text-base text-base-content/60 sm:h-12 sm:text-lg"
+          >
+            <span v-if="isRepetitions"
+              >Una ripetizione ogni {{ repetitionIntervalSeconds }} secondi</span
+            >
           </p>
         </template>
       </div>
@@ -103,7 +129,8 @@
               Prossimo step
             </p>
             <p class="mt-1 font-bold" :class="upcomingSegment.colorClass">
-              {{ upcomingSegment.typeLabel }} · {{ upcomingSegment.name }}<span v-if="upcomingSegment.setLabel"> · {{ upcomingSegment.setLabel }}</span>
+              {{ upcomingSegment.typeLabel }} · {{ upcomingSegment.name
+              }}<span v-if="upcomingSegment.setLabel"> · {{ upcomingSegment.setLabel }}</span>
             </p>
           </div>
           <button
@@ -124,16 +151,29 @@
       </div>
 
       <div class="player-actions grid grid-cols-3 gap-2">
-        <button class="btn btn-primary btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm" type="button" aria-label="Ricomincia il segmento corrente" @click="resetCurrentSegment">
+        <button
+          class="btn btn-primary btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          type="button"
+          aria-label="Ricomincia il segmento corrente"
+          @click="resetCurrentSegment"
+        >
           <RotateCcw class="size-4 sm:size-5" aria-hidden="true" />
           Reset
         </button>
-        <button class="btn btn-info btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm" type="button" @click="togglePause">
+        <button
+          class="btn btn-info btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          type="button"
+          @click="togglePause"
+        >
           <Play v-if="isPaused" class="size-4 sm:size-5" aria-hidden="true" />
           <Pause v-else class="size-4 sm:size-5" aria-hidden="true" />
           {{ isPaused ? 'Riprendi' : 'Pausa' }}
         </button>
-        <button class="btn btn-error btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm" type="button" @click="abandonWorkoutSession">
+        <button
+          class="btn btn-error btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          type="button"
+          @click="abandonWorkoutSession"
+        >
           <Square class="size-4 sm:size-5" aria-hidden="true" />
           Abbandona
         </button>
@@ -162,6 +202,8 @@ import {
   workoutPlayerStatusRef,
 } from '@/stores/workoutCreator';
 import { exercisesRef } from '@/stores/exercises';
+import { useWorkoutPreferences } from '@/composables/useWorkoutPreferences';
+import { signalTimer } from '@/services/workoutFeedback';
 
 type PlayerSegment = {
   name: string;
@@ -186,6 +228,10 @@ const isStarting = ref(true);
 const isPaused = ref(false);
 const playerElement = ref<HTMLElement>();
 const isFullscreen = ref(false);
+const { keepScreenAwake } = useWorkoutPreferences();
+let wakeLock: WakeLockSentinel | undefined;
+let isUnmounted = false;
+let lastRemainingCount = 0;
 let timer: ReturnType<typeof setInterval> | undefined;
 let countdownTimer: ReturnType<typeof setInterval> | undefined;
 let segmentStartedAt = 0;
@@ -310,10 +356,10 @@ const repetitionIntervalSeconds = computed(() => {
 const elapsedSeconds = computed(
   () => Math.min(segmentDurationMilliseconds.value, elapsedMilliseconds.value) / 1000,
 );
-const repetitionsCompleted = computed(() =>
+const currentRepetition = computed(() =>
   Math.min(
     currentSegment.value.target,
-    Math.floor(elapsedSeconds.value / repetitionIntervalSeconds.value),
+    Math.floor(elapsedSeconds.value / repetitionIntervalSeconds.value) + 1,
   ),
 );
 const isRepetitions = computed(() => currentSegment.value.mode === 'repetitions');
@@ -322,10 +368,12 @@ const startLabel = computed(() =>
 );
 const counterLabel = computed(() =>
   isRepetitions.value
-    ? `${repetitionsCompleted.value}/${currentSegment.value.target}`
+    ? `${currentRepetition.value}/${currentSegment.value.target}`
     : formatTime(Math.ceil(currentSegment.value.target - elapsedSeconds.value)),
 );
-const totalElapsedLabel = computed(() => formatTime(Math.floor(totalElapsedMilliseconds.value / 1000)));
+const totalElapsedLabel = computed(() =>
+  formatTime(Math.floor(totalElapsedMilliseconds.value / 1000)),
+);
 const segmentDurationMilliseconds = computed(
   () =>
     currentSegment.value.target *
@@ -347,11 +395,7 @@ watchEffect(() => {
   workoutPlayerStatusRef.value = {
     step: currentSegment.value.name,
     stepColorClass: currentSegment.value.colorClass,
-    remaining: isStarting.value
-      ? formatTime(Math.max(0, startCountdown.value))
-      : formatTime(
-          Math.ceil((segmentDurationMilliseconds.value - elapsedMilliseconds.value) / 1000),
-        ),
+    counter: isStarting.value ? formatTime(Math.max(0, startCountdown.value)) : counterLabel.value,
     paused: isPaused.value,
   };
 });
@@ -390,7 +434,8 @@ function restorePlayback() {
       !Number.isInteger(checkpoint.startCountdown) ||
       checkpoint.startCountdown < 0 ||
       checkpoint.startCountdown > 3
-    ) return false;
+    )
+      return false;
 
     currentSegmentIndex.value = checkpoint.segmentIndex;
     elapsedMilliseconds.value = Math.min(
@@ -420,11 +465,15 @@ function restorePlayback() {
 function checkpointAtExit() {
   if (!sessionId || activeWorkoutSessionRef.value?.id !== sessionId) return;
   if (isPaused.value) savePlayback();
-  else togglePause();
+  else setPaused(true, false);
 }
 
 function checkpointWhenHidden() {
-  if (document.visibilityState === 'hidden') checkpointAtExit();
+  if (document.visibilityState === 'hidden') {
+    checkpointAtExit();
+  } else if (activeWorkoutSessionRef.value?.isPaused === false) {
+    setPaused(false, false);
+  }
 }
 
 function updateTotalElapsed() {
@@ -434,11 +483,13 @@ function updateTotalElapsed() {
 }
 
 function startSegment() {
+  lastRemainingCount = 0;
   updateTotalElapsed();
   segmentStartedAt = Date.now();
   elapsedMilliseconds.value = 0;
   updateWorkoutSessionStep(currentSegment.value.sourceStepIndex);
   savePlayback();
+  signalTimer(true, false);
 }
 
 function skipToNextSegment() {
@@ -450,10 +501,18 @@ function skipToNextSegment() {
 function tick() {
   updateTotalElapsed();
   elapsedMilliseconds.value = Date.now() - segmentStartedAt;
+  const remainingCount = isRepetitions.value
+    ? currentSegment.value.target - currentRepetition.value + 1
+    : Math.max(0, Math.ceil((segmentDurationMilliseconds.value - elapsedMilliseconds.value) / 1000));
+  if (remainingCount !== lastRemainingCount) {
+    lastRemainingCount = remainingCount;
+    if (remainingCount > 0 && remainingCount <= 3) signalTimer();
+  }
   if (Date.now() - lastCheckpointAt >= 1000) savePlayback();
   if (elapsedMilliseconds.value < segmentDurationMilliseconds.value) return;
   if (currentSegmentIndex.value >= segments.value.length - 1) {
     stopTimer();
+    signalTimer(true, false);
     completeWorkoutSession();
     return;
   }
@@ -476,8 +535,11 @@ function runSegmentTimer() {
 }
 
 function runCountdown() {
+  if (startCountdown.value > 0 && startCountdown.value <= 3) signalTimer();
   countdownTimer = window.setInterval(() => {
     startCountdown.value -= 1;
+    if (startCountdown.value > 0) signalTimer();
+    else if (startCountdown.value === 0) signalTimer(true, false);
     savePlayback();
     if (startCountdown.value >= 0) return;
     stopCountdown();
@@ -487,10 +549,31 @@ function runCountdown() {
   }, 1000);
 }
 
-function togglePause() {
+async function syncWakeLock() {
+  if (!keepScreenAwake.value || document.visibilityState !== 'visible' || isUnmounted) {
+    await wakeLock?.release().catch(() => {});
+    wakeLock = undefined;
+    return;
+  }
+  if (wakeLock || !('wakeLock' in navigator)) return;
+  try {
+    const lock = await navigator.wakeLock.request('screen');
+    if (isUnmounted || !keepScreenAwake.value || document.visibilityState !== 'visible') {
+      await lock.release();
+    }
+    else wakeLock = lock;
+  } catch {
+    // The device can refuse a screen wake lock, for example in power saving mode.
+  }
+}
+
+watch(keepScreenAwake, () => void syncWakeLock());
+
+function setPaused(paused: boolean, syncSession = true) {
+  if (isPaused.value === paused) return;
   if (!isPaused.value && !isStarting.value) updateTotalElapsed();
   if (isPaused.value && !isStarting.value) lastTotalTickAt = Date.now();
-  isPaused.value = !isPaused.value;
+  isPaused.value = paused;
 
   if (isPaused.value) {
     if (isStarting.value) stopCountdown();
@@ -499,6 +582,8 @@ function togglePause() {
       stopTimer();
     }
     savePlayback();
+    const session = activeWorkoutSessionRef.value;
+    if (syncSession && session && session.id === sessionId) session.isPaused = true;
     return;
   }
 
@@ -508,6 +593,12 @@ function togglePause() {
     runSegmentTimer();
   }
   savePlayback();
+  const session = activeWorkoutSessionRef.value;
+  if (syncSession && session && session.id === sessionId) session.isPaused = false;
+}
+
+function togglePause() {
+  setPaused(!isPaused.value);
 }
 
 function resetCurrentSegment() {
@@ -521,10 +612,21 @@ function resetCurrentSegment() {
 
   segmentStartedAt = Date.now();
   elapsedMilliseconds.value = 0;
+  lastRemainingCount = 0;
   savePlayback();
 }
 
 watch(workoutPlayerPauseRequestRef, togglePause);
+watch(
+  () => activeWorkoutSessionRef.value?.isPaused,
+  (paused) => {
+    if (activeWorkoutSessionRef.value?.id === sessionId && typeof paused === 'boolean') {
+      if (!paused && document.visibilityState === 'hidden') return;
+      setPaused(paused, false);
+    }
+  },
+  { flush: 'sync' },
+);
 
 async function toggleFullscreen() {
   if (document.fullscreenElement) {
@@ -549,31 +651,41 @@ function syncFullscreenState() {
   isFullscreen.value = document.fullscreenElement === playerElement.value;
 }
 
-function beginWorkout() {
+function beginWorkout(paused = false) {
   totalElapsedMilliseconds.value = 0;
   lastTotalTickAt = 0;
   startCountdown.value = 3;
   isStarting.value = true;
-  isPaused.value = false;
-  runCountdown();
+  isPaused.value = paused;
+  if (!paused) runCountdown();
   savePlayback();
 }
 
 onMounted(() => {
+  isUnmounted = false;
+  void syncWakeLock();
   document.addEventListener('fullscreenchange', syncFullscreenState);
   document.addEventListener('visibilitychange', checkpointWhenHidden);
+  document.addEventListener('visibilitychange', syncWakeLock);
   window.addEventListener('pagehide', checkpointAtExit);
   if (!segments.value.length) return completeWorkoutSession();
-  if (restorePlayback()) return;
-  beginWorkout();
+  if (restorePlayback()) {
+    if (activeWorkoutSessionRef.value?.isPaused === false) setPaused(false, false);
+    return;
+  }
+  beginWorkout(activeWorkoutSessionRef.value?.isPaused === true);
 });
 onBeforeUnmount(() => {
+  isUnmounted = true;
+  void wakeLock?.release().catch(() => {});
+  wakeLock = undefined;
   checkpointAtExit();
   stopTimer();
   stopCountdown();
   workoutPlayerStatusRef.value = null;
   document.removeEventListener('fullscreenchange', syncFullscreenState);
   document.removeEventListener('visibilitychange', checkpointWhenHidden);
+  document.removeEventListener('visibilitychange', syncWakeLock);
   window.removeEventListener('pagehide', checkpointAtExit);
 });
 watch(

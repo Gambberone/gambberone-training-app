@@ -53,7 +53,7 @@
       >? Verranno rimosse anche le programmazioni nel calendario.
     </p>
   </GttModal>
-  <GttFab @click="showWorkoutCreatorModal = true" />
+  <GttBottomAction label="Crea workout" @click="showWorkoutCreatorModal = true" />
 </template>
 
 <script setup lang="ts">
@@ -67,7 +67,7 @@ import {
   type Workout,
   workoutsRef,
 } from '@/stores/workoutCreator.ts';
-import GttFab from '@/components/generic/GttFab.vue';
+import GttBottomAction from '@/components/generic/GttBottomAction.vue';
 import GttModal from '@/components/generic/GttModal.vue';
 import WorkoutCreatorModal from './creator/WorkoutCreatorModal.vue';
 

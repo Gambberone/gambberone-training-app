@@ -48,6 +48,7 @@ export type WorkoutSession = {
   id: string;
   workoutId: string;
   startedAt: string;
+  isPaused?: boolean;
   completedAt?: string;
   currentStepIndex: number;
   completedStepIndexes: number[];

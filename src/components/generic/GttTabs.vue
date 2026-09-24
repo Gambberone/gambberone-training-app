@@ -15,17 +15,23 @@
       </div>
     </div>
     <div
-      v-for="tab in props.tabs"
-      :key="tab.key"
-      :class="{ 'min-h-0 flex-1 overflow-y-auto': props.scrollContent && activeTab === tab.key }"
+      v-if="activeTab"
+      :key="activeTab"
+      ref="scrollElement"
+      :class="{
+        'gtt-tabs-scroll min-h-0 flex-1 overflow-y-auto': props.scrollContent,
+        'fade-top': props.scrollContent && fadeTop,
+        'fade-bottom': props.scrollContent && fadeBottom,
+      }"
+      @scroll="updateScrollFade"
     >
-      <slot :name="tab.key" v-if="activeTab === tab.key"></slot>
+      <slot :name="activeTab"></slot>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 interface Tab {
   key: string;
@@ -40,9 +46,32 @@ interface TabsProps {
 
 const props = defineProps<TabsProps>();
 
-const emit = defineEmits(['change']);
+const activeTab = defineModel<string>();
+const scrollElement = ref<HTMLElement | null>(null);
+const fadeTop = ref(false);
+const fadeBottom = ref(false);
+let resizeObserver: ResizeObserver | undefined;
 
-const activeTab = defineModel();
+function updateScrollFade() {
+  const element = scrollElement.value;
+  if (!element || !props.scrollContent) return;
+  fadeTop.value = element.scrollTop > 1;
+  fadeBottom.value = element.scrollTop + element.clientHeight < element.scrollHeight - 1;
+}
+
+watch(activeTab, async () => {
+  resizeObserver?.disconnect();
+  await nextTick();
+  if (!scrollElement.value || !props.scrollContent) return;
+  resizeObserver ??= new ResizeObserver(updateScrollFade);
+  resizeObserver.observe(scrollElement.value);
+  if (scrollElement.value.firstElementChild) {
+    resizeObserver.observe(scrollElement.value.firstElementChild);
+  }
+  updateScrollFade();
+});
+
+onBeforeUnmount(() => resizeObserver?.disconnect());
 
 onMounted(() => {
   activeTab.value =
@@ -64,3 +93,20 @@ const handleTabChange = (tab: Tab) => {
   activeTab.value = tab.key;
 };
 </script>
+
+<style scoped>
+.gtt-tabs-scroll.fade-top {
+  mask-image: linear-gradient(to bottom, transparent, black 1rem);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 1rem);
+}
+
+.gtt-tabs-scroll.fade-bottom {
+  mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent);
+}
+
+.gtt-tabs-scroll.fade-top.fade-bottom {
+  mask-image: linear-gradient(to bottom, transparent, black 1rem, black calc(100% - 1rem), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 1rem, black calc(100% - 1rem), transparent);
+}
+</style>
