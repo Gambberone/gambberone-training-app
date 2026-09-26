@@ -19,7 +19,7 @@
             v-if="props.goBack"
             class="btn btn-ghost btn-sm btn-circle mr-2 text-primary"
             type="button"
-            aria-label="Torna indietro"
+            :aria-label="tr('ui.go_back')"
             @click="emit('goBack')"
           >
             <ChevronLeft :size="25" />
@@ -31,7 +31,7 @@
             class="btn btn-ghost btn-sm btn-circle top-4 right-4"
             type="button"
             v-if="enableFullScreen"
-            :aria-label="isFullScreen ? 'Riduci modal' : 'Espandi modal a schermo intero'"
+            :aria-label="isFullScreen ? tr('ui.minimize_dialog') : tr('ui.expand_dialog_to_fullscreen')"
             @click="toggleFullScreen"
           >
             <Minimize v-if="isFullScreen" :size="20" />
@@ -40,7 +40,7 @@
           <button
             class="btn btn-ghost btn-sm btn-circle top-4 right-4 text-error"
             type="button"
-            aria-label="Chiudi modal"
+            :aria-label="tr('ui.close_dialog')"
             @click="closeModal"
           >
             <Close :size="25" />
@@ -77,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { ChevronLeft, X as Close, Maximize, Minimize } from '@lucide/vue';
 import { ref, watch } from 'vue';
 

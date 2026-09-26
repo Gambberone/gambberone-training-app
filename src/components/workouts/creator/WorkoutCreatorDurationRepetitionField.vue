@@ -4,7 +4,7 @@
       <button
         class="btn join-item btn-primary shadow-none"
         type="button"
-        aria-label="Riduci durata"
+        :aria-label="tr('ui.decrease_duration')"
         @click="decrease(true)"
       >
         -10
@@ -12,7 +12,7 @@
       <button
         class="btn join-item text-primary shadow-none"
         type="button"
-        aria-label="Riduci durata"
+        :aria-label="tr('ui.decrease_duration')"
         @click="decrease(false)"
       >
         <Minus />
@@ -27,7 +27,7 @@
       <button
         class="btn join-item text-primary shadow-none"
         type="button"
-        aria-label="Aumenta durata"
+        :aria-label="tr('ui.increase_duration')"
         @click="increase(false)"
       >
         <Plus />
@@ -35,7 +35,7 @@
       <button
         class="btn join-item btn-primary shadow-none"
         type="button"
-        aria-label="Riduci durata"
+        :aria-label="tr('ui.decrease_duration')"
         @click="increase(true)"
       >
         +10
@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { Minus, Plus } from '@lucide/vue';
 import GttFieldWrapper from '@/components/generic/form/GttFieldWrapper.vue';
 import { type FieldProps } from '@/components/generic/form/form.types.ts';

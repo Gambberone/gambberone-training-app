@@ -18,7 +18,7 @@
           :aria-expanded="expandedMuscleGroupId === muscleGroup.id"
           @click="toggleMuscleGroup(muscleGroup.id)"
         >
-          <span>{{ muscleGroup.name }}</span>
+          <span>{{ t(`muscleGroups.${muscleGroup.id}`) }}</span>
           <span class="badge mr-5" :class="badgeClass">{{
             exercisesForMuscleGroup(muscleGroup.id).length
           }}</span>
@@ -32,13 +32,13 @@
             >
               <div class="flex flex-1 gap-3">
                 <Dumbbell class="size-5 text-primary" aria-hidden="true" />
-                <div>{{ exercise.name }}</div>
+                <div>{{ localizedExerciseName(exercise) }}</div>
               </div>
               <div class="flex-0 flex">
                 <button
                   class="btn btn-square btn-ghost btn-sm text-primary"
                   type="button"
-                  :aria-label="`Modifica ${exercise.name}`"
+                  :aria-label="tr('messages.editNamed', { name: localizedExerciseName(exercise) })"
                   @click.stop="editExercise(exercise)"
                 >
                   <Pencil class="size-5" aria-hidden="true" />
@@ -46,7 +46,7 @@
                 <button
                   class="btn btn-square btn-ghost btn-sm text-error"
                   type="button"
-                  :aria-label="`Elimina ${exercise.name}`"
+                  :aria-label="tr('messages.deleteNamed', { name: localizedExerciseName(exercise) })"
                   @click.stop="removeExercise(exercise)"
                 >
                   <Trash class="size-5" aria-hidden="true" />
@@ -57,7 +57,7 @@
               v-if="exercisesForMuscleGroup(muscleGroup.id).length === 0"
               class="px-4 py-3 text-sm text-base-content/60"
             >
-              Nessun esercizio per questo macrogruppo.
+              {{ tr('ui.no_exercises_in_this_muscle_group') }}
             </li>
           </ul>
         </div>
@@ -65,7 +65,7 @@
     </article>
     </div>
   </div>
-  <GttBottomAction desktop-target="#workouts-desktop-action" label="Aggiungi esercizio" @click="isExercisesCreatorEditorModalOpen = true" />
+  <GttBottomAction desktop-target="#workouts-desktop-action" :label="tr('ui.add_exercise')" @click="isExercisesCreatorEditorModalOpen = true" />
   <ExerciseCreatorModal
     v-model="isExercisesCreatorEditorModalOpen"
     :exercise="selectedExerciseForEdit"
@@ -74,19 +74,21 @@
   <GttModal
     v-model="showExerciseEliminationModal"
     :actions="[
-      { id: 'cancel', label: 'Annulla' },
-      { id: 'delete', label: 'Elimina', color: 'error' },
+      { id: 'cancel', label: tr('ui.cancel') },
+      { id: 'delete', label: tr('ui.delete'), color: 'error' },
     ]"
-    title="Eliminazione esercizio"
+    :title="tr('ui.delete_exercise')"
     @action="eliminationModalActionHandler"
   >
     <p class="text-md">
-      {{ `Sei sicuro di voler eliminare l'esercizio ${selectedExerciseForElimination?.name}` }}
+      {{ tr('messages.deleteExercise', { name: selectedExerciseForElimination ? localizedExerciseName(selectedExerciseForElimination) : '' }) }}
     </p>
   </GttModal>
 </template>
 
 <script setup lang="ts">
+import { tr, localizedExerciseName } from '@/localization';
+import { useI18n } from 'vue-i18n';
 import { Dumbbell, Pencil, Trash } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import {
@@ -100,6 +102,7 @@ import GttBottomAction from '@/components/generic/GttBottomAction.vue';
 import GttModal from '@/components/generic/GttModal.vue';
 import ExerciseCreatorModal from './ExerciseCreatorModal.vue';
 
+const { t } = useI18n();
 const isExercisesCreatorEditorModalOpen = ref(false);
 const expandedMuscleGroupId = ref<MuscleGroup['id'] | null>(null);
 
@@ -124,7 +127,7 @@ const exerciseSections = [
     badgeClass: 'badge-error',
   },
   {
-    title: 'Exercises',
+    title: tr('ui.exercises'),
     groups: muscleGroups.filter(
       ({ id }) => id !== MUSCLE_GROUPS.STRETCHING && id !== MUSCLE_GROUPS.WARMUP,
     ),

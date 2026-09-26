@@ -15,29 +15,30 @@
   </GttModal>
   <GttModal
     v-model="isDiscardStepConfirmationOpen"
-    title="Modifiche non salvate"
+    :title="tr('ui.unsaved_changes')"
     :actions="[
-      { id: 'keep-editing', label: 'Continua' },
-      { id: 'discard', label: 'Abbandona', color: 'error' },
+      { id: 'keep-editing', label: tr('ui.continue') },
+      { id: 'discard', label: tr('ui.abandon'), color: 'error' },
     ]"
     @action="handleDiscardStepConfirmation"
   >
-    <p class="text-md">Vuoi tornare alla lista degli step senza salvare le modifiche?</p>
+    <p class="text-md">{{ tr('ui.return_to_the_step_list_without_saving_your_changes') }}</p>
   </GttModal>
   <GttModal
     v-model="isDiscardConfirmationOpen"
-    title="Modifiche non salvate"
+    :title="tr('ui.unsaved_changes')"
     :actions="[
-      { id: 'keep-editing', label: 'Continua' },
-      { id: 'discard', label: 'Abbandona', color: 'error' },
+      { id: 'keep-editing', label: tr('ui.continue') },
+      { id: 'discard', label: tr('ui.abandon'), color: 'error' },
     ]"
     @action="handleDiscardConfirmation"
   >
-    <p class="text-md">Hai modifiche non salvate. Vuoi davvero chiudere il workout creator?</p>
+    <p class="text-md">{{ tr('ui.you_have_unsaved_changes_close_the_workout_editor') }}</p>
   </GttModal>
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GttModal from '@/components/generic/GttModal.vue';
@@ -169,8 +170,8 @@ onBeforeUnmount(() => {
 
 const modalTitle = computed(
   () =>
-    currentWorkoutCreatorStep.value?.type ??
-    (props.workout ? 'Modifica workout' : 'Workout creator'),
+    (currentWorkoutCreatorStep.value ? tr(`stepTypes.${currentWorkoutCreatorStep.value.type}`) : undefined) ??
+    (props.workout ? tr('ui.edit_workout') : tr('ui.workout_editor')),
 );
 const stepActions = computed(() => {
   if (currentWorkoutCreatorStep.value) {
@@ -178,10 +179,10 @@ const stepActions = computed(() => {
     return [
       ...(editingWorkoutCreatorStepIndex.value === undefined
         ? []
-        : [{ id: 'delete-step', label: 'Elimina step', color: 'error' as const }]),
+        : [{ id: 'delete-step', label: tr('ui.delete_step'), color: 'error' as const }]),
       {
         id: 'create-step',
-        label: editingWorkoutCreatorStepIndex.value === undefined ? 'Crea step' : 'Salva step',
+        label: editingWorkoutCreatorStepIndex.value === undefined ? tr('ui.create_step') : tr('ui.save_step'),
         color: 'primary',
         disabled: isExerciseStep
           ? (exerciseValidationErrors.value?.length ?? 0) > 0
@@ -194,7 +195,7 @@ const stepActions = computed(() => {
     ? [
         {
           id: 'save-workout',
-          label: props.workout ? 'Salva workout' : 'Crea workout',
+          label: props.workout ? tr('ui.save_workout') : tr('ui.create_workout'),
           color: 'primary',
         },
       ]
@@ -211,11 +212,11 @@ const handleAction = (actionId: string) => {
       const workout = createWorkout();
       if (workout) {
         showToast({
-          title: 'Workout creato con successo!',
-          message: 'Vuoi programmarlo nel calendario?',
+          title: tr('ui.workout_created_successfully'),
+          message: tr('ui.schedule_it_in_the_calendar'),
           actions: [
-            { label: 'Non ora', color: 'secondary' },
-            { label: 'Programma', color: 'primary', onClick: () => goToCalendar(workout.id) },
+            { label: tr('ui.not_now'), color: 'secondary' },
+            { label: tr('ui.schedule'), color: 'primary', onClick: () => goToCalendar(workout.id) },
           ],
         });
       }

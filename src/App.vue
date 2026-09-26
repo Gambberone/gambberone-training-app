@@ -3,6 +3,7 @@ import { computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import GttToast from './components/generic/GttToast.vue';
 import WorkoutPlayer from './components/workouts/WorkoutPlayer.vue';
+import { initializeAppTour } from './composables/useAppTour';
 import { useTheme } from './composables/useTheme';
 import { useAppUpdateNotice } from './composables/useAppUpdateNotice';
 import {
@@ -12,6 +13,7 @@ import {
   workoutsRef,
 } from './stores/workoutCreator';
 
+initializeAppTour();
 useTheme();
 useAppUpdateNotice();
 

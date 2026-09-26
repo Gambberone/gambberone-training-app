@@ -1,3 +1,4 @@
+import { tr } from '@/localization';
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { activeToast, showToast } from '@/composables/toast';
 
@@ -15,13 +16,13 @@ export function useAppUpdateNotice() {
     ) return;
 
     showToast({
-      title: 'Nuova versione disponibile',
-      message: 'Ricarica la pagina per usare gli ultimi aggiornamenti.',
+      title: tr('ui.new_version_available'),
+      message: tr('ui.reload_the_page_to_get_the_latest_updates'),
       kind: 'update',
       duration: null,
       actions: [
-        { label: 'Più tardi', onClick: () => { dismissedBuildId.value = availableBuildId.value; } },
-        { label: 'Ricarica', color: 'primary', onClick: () => {
+        { label: tr('ui.later'), onClick: () => { dismissedBuildId.value = availableBuildId.value; } },
+        { label: tr('ui.reload'), color: 'primary', onClick: () => {
           dismissedBuildId.value = availableBuildId.value;
           window.location.reload();
         } },

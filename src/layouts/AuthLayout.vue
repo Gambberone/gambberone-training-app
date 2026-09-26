@@ -10,10 +10,14 @@
         <h1 class="mt-4 text-2xl font-bold tracking-tight text-base-content">
           Gambberone Training
         </h1>
-        <p class="mt-1 text-sm text-base-content/65">Il tuo allenamento, sempre con te.</p>
+        <p class="mt-1 text-sm text-base-content/65">{{ tr('ui.your_training_always_with_you') }}</p>
       </header>
 
       <router-view />
     </div>
   </main>
 </template>
+
+<script setup lang="ts">
+import { tr } from '@/localization';
+</script>

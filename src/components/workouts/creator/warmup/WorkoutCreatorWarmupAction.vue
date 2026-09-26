@@ -3,11 +3,12 @@
     <div v-for="(warmupExercise, warmupExerciseIndex) in warmupExercises" :key="warmupExercise.id">
       <WorkoutCreatorWarmupExercise v-model="warmupExercises[warmupExerciseIndex]" />
     </div>
-    <button class="btn" type="button" @click="addWarmupExercise">Aggiungi esercizio</button>
+    <button class="btn" type="button" @click="addWarmupExercise">{{ tr('ui.add_exercise') }}</button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { computed } from 'vue';
 import WorkoutCreatorWarmupExercise from './WorkoutCreatorWarmupExercise.vue';
 import {

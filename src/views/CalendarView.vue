@@ -7,16 +7,16 @@
           <button
             class="btn btn-ghost btn-sm btn-circle"
             type="button"
-            :aria-label="calendarView === 'month' ? 'Mese precedente' : 'Settimana precedente'"
+            :aria-label="calendarView === 'month' ? tr('ui.previous_month') : tr('ui.previous_week')"
             @click="movePeriod(-1)"
           >
             <ChevronLeft :size="20" />
           </button>
-          <button class="btn btn-primary btn-sm" type="button" @click="goToToday">Oggi</button>
+          <button class="btn btn-primary btn-sm" type="button" @click="goToToday">{{ tr('ui.today') }}</button>
           <button
             class="btn btn-ghost btn-sm btn-circle"
             type="button"
-            :aria-label="calendarView === 'month' ? 'Mese successivo' : 'Settimana successiva'"
+            :aria-label="calendarView === 'month' ? tr('ui.next_month') : tr('ui.next_week')"
             @click="movePeriod(1)"
           >
             <ChevronRight :size="20" />
@@ -24,15 +24,15 @@
         </div>
       </div>
       <div class="mt-3 flex items-center justify-between gap-3">
-        <p class="text-sm text-base-content/60">Tocca un giorno per programmare un workout.</p>
-        <div class="join shrink-0" aria-label="Vista calendario">
+        <p class="text-sm text-base-content/60">{{ tr('ui.select_a_day_to_schedule_a_workout') }}</p>
+        <div class="join shrink-0" :aria-label="tr('ui.calendar_view')">
           <button
             class="btn btn-sm join-item"
             :class="{ 'btn-primary': calendarView === 'month' }"
             type="button"
             @click="calendarView = 'month'"
           >
-            Mese
+            {{ tr('ui.month') }}
           </button>
           <button
             class="btn btn-sm join-item"
@@ -40,7 +40,7 @@
             type="button"
             @click="calendarView = 'week'"
           >
-            Settimana
+            {{ tr('ui.week') }}
           </button>
         </div>
       </div>
@@ -76,7 +76,7 @@
               }}</span>
             </div>
             <span v-if="workoutsForDate(day.key).length > 2" class="calendar-more">
-              +{{ workoutsForDate(day.key).length - 2 }} altri
+              {{ tr('messages.calendarMore', { count: workoutsForDate(day.key).length - 2 }) }}
             </span>
           </div>
         </button>
@@ -110,7 +110,7 @@
             }}</span>
           </div>
           <span v-if="workoutsForDate(day.key).length > 2" class="calendar-more">
-            +{{ workoutsForDate(day.key).length - 2 }} altri
+            {{ tr('messages.calendarMore', { count: workoutsForDate(day.key).length - 2 }) }}
           </span>
         </div>
       </button>
@@ -126,6 +126,7 @@
 </template>
 
 <script setup lang="ts">
+import { tr, appLocale } from '@/localization';
 import { computed, ref, watch } from 'vue';
 import { ChevronLeft, ChevronRight } from '@lucide/vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -134,7 +135,7 @@ import { scheduledWorkoutsRef, workoutsRef } from '@/stores/workoutCreator';
 
 type CalendarDay = { date: Date; key: string; isCurrentMonth: boolean; isToday: boolean };
 
-const weekdays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+const weekdays = computed(() => Array.from({ length: 7 }, (_, index) => new Intl.DateTimeFormat(appLocale(), { weekday: 'short' }).format(new Date(2024, 0, 1 + index))));
 type CalendarView = 'month' | 'week';
 const route = useRoute();
 const router = useRouter();
@@ -160,21 +161,18 @@ watch(
 
 const calendarLabel = computed(() => {
   if (calendarView.value === 'month') {
-    return new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(
+    return new Intl.DateTimeFormat(appLocale(), { month: 'long', year: 'numeric' }).format(
       currentDate.value,
     );
   }
 
-  const [start, end] = weekDays.value;
-  const startLabel = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'short' }).format(
-    start.date,
-  );
-  const endLabel = new Intl.DateTimeFormat('it-IT', {
+  const start = weekDays.value[0];
+  const end = weekDays.value[6];
+  return new Intl.DateTimeFormat(appLocale(), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(end.date);
-  return `${startLabel} – ${endLabel}`;
+  }).formatRange(start.date, end.date);
 });
 const calendarDays = computed<CalendarDay[]>(() => {
   const firstDay = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), 1);
@@ -206,10 +204,10 @@ function workoutsForDate(date: string) {
   return scheduledWorkoutsRef.value.filter((scheduledWorkout) => scheduledWorkout.date === date);
 }
 function workoutName(workoutId: string) {
-  return workoutsRef.value.find((workout) => workout.id === workoutId)?.name ?? 'Workout eliminato';
+  return workoutsRef.value.find((workout) => workout.id === workoutId)?.name ?? tr('ui.deleted_workout');
 }
 function weekdayLabel(date: Date) {
-  return new Intl.DateTimeFormat('it-IT', { weekday: 'short' }).format(date);
+  return new Intl.DateTimeFormat(appLocale(), { weekday: 'short' }).format(date);
 }
 function movePeriod(amount: number) {
   const nextDate = new Date(currentDate.value);

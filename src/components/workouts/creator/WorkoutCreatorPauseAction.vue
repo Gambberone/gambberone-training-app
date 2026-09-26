@@ -2,11 +2,12 @@
   <WorkoutCreatorDurationRepetitionField
     id="pause_duration"
     v-model="pauseDuration"
-    label="Durata pausa (secondi)"
+    :label="tr('ui.rest_duration_seconds')"
   />
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { computed } from 'vue';
 import {
   currentWorkoutCreatorStep,

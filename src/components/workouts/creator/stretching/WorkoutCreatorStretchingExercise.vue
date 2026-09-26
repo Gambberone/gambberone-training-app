@@ -3,8 +3,8 @@
     <GttSelectField
       :id="`stretching_exercise_${stretchingExercise.id}`"
       v-model="selectedExerciseId"
-      :options="stretchingExercises"
-      label="Esercizio stretching"
+      :options="localizedExercises(stretchingExercises)"
+      :label="tr('ui.stretching_exercise')"
       value-key="name"
       required
     />
@@ -12,8 +12,8 @@
       v-if="props.showRemove"
       class="btn btn-square btn-ghost btn-error mb-1"
       type="button"
-      aria-label="Elimina esercizio stretching"
-      title="Elimina esercizio"
+      :aria-label="tr('ui.delete_stretching_exercise')"
+      :title="tr('ui.delete_exercise')"
       @click="emit('remove')"
     >
       <Trash2 class="size-5" aria-hidden="true" />
@@ -23,11 +23,12 @@
   <WorkoutCreatorDurationRepetitionField
     :id="`stretching_duration_${stretchingExercise.id}`"
     v-model="stretchingDuration"
-    label="Durata (secondi)"
+    :label="tr('ui.duration_seconds')"
   />
 </template>
 
 <script setup lang="ts">
+import { tr, localizedExercises } from '@/localization';
 import { Trash2 } from '@lucide/vue';
 import { computed } from 'vue';
 import { WORKOUT_CREATOR_STEP_ACTION, type StretchingExercise } from '@/constants/workout.ts';

@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between gap-3">
         <div>
           <p class="text-sm font-semibold text-primary">
-            In corso · <span class="font-mono tabular-nums">{{ totalElapsedLabel }}</span>
+            {{ tr('messages.inProgress') }} · <span class="font-mono tabular-nums">{{ totalElapsedLabel }}</span>
           </p>
           <h2 class="text-xl font-bold">{{ workout.name }}</h2>
         </div>
@@ -15,8 +15,8 @@
           <button
             class="btn btn-square btn-ghost btn-sm"
             type="button"
-            aria-label="Riduci player"
-            title="Continua in background"
+            :aria-label="tr('ui.minimize_player')"
+            :title="tr('ui.continue_in_the_background')"
             @click="minimizePlayer"
           >
             <Minimize2 class="size-5" aria-hidden="true" />
@@ -24,8 +24,8 @@
           <button
             class="btn btn-square btn-ghost btn-sm"
             type="button"
-            :aria-label="isFullscreen ? 'Esci da schermo intero' : 'Apri a schermo intero'"
-            :title="isFullscreen ? 'Esci da schermo intero' : 'Schermo intero'"
+            :aria-label="isFullscreen ? tr('ui.exit_fullscreen') : tr('ui.enter_fullscreen')"
+            :title="isFullscreen ? tr('ui.exit_fullscreen') : tr('ui.fullscreen')"
             @click="toggleFullscreen"
           >
             <Minimize v-if="isFullscreen" class="size-5" aria-hidden="true" />
@@ -45,11 +45,11 @@
         class="flex min-h-80 flex-col justify-center rounded-box bg-base-200 p-3 text-center sm:p-8"
       >
         <template v-if="isStarting">
-          <p class="text-base font-semibold uppercase tracking-wider text-primary">Preparati</p>
+          <p class="text-base font-semibold uppercase tracking-wider text-primary">{{ tr('ui.get_ready') }}</p>
           <p class="mt-3 text-8xl font-black text-primary sm:text-9xl" aria-live="assertive">
             {{ startLabel }}
           </p>
-          <p class="mt-3 text-base text-base-content/60">Si parte tra un attimo</p>
+          <p class="mt-3 text-base text-base-content/60">{{ tr('ui.starting_shortly') }}</p>
         </template>
         <template v-else>
           <p
@@ -116,7 +116,7 @@
             class="mt-2 flex h-10 items-center justify-center text-base text-base-content/60 sm:h-12 sm:text-lg"
           >
             <span v-if="isRepetitions"
-              >Una ripetizione ogni {{ repetitionIntervalSeconds }} secondi</span
+              >{{ tr('messages.repetitionInterval', { seconds: repetitionIntervalSeconds }) }}</span
             >
           </p>
         </template>
@@ -128,15 +128,15 @@
             class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
             type="button"
             :disabled="isStarting || !previousSegment"
-            :aria-label="previousSegment ? `Torna a ${previousSegment.name}` : 'Nessuno step precedente'"
-            title="Torna allo step precedente"
+            :aria-label="previousSegment ? tr('messages.previousNamed', { name: previousSegment.name }) : tr('ui.no_previous_step')"
+            :title="tr('ui.go_to_the_previous_step')"
             @click="skipToPreviousSegment"
           >
             <SkipBack :size="24" aria-hidden="true" />
           </button>
           <div v-if="upcomingSegment" class="min-w-0 flex-1">
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/55">
-              Prossimo step
+              {{ tr('ui.next_step') }}
             </p>
             <p class="mt-1 font-bold" :class="upcomingSegment.colorClass">
               {{ upcomingSegment.typeLabel }} · {{ upcomingSegment.name
@@ -144,15 +144,15 @@
             </p>
           </div>
           <div v-else class="min-w-0 flex-1 text-success">
-            <p class="text-xs font-semibold uppercase tracking-wider">Ultimo step</p>
-            <p class="mt-1 font-bold">Al termine il workout sarà completato.</p>
+            <p class="text-xs font-semibold uppercase tracking-wider">{{ tr('ui.last_step') }}</p>
+            <p class="mt-1 font-bold">{{ tr('ui.the_workout_will_be_completed_after_this_step') }}</p>
           </div>
           <button
             :disabled="isStarting || !upcomingSegment"
             class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
             type="button"
-            :aria-label="upcomingSegment ? `Avvia ora ${upcomingSegment.name}` : 'Nessuno step successivo'"
-            title="Avvia il prossimo step"
+            :aria-label="upcomingSegment ? tr('messages.startNamed', { name: upcomingSegment.name }) : tr('ui.no_next_step')"
+            :title="tr('ui.start_the_next_step')"
             @click="skipToNextSegment"
           >
             <SkipForward :size="24" aria-hidden="true" />
@@ -163,11 +163,11 @@
         <button
           class="btn btn-primary btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
           type="button"
-          aria-label="Ricomincia il segmento corrente"
+          :aria-label="tr('ui.restart_the_current_segment')"
           @click="resetCurrentSegment"
         >
           <RotateCcw class="size-4 sm:size-5" aria-hidden="true" />
-          Reset
+          {{ tr('ui.reset') }}
         </button>
         <button
           class="btn btn-info btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
@@ -176,7 +176,7 @@
         >
           <Play v-if="isPaused" class="size-4 sm:size-5" aria-hidden="true" />
           <Pause v-else class="size-4 sm:size-5" aria-hidden="true" />
-          {{ isPaused ? 'Riprendi' : 'Pausa' }}
+          {{ isPaused ? tr('ui.resume') : tr('ui.pause') }}
         </button>
         <button
           class="btn btn-error btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
@@ -184,7 +184,7 @@
           @click="abandonWorkoutSession"
         >
           <Square class="size-4 sm:size-5" aria-hidden="true" />
-          Abbandona
+          {{ tr('ui.abandon') }}
         </button>
       </div>
     </div>
@@ -192,6 +192,7 @@
 </template>
 
 <script setup lang="ts">
+import { tr, localizedExerciseName } from '@/localization';
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
 import { Maximize, Minimize, Minimize2, Pause, Play, RotateCcw, SkipBack, SkipForward, Square } from '@lucide/vue';
 import {
@@ -249,8 +250,10 @@ let segmentStartedAt = 0;
 let lastTotalTickAt = 0;
 let lastCheckpointAt = 0;
 
-const exerciseName = (id?: string) =>
-  exercisesRef.value.find((exercise) => exercise.id === id)?.name ?? 'Esercizio';
+const exerciseName = (id?: string) => {
+  const exercise = exercisesRef.value.find((item) => item.id === id);
+  return exercise ? localizedExerciseName(exercise) : tr('ui.exercise');
+};
 
 const segmentStyle = (type: WorkoutCreatorStep['type']) => {
   switch (type) {
@@ -260,9 +263,9 @@ const segmentStyle = (type: WorkoutCreatorStep['type']) => {
       return { typeLabel: 'Stretching', colorClass: 'text-warning' };
     case WORKOUT_CREATOR_STEP_ACTION.PAUSE:
     case WORKOUT_CREATOR_STEP_ACTION.SETPAUSE:
-      return { typeLabel: 'Pausa', colorClass: 'text-info' };
+      return { typeLabel: tr('ui.rest'), colorClass: 'text-info' };
     default:
-      return { typeLabel: 'Esercizio', colorClass: 'text-primary' };
+      return { typeLabel: tr('ui.exercise'), colorClass: 'text-primary' };
   }
 };
 
@@ -298,7 +301,7 @@ const segments = computed<PlayerSegment[]>(() =>
       return [
         {
           ...style,
-          name: 'Recupero',
+          name: tr('messages.recovery'),
           sourceStepIndex,
           mode: 'duration' as const,
           target: Math.max(1, step.pauseDuration ?? 0),
@@ -315,7 +318,7 @@ const segments = computed<PlayerSegment[]>(() =>
       const exercise = {
         ...style,
         name: exerciseName(step.exerciseId),
-        setLabel: sets > 1 ? `Set ${setIndex + 1}/${sets}` : undefined,
+        setLabel: sets > 1 ? tr('messages.setNumber', { number: setIndex + 1, total: sets }) : undefined,
         sourceStepIndex,
         mode: step.exerciseModeType ?? 'repetitions',
         target: Math.max(
@@ -331,7 +334,7 @@ const segments = computed<PlayerSegment[]>(() =>
           ? [
               {
                 ...segmentStyle(WORKOUT_CREATOR_STEP_ACTION.SETPAUSE),
-                name: 'Recupero tra set',
+                name: tr('messages.setRecovery'),
                 sourceStepIndex,
                 mode: 'duration' as const,
                 target: Math.max(1, step.pauseBetweenSetsDuration ?? 0),
@@ -346,8 +349,8 @@ const segments = computed<PlayerSegment[]>(() =>
 const currentSegment = computed<PlayerSegment>(
   () =>
     segments.value[currentSegmentIndex.value] ?? {
-      name: 'Workout completato',
-      typeLabel: 'Completato',
+      name: tr('messages.workoutDone'),
+      typeLabel: tr('ui.completed'),
       colorClass: 'text-success',
       sourceStepIndex: 0,
       mode: 'duration',

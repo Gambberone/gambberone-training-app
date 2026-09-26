@@ -9,26 +9,28 @@
     <GttSelectField
       v-model="selectedMuscleGroup"
       id="exercise_muscle_group"
-      label="Macrogruppo"
-      :options="muscleGroups"
-      placeholder="Seleziona un macrogruppo"
+      :label="tr('ui.muscle_group')"
+      :options="localizedMuscleGroups"
+      :placeholder="tr('ui.select_a_muscle_group')"
       value-key="name"
       required
       :error="muscleGroupError"
     />
     <GttInputField
       v-model="exerciseName"
-      label="Nome esercizio"
+      :label="tr('ui.exercise_name')"
       id="exercise_name"
       required
       :error="exerciseNameError"
-      placeholder="Es. Curl con manubri"
+      :placeholder="tr('ui.e_g_dumbbell_curl')"
     />
   </GttModal>
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { muscleGroups, type Exercise, type MuscleGroupType } from '@/domain/exercises.ts';
 import { exercisesRef } from '@/stores/exercises';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
@@ -39,6 +41,8 @@ interface ExerciseCreatorEditorProps {
   exercise: Exercise | null;
 }
 
+const { t } = useI18n();
+const localizedMuscleGroups = computed(() => muscleGroups.map(({ id }) => ({ id, name: t(`muscleGroups.${id}`) })));
 const isOpen = defineModel<boolean>({ default: false });
 const props = defineProps<ExerciseCreatorEditorProps>();
 
@@ -75,11 +79,11 @@ watch(selectedMuscleGroup, (muscleGroupId) => {
 
 const modalActions = computed(() => {
   return props.exercise
-    ? [{ id: 'save', label: 'Salva', color: 'primary' }]
-    : [{ id: 'create', label: 'Crea', color: 'primary' }];
+    ? [{ id: 'save', label: tr('ui.save'), color: 'primary' }]
+    : [{ id: 'create', label: tr('ui.create'), color: 'primary' }];
 });
 
-const modalTitle = computed(() => (props.exercise ? 'Modifica esercizio' : 'Crea esercizio'));
+const modalTitle = computed(() => (props.exercise ? tr('ui.edit_exercise') : tr('ui.create_exercise')));
 
 const handleAction = (actionId: string) => {
   if (actionId !== 'create' && actionId !== 'save') {
@@ -89,8 +93,8 @@ const handleAction = (actionId: string) => {
   const name = exerciseName.value.trim();
   const muscleGroupId = selectedMuscleGroup.value;
 
-  exerciseNameError.value = name ? undefined : "Il nome dell'esercizio è obbligatorio.";
-  muscleGroupError.value = muscleGroupId ? undefined : 'Il macrogruppo è obbligatorio.';
+  exerciseNameError.value = name ? undefined : tr('ui.exercise_name_is_required');
+  muscleGroupError.value = muscleGroupId ? undefined : tr('ui.muscle_group_is_required');
 
   if (!name || !muscleGroupId) {
     return;

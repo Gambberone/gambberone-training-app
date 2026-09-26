@@ -3,7 +3,7 @@
     <div v-if="!isWorkoutPlayerOpenRef">
       <button
         class="btn gap-2 font-semibold"
-        :class="isDesktop && desktopTarget ? 'btn-ghost whitespace-nowrap text-primary' : 'btn-primary mx-auto flex h-12 w-full max-w-2xl rounded-xl border border-primary/20 shadow-sm shadow-primary/15'"
+        :class="isDesktop && desktopTarget ? 'btn-outline btn-primary whitespace-nowrap' : 'btn-outline btn-primary mx-auto flex h-12 w-full max-w-2xl rounded-xl'"
         type="button"
         @click="emit('click')"
       >

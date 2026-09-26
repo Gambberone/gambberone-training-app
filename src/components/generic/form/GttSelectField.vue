@@ -30,13 +30,14 @@
         :aria-label="props.splitActionLabel"
         @click="emit('action')"
       >
-        <slot name="split-action">Aggiungi</slot>
+        <slot name="split-action">{{ tr('ui.add') }}</slot>
       </button>
     </div>
   </GttFieldWrapper>
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import GttFieldWrapper from './GttFieldWrapper.vue';
 import type { FieldProps } from './form.types';
 

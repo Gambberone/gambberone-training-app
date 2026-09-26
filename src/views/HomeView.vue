@@ -3,15 +3,17 @@
     <header class="mb-7">
       <p class="mb-1 text-sm font-semibold text-primary">{{ todayLabel }}</p>
       <h1 class="text-3xl font-bold tracking-tight text-base-content">
-        {{ greeting
-        }}<span v-if="userName" class="text-primary">{{ userName }}</span>
+        {{ greeting }}<span v-if="userName" class="text-primary">{{ userName }}</span>
       </h1>
       <p class="mt-2 text-base-content/65">{{ t('home.intro') }}</p>
     </header>
 
-    <div class="grid items-stretch gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
       <div class="flex min-w-0 flex-col">
-        <div v-if="todayWorkouts.length" class="card border border-base-300/50 bg-base-100 h-full p-5 shadow-sm space-y-3">
+        <div
+          v-if="todayWorkouts.length"
+          class="card border border-base-300/50 bg-base-100 p-5 shadow-sm space-y-3"
+        >
           <div class="flex items-center justify-between gap-3">
             <h2 class="text-lg font-bold text-base-content">
               {{ t('home.today', todayWorkouts.length) }}
@@ -67,7 +69,10 @@
           </article>
         </div>
 
-        <article v-else class="card h-full overflow-hidden border border-base-300/50 bg-base-100 shadow-sm">
+        <article
+          v-else
+          class="card overflow-hidden border border-base-300/50 bg-base-100 shadow-sm"
+        >
           <div class="card-body items-center px-6 py-6 text-center lg:items-start lg:text-left">
             <div class="grid size-16 place-items-center rounded-full bg-success/15 text-success">
               <FaceGrinning :size="31" />
@@ -83,80 +88,99 @@
           </div>
         </article>
       </div>
-      <aside class="flex min-w-0 flex-col">
-        <section class="card h-full border border-base-300/50 bg-base-100 p-5 shadow-sm" aria-labelledby="summary-heading">
+      <aside class="flex min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-stretch">
+        <section
+          class="card flex-1 border border-base-300/50 bg-base-100 p-5 shadow-sm"
+          aria-labelledby="summary-heading"
+        >
           <h2 id="summary-heading" class="text-lg font-bold">{{ t('home.summary') }}</h2>
           <p class="mt-1 text-sm text-base-content/60">{{ t('home.period') }}</p>
           <dl class="mt-6 grid grid-cols-2 gap-4">
             <div>
-              <dd class="text-3xl font-bold text-primary">{{ weekSessions.length }}</dd>
+              <dd class="text-5xl font-bold text-primary">{{ weekSessions.length }}</dd>
               <dt class="mt-1 text-sm text-base-content/65">{{ t('home.completedWorkouts') }}</dt>
             </div>
             <div>
-              <dd class="text-3xl font-bold">
+              <dd class="text-5xl font-bold">
                 {{ weeklyMinutes }}<span class="ml-1 text-sm font-normal">min</span>
               </dd>
               <dt class="mt-1 text-sm text-base-content/65">{{ t('home.sessionTime') }}</dt>
             </div>
           </dl>
-          <WorkoutTrend />
+          <WorkoutTrend class="lg:mt-auto lg:flex lg:min-h-64 lg:h-1/2 lg:flex-none lg:flex-col" />
         </section>
       </aside>
-    </div>
-        <section class="card mt-8 border border-base-300/50 bg-base-100 p-5 shadow-sm" aria-labelledby="week-heading">
-          <div class="mb-4 flex items-center justify-between gap-3">
-            <h2 id="week-heading" class="text-lg font-bold">{{ t('home.agenda') }}</h2>
-            <RouterLink to="/calendar" class="text-sm font-semibold text-primary"
-              >{{ t('home.calendar') }} →</RouterLink
-            >
+    <section
+      class="card border border-base-300/50 bg-base-100 p-5 shadow-sm lg:col-start-1 lg:row-start-2"
+      aria-labelledby="week-heading"
+    >
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h2 id="week-heading" class="text-lg font-bold">{{ t('home.agenda') }}</h2>
+        <RouterLink to="/calendar" class="text-sm font-semibold text-primary"
+          >{{ t('home.calendar') }} →</RouterLink
+        >
+      </div>
+      <div
+        id="home-agenda-days"
+        class="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))] lg:items-stretch lg:gap-2"
+      >
+        <RouterLink
+          v-for="day in weekDays"
+          :key="day.key"
+          to="/calendar"
+          :aria-label="
+            t('home.dayLabel', {
+              day: day.label,
+              number: day.number,
+              scheduled: day.scheduled.length,
+              completed: day.completed.length,
+            })
+          "
+          class="flex min-w-0 flex-col rounded-box border"
+          :class="[
+            day.key === todayKey
+              ? 'gap-3 border-primary bg-primary/10 p-4 text-primary '
+              : 'gap-2 border-base-300/50 bg-base-100 p-3',
+          ]"
+        >
+          <span class="text-xs capitalize text-base-content/60">{{ day.label }}</span>
+          <span class="font-bold" :class="day.key === todayKey ? 'text-2xl' : 'text-lg'">{{ day.number }}</span>
+          <div v-if="day.completed.length" class="space-y-3">
+            <div v-for="session in day.completed" :key="session.id" class="text-sm">
+              <p class="break-words font-semibold text-base-content">
+                {{ workoutName(session.workoutId) }}
+              </p>
+              <p class="mt-1 text-xs text-primary">
+                {{ t('home.completed') }} · {{ sessionMinutes(session) }} min
+              </p>
+            </div>
           </div>
-          <div id="home-agenda-days" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-            <RouterLink
-              v-for="(day, index) in weekDays"
-              :key="day.key"
-              to="/calendar"
-              :aria-label="t('home.dayLabel', { day: day.label, number: day.number, scheduled: day.scheduled.length, completed: day.completed.length })"
-              class="flex min-w-0 flex-col gap-3 rounded-box border p-4 xl:min-h-56"
-              :class="[
-                day.key === todayKey
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-base-300/50 bg-base-100',
-                index >= 3 && !showAllAgendaDays ? 'max-lg:hidden' : '',
-              ]"
-            >
-              <span class="text-xs capitalize text-base-content/60">{{ day.label }}</span>
-              <span class="text-lg font-bold">{{ day.number }}</span>
-              <div v-if="day.completed.length" class="space-y-3">
-                <div v-for="session in day.completed" :key="session.id" class="text-sm">
-                  <p class="break-words font-semibold text-base-content">{{ workoutName(session.workoutId) }}</p>
-                  <p class="mt-1 text-xs text-primary">{{ t('home.completed') }} · {{ sessionMinutes(session) }} min</p>
-                </div>
-              </div>
-              <div v-if="day.scheduled.length" class="space-y-3">
-                <div v-for="workout in day.scheduled" :key="workout.id" class="text-sm">
-                  <p class="break-words font-semibold text-base-content">{{ workoutName(workout.workoutId) }}</p>
-                  <p class="mt-1 text-xs text-base-content/60">{{ t('home.scheduled') }}<span v-if="workout.time"> · {{ workout.time }}</span></p>
-                </div>
-              </div>
-              <span v-if="!day.completed.length && !day.scheduled.length" class="text-sm text-base-content/45">{{ t(day.key > todayKey ? 'home.emptyFuture' : 'home.empty') }}</span>
-            </RouterLink>
+          <div v-if="day.scheduled.length" class="space-y-3">
+            <div v-for="workout in day.scheduled" :key="workout.id" class="text-sm">
+              <p class="break-words font-semibold text-base-content">
+                {{ workoutName(workout.workoutId) }}
+              </p>
+              <p class="mt-1 text-xs text-base-content/60">
+                {{ t('home.scheduled') }}<span v-if="workout.time"> · {{ workout.time }}</span>
+              </p>
+            </div>
           </div>
-          <button
-            class="btn btn-ghost mt-3 self-center text-primary lg:hidden"
-            type="button"
-            :aria-expanded="showAllAgendaDays"
-            aria-controls="home-agenda-days"
-            @click="showAllAgendaDays = !showAllAgendaDays"
+          <span
+            v-if="!day.completed.length && !day.scheduled.length"
+            class="text-sm text-base-content/45"
+            >{{ t(day.key > todayKey ? 'home.emptyFuture' : 'home.empty') }}</span
           >
-            {{ t(showAllAgendaDays ? 'home.showLess' : 'home.showMore') }}
-          </button>
-        </section>
+        </RouterLink>
+      </div>
+
+    </section>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { ArrowRight, CalendarPlus, Clock3, Dumbbell, FaceGrinning, Play } from '@lucide/vue';
-import { computed, ref, defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
 const WorkoutTrend = defineAsyncComponent(() => import('@/components/home/WorkoutTrend.vue'));
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
@@ -171,17 +195,18 @@ import {
 } from '@/stores/workoutCreator';
 
 const { currentUser } = useAuth();
-const showAllAgendaDays = ref(false);
 
 const pad = (value: number) => String(value).padStart(2, '0');
 const now = new Date();
 const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-const todayLabel = computed(() => new Intl.DateTimeFormat(locale.value, {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-}).format(now));
+const todayLabel = computed(() =>
+  new Intl.DateTimeFormat(locale.value, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(now),
+);
 
 const greeting = computed(() => {
   const hour = new Date().getHours();
@@ -210,7 +235,10 @@ function workoutDetails(workoutId: string) {
   const workout = workoutsRef.value.find((item) => item.id === workoutId);
   if (!workout) return t('home.unavailable');
   const minutes = Math.ceil(workoutEstimatedDuration(workout) / 60);
-  return t('home.steps', { count: workout.steps.length }, workout.steps.length) + (minutes ? ` · ${t('home.estimate', { minutes })}` : '');
+  return (
+    t('home.steps', { count: workout.steps.length }, workout.steps.length) +
+    (minutes ? ` · ${t('home.estimate', { minutes })}` : '')
+  );
 }
 
 const localKey = (date: Date) =>
@@ -218,7 +246,7 @@ const localKey = (date: Date) =>
 const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
 const weekDays = computed(() =>
-  Array.from({ length: 7 }, (_, index) => {
+  Array.from({ length: 4 }, (_, index) => {
     const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     date.setDate(date.getDate() + index);
     const key = localKey(date);
@@ -226,7 +254,9 @@ const weekDays = computed(() =>
       key,
       number: date.getDate(),
       label: new Intl.DateTimeFormat(locale.value, { weekday: 'short' }).format(date),
-      completed: workoutSessionsRef.value.filter((session) => session.completedAt && localKey(new Date(session.completedAt)) === key),
+      completed: workoutSessionsRef.value.filter(
+        (session) => session.completedAt && localKey(new Date(session.completedAt)) === key,
+      ),
       scheduled: scheduledWorkoutsRef.value.filter((item) => item.date === key),
     };
   }),

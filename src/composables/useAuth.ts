@@ -1,3 +1,4 @@
+import { tr } from '@/localization';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
@@ -117,18 +118,18 @@ export function authErrorMessage(error: unknown) {
     case 'auth/invalid-credential':
     case 'auth/user-not-found':
     case 'auth/wrong-password':
-      return 'Email o password non corretti.';
+      return tr('ui.incorrect_email_or_password');
     case 'auth/email-already-in-use':
-      return 'Esiste già un account associato a questa email.';
+      return tr('ui.an_account_with_this_email_already_exists');
     case 'auth/weak-password':
-      return 'La password deve contenere almeno 6 caratteri.';
+      return tr('ui.password_must_contain_at_least_6_characters');
     case 'auth/invalid-email':
-      return 'Inserisci un indirizzo email valido.';
+      return tr('ui.enter_a_valid_email_address');
     case 'auth/too-many-requests':
-      return 'Troppi tentativi. Attendi qualche minuto e riprova.';
+      return tr('ui.too_many_attempts_wait_a_few_minutes_and_try_again');
     case 'auth/invalid-action-code':
-      return 'Questo link non è più valido. Richiedi una nuova email di verifica.';
+      return tr('ui.this_link_is_no_longer_valid_request_another_verification_email');
     default:
-      return 'Qualcosa non ha funzionato. Riprova tra poco.';
+      return tr('ui.something_went_wrong_try_again_shortly');
   }
 }

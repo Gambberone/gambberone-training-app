@@ -2,7 +2,7 @@
   <section class="mt-6 border-t border-base-300/50 pt-4" aria-labelledby="trend-heading">
     <h3 id="trend-heading" class="text-sm font-semibold">{{ t('home.trend.title') }}</h3>
     <p class="mt-1 text-xs text-base-content/60">{{ t('home.trend.period') }}</p>
-    <div class="relative mt-3 h-40 min-w-0">
+    <div class="relative mt-3 h-40 min-w-0 shrink-0">
       <Line v-if="colors" :data="chartData" :options="chartOptions" role="img" :aria-label="chartDescription" />
     </div>
     <p v-if="!hasActivity" class="mt-2 text-xs text-base-content/60">{{ t('home.trend.empty') }}</p>

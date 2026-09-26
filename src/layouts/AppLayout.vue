@@ -10,7 +10,7 @@
           <button
             class="flex min-w-0 flex-1 items-center justify-between gap-2 py-2 pl-3 text-left"
             type="button"
-            aria-label="Riapri workout in corso"
+            :aria-label="tr('ui.reopen_current_workout')"
             @click="openWorkoutPlayer"
           >
             <span class="flex min-w-0 items-center gap-2">
@@ -31,8 +31,8 @@
           <button
             class="btn btn-square btn-ghost btn-sm shrink-0 text-primary"
             type="button"
-            :aria-label="workoutPlayerStatusRef?.paused ? 'Riprendi workout' : 'Metti in pausa workout'"
-            :title="workoutPlayerStatusRef?.paused ? 'Riprendi' : 'Pausa'"
+            :aria-label="workoutPlayerStatusRef?.paused ? tr('ui.resume_workout') : tr('ui.pause_workout')"
+            :title="workoutPlayerStatusRef?.paused ? tr('ui.resume') : tr('ui.pause')"
             @click="toggleWorkoutPlayerPause"
           >
             <Play v-if="workoutPlayerStatusRef?.paused" class="size-5" aria-hidden="true" />
@@ -41,8 +41,8 @@
           <button
             class="btn btn-square btn-ghost btn-sm shrink-0 text-error"
             type="button"
-            aria-label="Ferma workout"
-            title="Ferma workout"
+            :aria-label="tr('ui.stop_workout')"
+            :title="tr('ui.stop_workout')"
             @click="abandonWorkoutSession"
           >
             <Square class="size-5" aria-hidden="true" />
@@ -69,25 +69,25 @@
     <nav
       class="dock dock-sm app-dock shrink-0"
       style="position: relative; bottom: auto"
-      aria-label="Navigazione principale"
+      :aria-label="tr('ui.main_navigation')"
     >
-      <router-link to="/" aria-label="Dashboard" title="Dashboard" :class="{ 'dock-active': route.name === 'home' }">
+      <router-link data-tour="nav-home" to="/" :aria-label="tr('ui.dashboard')" :title="tr('ui.dashboard')" :class="{ 'dock-active': route.name === 'home' }">
         <House />
       </router-link>
 
-      <router-link to="/calendar" aria-label="Calendario" title="Calendario" :class="{ 'dock-active': route.name === 'calendar' }">
+      <router-link data-tour="nav-calendar" to="/calendar" :aria-label="tr('ui.calendar')" :title="tr('ui.calendar')" :class="{ 'dock-active': route.name === 'calendar' }">
         <CalendarDays />
       </router-link>
 
-      <router-link to="/workouts" aria-label="Workout" title="Workout" :class="{ 'dock-active': route.name === 'workouts' }">
+      <router-link data-tour="nav-workouts" to="/workouts" :aria-label="tr('ui.workout')" :title="tr('ui.workout')" :class="{ 'dock-active': route.name === 'workouts' }">
         <Dumbbell />
       </router-link>
 
-      <router-link to="/history" aria-label="Storico" title="Storico" :class="{ 'dock-active': route.name === 'history' }">
+      <router-link data-tour="nav-history" to="/history" :aria-label="tr('ui.history')" :title="tr('ui.history')" :class="{ 'dock-active': route.name === 'history' }">
         <RotateCcwClock />
       </router-link>
 
-      <router-link to="/account" aria-label="Account" title="Account" class="app-nav-account" :class="{ 'dock-active': route.name === 'account' }">
+      <router-link to="/account" :aria-label="tr('ui.account')" :title="tr('ui.account')" class="app-nav-account" :class="{ 'dock-active': route.name === 'account' }">
         <div class="grid size-7 place-items-center overflow-hidden rounded-full bg-primary/15 text-primary">
           <img v-if="profilePhoto" :src="profilePhoto" alt="Foto del profilo" class="h-full w-full object-cover" />
           <UserRound v-else class="size-5" aria-hidden="true" />
@@ -98,6 +98,7 @@
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { CalendarDays, RotateCcwClock, Dumbbell, House, Pause, Play, Square, UserRound } from '@lucide/vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';

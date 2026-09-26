@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { watch, type Ref } from 'vue';
 import { auth, db } from '@/firebase';
-import { exercises as seedExercises } from '@/domain/exercises';
+import { exercises as seedExercises, MUSCLE_GROUPS } from '@/domain/exercises';
 import { exercisesRef } from '@/stores/exercises';
 import {
   activeWorkoutSessionRef,
@@ -93,6 +93,20 @@ async function migrateLocalData(userId: string) {
       }
     });
     batch.set(migrationRef, { version: 2, migratedAt: new Date().toISOString() });
+    await batch.commit();
+  }
+  // Add only the new glute exercises; preserve the existing catalogue and user edits.
+  if (migrationVersion < 3) {
+    const batch = writeBatch(db);
+    const existingExercises = await getDocs(collection(userDocument(userId), 'exercises'));
+    const existingIds = new Set(existingExercises.docs.map((exercise) => exercise.id));
+    seedExercises.filter((exercise) => exercise.muscleGroupId === MUSCLE_GROUPS.GLUTES)
+      .forEach((exercise) => {
+        if (!existingIds.has(exercise.id)) {
+          batch.set(collectionDocument(userId, 'exercises', exercise.id), exercise);
+        }
+      });
+    batch.set(migrationRef, { version: 3, migratedAt: new Date().toISOString() });
     await batch.commit();
   }
 }

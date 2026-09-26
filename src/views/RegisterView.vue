@@ -2,53 +2,35 @@
   <section class="card border border-base-300 bg-base-100 shadow-sm">
     <form class="card-body gap-5 p-6" @submit.prevent="submit">
       <div>
-        <h2 class="text-xl font-bold text-base-content">Crea il tuo account</h2>
-        <p class="mt-1 text-sm text-base-content/65">Inizia a tenere traccia dei tuoi progressi.</p>
+        <h2 class="text-xl font-bold text-base-content">{{ tr('ui.create_your_account') }}</h2>
+        <p class="mt-1 text-sm text-base-content/65">{{ tr('ui.start_tracking_your_progress') }}</p>
       </div>
 
-      <label class="form-control w-full gap-2">
-        <span class="label-text font-semibold text-base-content">Email</span>
-        <div class="input w-full">
-          <Mail :size="18" class="text-base-content/55" />
-          <input
-            v-model="email"
+      <GttInputField id="register-email" :label="tr('ui.email')" compact v-model="email"
             type="email"
             autocomplete="email"
-            placeholder="nome@email.com"
-            required
-          />
-        </div>
-      </label>
+            :placeholder="tr('ui.name_email_com')"
+            required>
+        <template #prefix><Mail :size="18" class="text-base-content/55" /></template>
+      </GttInputField>
 
-      <label class="form-control w-full gap-2">
-        <span class="label-text font-semibold text-base-content">Password</span>
-        <div class="input w-full">
-          <LockKeyhole :size="18" class="text-base-content/55" />
-          <input
-            v-model="password"
+      <GttInputField id="register-password" :label="tr('ui.password')" compact v-model="password"
             type="password"
             autocomplete="new-password"
-            placeholder="Almeno 6 caratteri"
+            :placeholder="tr('ui.at_least_6_characters')"
             minlength="6"
-            required
-          />
-        </div>
-      </label>
+            required>
+        <template #prefix><LockKeyhole :size="18" class="text-base-content/55" /></template>
+      </GttInputField>
 
-      <label class="form-control w-full gap-2">
-        <span class="label-text font-semibold text-base-content">Conferma password</span>
-        <div class="input w-full">
-          <LockKeyhole :size="18" class="text-base-content/55" />
-          <input
-            v-model="passwordConfirmation"
+      <GttInputField id="register-passwordConfirmation" :label="tr('ui.confirm_password')" compact v-model="passwordConfirmation"
             type="password"
             autocomplete="new-password"
-            placeholder="Ripeti la password"
+            :placeholder="tr('ui.repeat_your_password')"
             minlength="6"
-            required
-          />
-        </div>
-      </label>
+            required>
+        <template #prefix><LockKeyhole :size="18" class="text-base-content/55" /></template>
+      </GttInputField>
 
       <p v-if="errorMessage" class="rounded-box bg-error/10 p-3 text-sm text-error" role="alert">
         {{ errorMessage }}
@@ -56,13 +38,13 @@
 
       <button class="btn btn-primary mt-1 w-full" type="submit" :disabled="isSubmitting">
         <span v-if="isSubmitting" class="loading loading-spinner loading-sm" />
-        Crea account
+        {{ tr('ui.create_account') }}
       </button>
 
       <p class="text-center text-sm text-base-content/65">
-        Hai già un account?
+        {{ tr('ui.already_have_an_account') }}
         <RouterLink class="font-semibold text-primary hover:underline" to="/auth/login">
-          Accedi
+          {{ tr('ui.sign_in') }}
         </RouterLink>
       </p>
     </form>
@@ -70,6 +52,8 @@
 </template>
 
 <script setup lang="ts">
+import GttInputField from '@/components/generic/form/GttInputField.vue';
+import { tr } from '@/localization';
 import { LockKeyhole, Mail } from '@lucide/vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -85,7 +69,7 @@ const { register, sendVerificationEmail } = useAuth();
 
 async function submit() {
   if (password.value !== passwordConfirmation.value) {
-    errorMessage.value = 'Le password non coincidono.';
+    errorMessage.value = tr('ui.passwords_do_not_match');
     return;
   }
 

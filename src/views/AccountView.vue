@@ -13,31 +13,63 @@
           <p class="mt-1 text-sm text-base-content/65">{{ t('account.profileDescription') }}</p>
         </div>
         <div class="flex items-center gap-4">
-          <div class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-primary">
-            <img v-if="profilePhoto" :src="profilePhoto" :alt="t('account.photo')" class="h-full w-full object-cover" />
+          <div
+            class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-primary"
+          >
+            <img
+              v-if="profilePhoto"
+              :src="profilePhoto"
+              :alt="t('account.photo')"
+              class="h-full w-full object-cover"
+            />
             <UserRound v-else class="size-8" aria-hidden="true" />
           </div>
           <div class="flex flex-wrap gap-2">
             <label class="btn btn-outline btn-sm" :class="{ 'btn-disabled': isSavingPhoto }">
               <span v-if="isSavingPhoto" class="loading loading-spinner loading-xs" />
               {{ profilePhoto ? t('account.changePhoto') : t('account.uploadPhoto') }}
-              <input class="sr-only" type="file" accept="image/jpeg,image/png,image/webp"
-                :disabled="isSavingPhoto" :aria-label="t('account.choosePhoto')" @change="savePhoto" />
+              <input
+                class="sr-only"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                :disabled="isSavingPhoto"
+                :aria-label="t('account.choosePhoto')"
+                @change="savePhoto"
+              />
             </label>
-            <button v-if="profilePhoto" class="btn btn-ghost btn-sm" type="button"
-              :disabled="isSavingPhoto" @click="removePhoto">{{ t('account.removePhoto') }}</button>
+            <button
+              v-if="profilePhoto"
+              class="btn btn-ghost btn-sm"
+              type="button"
+              :disabled="isSavingPhoto"
+              @click="removePhoto"
+            >
+              {{ t('account.removePhoto') }}
+            </button>
           </div>
         </div>
         <p class="text-xs text-base-content/60">{{ t('account.photoHint') }}</p>
         <p v-if="photoError" class="text-sm text-error" role="alert">{{ photoError }}</p>
-        <label class="form-control w-full gap-2">
-          <span class="label-text font-semibold text-base-content">{{ t('account.displayName') }}</span>
-          <input v-model="displayName" class="input input-bordered w-full" type="text"
-            autocomplete="nickname" maxlength="60" :placeholder="t('account.namePlaceholder')" required />
-        </label>
-        <p v-if="nameError" class="text-sm text-error" role="alert">{{ nameError }}</p>
-        <button class="btn btn-primary self-end" type="submit"
-          :disabled="isSavingName || !displayName.trim() || displayName.trim() === (currentUser?.displayName ?? '')">
+        <GttInputField
+          id="account-display-name"
+          v-model="displayName"
+          :label="t('account.displayName')"
+          :error="nameError"
+          :placeholder="t('account.namePlaceholder')"
+          autocomplete="nickname"
+          maxlength="60"
+          required
+          compact
+        />
+        <button
+          class="btn btn-primary self-end"
+          type="submit"
+          :disabled="
+            isSavingName ||
+            !displayName.trim() ||
+            displayName.trim() === (currentUser?.displayName ?? '')
+          "
+        >
           <span v-if="isSavingName" class="loading loading-spinner loading-sm" />
           {{ t('account.saveName') }}
         </button>
@@ -45,34 +77,57 @@
     </article>
 
     <article class="card mt-4 border border-base-300 bg-base-100 shadow-sm">
+      <div class="card-body gap-3 p-5">
+        <h2 class="font-bold">{{ t('tour.help') }}</h2>
+        <p class="text-sm text-base-content/65">{{ t('tour.replayDescription') }}</p>
+        <button
+          class="btn btn-outline self-start"
+          type="button"
+          :disabled="isTourRunning || !!activeWorkoutSessionRef"
+          @click="startTour"
+        >
+          {{ t('tour.replay') }}
+        </button>
+        <p v-if="activeWorkoutSessionRef" class="text-sm text-base-content/60">
+          {{ t('tour.workoutActive') }}
+        </p>
+        <p v-if="tourError" class="text-sm text-error" role="alert">{{ t('tour.error') }}</p>
+      </div>
+    </article>
+
+    <article class="card mt-4 border border-base-300 bg-base-100 shadow-sm">
       <div class="card-body gap-4 p-5">
         <div>
           <h2 class="font-bold text-base-content">{{ t('account.personalization') }}</h2>
-          <p class="mt-1 text-sm text-base-content/65">{{ t('account.personalizationDescription') }}</p>
+          <p class="mt-1 text-sm text-base-content/65">
+            {{ t('account.personalizationDescription') }}
+          </p>
         </div>
-        <label class="form-control w-full gap-2">
-          <span class="label-text font-semibold text-base-content">{{ t('account.theme') }}</span>
-          <select v-model="themePreference" class="select select-bordered w-full">
-            <option value="auto">{{ t('account.auto') }}</option>
-            <option value="light">{{ t('account.light') }}</option>
-            <option value="dark">{{ t('account.dark') }}</option>
-          </select>
-        </label>
-        <label class="form-control w-full gap-2">
-          <span class="label-text font-semibold text-base-content">{{ t('account.language') }}</span>
-          <select :value="locale" class="select select-bordered w-full"
-            :disabled="!isLanguageReady || isSavingLanguage"
-            @change="changeLanguage(($event.target as HTMLSelectElement).value)">
-            <option value="it">Italiano</option>
-            <option value="en">English</option>
-          </select>
-          <span v-if="languageError" class="text-sm text-error" role="alert">{{ t('account.languageError') }}</span>
-        </label>
+        <GttSelectField
+          id="account-theme"
+          :model-value="themePreference"
+          :label="t('account.theme')"
+          :options="themeOptions"
+          compact
+          @update:model-value="setTheme"
+        />
+        <GttSelectField
+          id="account-language"
+          :model-value="locale"
+          :label="t('account.language')"
+          :options="languageOptions"
+          :disabled="!isLanguageReady || isSavingLanguage"
+          :error="languageError ? t('account.languageError') : undefined"
+          compact
+          @update:model-value="value => value && changeLanguage(value)"
+        />
         <div class="divider my-0" />
         <label class="flex cursor-pointer items-center justify-between gap-4">
           <span>
             <span class="block font-semibold text-base-content">{{ t('account.sounds') }}</span>
-            <span class="mt-1 block text-sm text-base-content/65">{{ t('account.soundsDescription') }}</span>
+            <span class="mt-1 block text-sm text-base-content/65">{{
+              t('account.soundsDescription')
+            }}</span>
           </span>
           <input v-model="timerSounds" type="checkbox" class="toggle toggle-primary shrink-0" />
         </label>
@@ -80,7 +135,9 @@
         <label class="flex cursor-pointer items-center justify-between gap-4">
           <span>
             <span class="block font-semibold text-base-content">{{ t('account.vibration') }}</span>
-            <span class="mt-1 block text-sm text-base-content/65">{{ t('account.vibrationDescription') }}</span>
+            <span class="mt-1 block text-sm text-base-content/65">{{
+              t('account.vibrationDescription')
+            }}</span>
           </span>
           <input v-model="timerVibration" type="checkbox" class="toggle toggle-primary shrink-0" />
         </label>
@@ -88,7 +145,9 @@
         <label class="flex cursor-pointer items-center justify-between gap-4">
           <span>
             <span class="block font-semibold text-base-content">{{ t('account.screen') }}</span>
-            <span class="mt-1 block text-sm text-base-content/65">{{ t('account.screenDescription') }}</span>
+            <span class="mt-1 block text-sm text-base-content/65">{{
+              t('account.screenDescription')
+            }}</span>
           </span>
           <input v-model="keepScreenAwake" type="checkbox" class="toggle toggle-primary shrink-0" />
         </label>
@@ -110,21 +169,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import GttInputField from '@/components/generic/form/GttInputField.vue';
+import GttSelectField from '@/components/generic/form/GttSelectField.vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
 import { UserRound } from '@lucide/vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
+import { useAppTour } from '@/composables/useAppTour';
+import { activeWorkoutSessionRef } from '@/stores/workoutCreator';
 import { useLanguage } from '@/composables/useLanguage';
 import { useTheme } from '@/composables/useTheme';
 import { useWorkoutPreferences } from '@/composables/useWorkoutPreferences';
 import { showToast } from '@/composables/toast';
 
+const { startTour, isTourRunning, tourError } = useAppTour();
 const { themePreference } = useTheme();
+const themeOptions = computed(() => [
+  { id: 'auto', label: t('account.auto') },
+  { id: 'light', label: t('account.light') },
+  { id: 'dark', label: t('account.dark') },
+]);
+const languageOptions = [{ id: 'it', label: 'Italiano' }, { id: 'en', label: 'English' }];
+function setTheme(value?: string) {
+  if (value === 'auto' || value === 'light' || value === 'dark') themePreference.value = value;
+}
 const { isLanguageReady, isSavingLanguage, languageError, changeLanguage } = useLanguage();
 const { timerSounds, timerVibration, keepScreenAwake } = useWorkoutPreferences();
-const { currentUser, profilePhoto, signOut, updateDisplayName, updateProfilePhoto, removeProfilePhoto } = useAuth();
+const {
+  currentUser,
+  profilePhoto,
+  signOut,
+  updateDisplayName,
+  updateProfilePhoto,
+  removeProfilePhoto,
+} = useAuth();
 const router = useRouter();
 const displayName = ref(currentUser.value?.displayName ?? '');
 const isSavingName = ref(false);

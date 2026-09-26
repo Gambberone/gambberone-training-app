@@ -11,7 +11,7 @@
         :id="props.id"
         v-model="hour"
         class="gtt-time-select select select-bordered join-item w-1/2 text-center"
-        aria-label="Ora"
+        :aria-label="tr('ui.hour')"
         :disabled="props.disabled"
         @change="syncValue"
       >
@@ -25,7 +25,7 @@
       <select
         v-model="minute"
         class="gtt-time-select select select-bordered join-item w-1/2 text-center"
-        aria-label="Minuti"
+        :aria-label="tr('ui.minutes')"
         :disabled="props.disabled"
         @change="syncValue"
       >
@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { ref, watch } from 'vue';
 import GttFieldWrapper from './GttFieldWrapper.vue';
 import type { FieldProps } from './form.types';

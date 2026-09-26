@@ -6,11 +6,9 @@
       </div>
 
       <div>
-        <h2 class="text-xl font-bold text-base-content">Verifica la tua email</h2>
+        <h2 class="text-xl font-bold text-base-content">{{ tr('ui.verify_your_email') }}</h2>
         <p class="mt-2 text-sm leading-6 text-base-content/65">
-          Abbiamo inviato un link di verifica
-          <template v-if="currentUser?.email"> a <strong class="text-base-content">{{ currentUser.email }}</strong></template>.
-          Aprilo per confermare il tuo account.
+          {{ tr('messages.verifySent', { email: currentUser?.email ?? '' }) }}
         </p>
       </div>
 
@@ -23,18 +21,19 @@
 
       <button class="btn btn-primary w-full" type="button" :disabled="isChecking" @click="checkVerification">
         <span v-if="isChecking" class="loading loading-spinner loading-sm" />
-        Ho verificato la mia email
+        {{ tr('ui.i_have_verified_my_email') }}
       </button>
       <button class="btn btn-ghost btn-sm" type="button" :disabled="isResending" @click="resendVerification">
         <span v-if="isResending" class="loading loading-spinner loading-xs" />
-        Reinvia email di verifica
+        {{ tr('ui.resend_verification_email') }}
       </button>
-      <button class="btn btn-ghost btn-sm" type="button" @click="logout">Esci dall'account</button>
+      <button class="btn btn-ghost btn-sm" type="button" @click="logout">{{ tr('ui.sign_out') }}</button>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { applyActionCode } from 'firebase/auth';
 import { MailCheck } from '@lucide/vue';
 import { onMounted, ref } from 'vue';
@@ -68,7 +67,7 @@ onMounted(async () => {
 
 async function checkVerification() {
   if (!currentUser.value) {
-    errorMessage.value = 'Accedi per controllare lo stato della verifica.';
+    errorMessage.value = tr('ui.sign_in_to_check_your_verification_status');
     return;
   }
 
@@ -79,7 +78,7 @@ async function checkVerification() {
     if (currentUser.value.emailVerified) {
       await router.replace({ name: 'home' });
     } else {
-      message.value = 'Email non ancora verificata. Apri il link ricevuto e riprova.';
+      message.value = tr('messages.notVerified');
     }
   } catch (error) {
     errorMessage.value = authErrorMessage(error);
@@ -90,7 +89,7 @@ async function checkVerification() {
 
 async function resendVerification() {
   if (!currentUser.value) {
-    errorMessage.value = 'Accedi per richiedere una nuova email.';
+    errorMessage.value = tr('ui.sign_in_to_request_another_email');
     return;
   }
 
@@ -98,7 +97,7 @@ async function resendVerification() {
   errorMessage.value = '';
   try {
     await sendVerificationEmail();
-    message.value = 'Abbiamo inviato una nuova email di verifica.';
+    message.value = tr('messages.verificationResent');
   } catch (error) {
     errorMessage.value = authErrorMessage(error);
   } finally {

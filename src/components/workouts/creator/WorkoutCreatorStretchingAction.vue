@@ -10,11 +10,12 @@
         @remove="removeStretchingExercise(stretchingExerciseIndex)"
       />
     </div>
-    <button class="btn" type="button" @click="addStretchingExercise">Aggiungi esercizio</button>
+    <button class="btn" type="button" @click="addStretchingExercise">{{ tr('ui.add_exercise') }}</button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { computed } from 'vue';
 import WorkoutCreatorStretchingExercise from './stretching/WorkoutCreatorStretchingExercise.vue';
 import {

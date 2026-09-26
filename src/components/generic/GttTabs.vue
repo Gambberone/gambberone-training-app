@@ -6,6 +6,7 @@
         <a
           v-for="tab in props.tabs"
           :key="tab.key"
+          :data-tour-tab="tab.key"
           class="tab"
           role="tab"
           :class="tabClass(tab)"

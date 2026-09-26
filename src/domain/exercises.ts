@@ -1,6 +1,5 @@
 export type MuscleGroup = {
   id: MuscleGroupType;
-  name: string;
 };
 
 export type Exercise = {
@@ -15,6 +14,7 @@ export type MuscleGroupType =
   | 'ABDOMINALS'
   | 'BICEPS'
   | 'LEGS'
+  | 'GLUTES'
   | 'CHEST'
   | 'BACK'
   | 'SHOULDERS'
@@ -26,6 +26,7 @@ export const MUSCLE_GROUPS = {
   ABDOMINALS: 'ABDOMINALS',
   BICEPS: 'BICEPS',
   LEGS: 'LEGS',
+  GLUTES: 'GLUTES',
   CHEST: 'CHEST',
   BACK: 'BACK',
   SHOULDERS: 'SHOULDERS',
@@ -33,15 +34,16 @@ export const MUSCLE_GROUPS = {
 } as const satisfies Record<MuscleGroupType, MuscleGroupType>;
 
 export const muscleGroups: MuscleGroup[] = [
-  { id: MUSCLE_GROUPS.STRETCHING, name: 'Stretching' },
-  { id: MUSCLE_GROUPS.WARMUP, name: 'Warm-up' },
-  { id: MUSCLE_GROUPS.ABDOMINALS, name: 'Addominali' },
-  { id: MUSCLE_GROUPS.BICEPS, name: 'Bicipiti' },
-  { id: MUSCLE_GROUPS.LEGS, name: 'Gambe' },
-  { id: MUSCLE_GROUPS.CHEST, name: 'Petto' },
-  { id: MUSCLE_GROUPS.BACK, name: 'Schiena' },
-  { id: MUSCLE_GROUPS.SHOULDERS, name: 'Spalle' },
-  { id: MUSCLE_GROUPS.TRICEPS, name: 'Tricipiti' },
+  { id: MUSCLE_GROUPS.STRETCHING },
+  { id: MUSCLE_GROUPS.WARMUP },
+  { id: MUSCLE_GROUPS.ABDOMINALS },
+  { id: MUSCLE_GROUPS.BICEPS },
+  { id: MUSCLE_GROUPS.LEGS },
+  { id: MUSCLE_GROUPS.GLUTES },
+  { id: MUSCLE_GROUPS.CHEST },
+  { id: MUSCLE_GROUPS.BACK },
+  { id: MUSCLE_GROUPS.SHOULDERS },
+  { id: MUSCLE_GROUPS.TRICEPS },
 ];
 
 export const exercises: Exercise[] = [
@@ -120,4 +122,11 @@ export const exercises: Exercise[] = [
   { id: 'leg-curl', name: 'Leg curl', muscleGroupId: MUSCLE_GROUPS.LEGS },
   { id: 'leg-extension', name: 'Leg extension', muscleGroupId: MUSCLE_GROUPS.LEGS },
   { id: 'calf-raise', name: 'Calf raise', muscleGroupId: MUSCLE_GROUPS.LEGS },
+
+  // Glutei
+  { id: 'hip-thrust', name: 'Hip thrust', muscleGroupId: MUSCLE_GROUPS.GLUTES },
+  { id: 'glute-bridge', name: 'Glute bridge', muscleGroupId: MUSCLE_GROUPS.GLUTES },
+  { id: 'kickback-cavo', name: 'Kickback al cavo', muscleGroupId: MUSCLE_GROUPS.GLUTES },
+  { id: 'donkey-kick', name: 'Donkey kick', muscleGroupId: MUSCLE_GROUPS.GLUTES },
+  { id: 'abduzioni-anca', name: 'Abduzioni dell’anca', muscleGroupId: MUSCLE_GROUPS.GLUTES },
 ];

@@ -1,7 +1,7 @@
 <template>
   <GttSelectField
-    :options="warmupExercises"
-    label="Warmup exercise"
+    :options="localizedExercises(warmupExercises)"
+    :label="tr('ui.warm_up_exercise')"
     :id="`warmup_exercise_${warmupExercise.id}`"
     value-key="name"
     required
@@ -12,22 +12,23 @@
     <WorkoutCreatorDurationRepetitionField
       :id="`warmup_value_${warmupExercise.id}`"
       v-model="warmupValue"
-      :label="isRepetitions ? 'Ripetizioni' : 'Durata (secondi)'"
+      :label="isRepetitions ? tr('ui.repetitions') : tr('ui.duration_seconds')"
     />
     <label class="label">
-      A tempo
+      {{ tr('ui.timed') }}
       <input v-model="isRepetitions" type="checkbox" class="toggle toggle-sm toggle-neutral" />
-      Ripetizioni
+      {{ tr('ui.repetitions') }}
     </label>
   </div>
   <WorkoutCreatorDurationRepetitionField
     v-if="isRepetitions"
     :id="`warmup_repetition_interval_${warmupExercise.id}`"
     v-model="repetitionInterval"
-    label="Secondi per ripetizione"
+    :label="tr('ui.seconds_per_repetition')"
   />
 </template>
 <script setup lang="ts">
+import { tr, localizedExercises } from '@/localization';
 import { computed } from 'vue';
 import { DEFAULT_REPETITION_INTERVAL_SECONDS, WORKOUT_CREATOR_STEP_ACTION } from '@/constants/workout.ts';
 import type { WarmupExercise } from '@/constants/workout.ts';

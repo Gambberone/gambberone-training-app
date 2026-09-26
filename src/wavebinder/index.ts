@@ -52,16 +52,16 @@ export const wb = new WaveBinder(
         pauseBetweenSetsDuration: number,
       ) => {
         const errors: string[] = [];
-        if (!selectedExercise) errors.push('Seleziona un esercizio.');
+        if (!selectedExercise) errors.push('messages.enterExercise');
         if (!Number.isFinite(Number(exerciseValue)) || Number(exerciseValue) <= 0) {
-          errors.push('Inserisci un valore maggiore di zero.');
+          errors.push('messages.positiveValue');
         }
         if (exerciseMode === 'repetitions' && (!Number.isInteger(Number(repetitionIntervalSeconds)) || Number(repetitionIntervalSeconds) < 1)) {
-          errors.push('L’intervallo tra le ripetizioni deve essere di almeno un secondo.');
+          errors.push('messages.intervalError');
         }
-        if (!Number.isInteger(Number(sets)) || Number(sets) < 1) errors.push('I set devono essere almeno uno.');
+        if (!Number.isInteger(Number(sets)) || Number(sets) < 1) errors.push('messages.setsError');
         if (hasSetPause && Number(sets) > 1 && (!Number.isFinite(Number(pauseBetweenSetsDuration)) || Number(pauseBetweenSetsDuration) <= 0)) {
-          errors.push('Inserisci la durata della pausa tra i set.');
+          errors.push('messages.pauseError');
         }
         return errors;
       },
@@ -73,25 +73,25 @@ export const wb = new WaveBinder(
     {
       name: 'validateWarmupExercises',
       implementation: (items: WarmupExercise[]) => {
-        if (!items?.length) return ['Aggiungi almeno un esercizio di warm-up.'];
+        if (!items?.length) return ['messages.warmupRequired'];
         return items.flatMap((item, index) => {
-          if (!item.exerciseId) return [`Seleziona l'esercizio ${index + 1} di warm-up.`];
+          if (!item.exerciseId) return [JSON.stringify({ key: 'messages.warmupExercise', values: { number: index + 1 } })];
           const value = item.modeType === 'repetitions' ? item.repetitions : item.duration;
           if (item.modeType === 'repetitions' &&
             (!Number.isInteger(item.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS) || (item.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS) < 1)) {
-            return [`L’intervallo tra le ripetizioni del warm-up ${index + 1} deve essere di almeno un secondo.`];
+            return [JSON.stringify({ key: 'messages.warmupInterval', values: { number: index + 1 } })];
           }
-          return Number(value) > 0 ? [] : [`Inserisci un valore maggiore di zero per il warm-up ${index + 1}.`];
+          return Number(value) > 0 ? [] : [JSON.stringify({ key: 'messages.warmupPositive', values: { number: index + 1 } })];
         });
       },
     },
     {
       name: 'validateStretchingExercises',
       implementation: (items: StretchingExercise[]) => {
-        if (!items?.length) return ['Aggiungi almeno un esercizio di stretching.'];
+        if (!items?.length) return ['messages.stretchRequired'];
         return items.flatMap((item, index) => {
-          if (!item.exerciseId) return [`Seleziona l'esercizio ${index + 1} di stretching.`];
-          return Number(item.duration) > 0 ? [] : [`Inserisci una durata maggiore di zero per lo stretching ${index + 1}.`];
+          if (!item.exerciseId) return [JSON.stringify({ key: 'messages.stretchExercise', values: { number: index + 1 } })];
+          return Number(item.duration) > 0 ? [] : [JSON.stringify({ key: 'messages.stretchPositive', values: { number: index + 1 } })];
         });
       },
     },
@@ -103,17 +103,17 @@ export const wb = new WaveBinder(
         time?: string;
         scheduled?: ScheduledWorkout[];
       } | null) => {
-        if (!input?.date || !input.workoutId) return ['Scegli un workout da programmare.'];
+        if (!input?.date || !input.workoutId) return ['messages.scheduleRequired'];
         const duplicate = input.scheduled?.some(
           (item) => item.date === input.date && item.workoutId === input.workoutId && item.time === input.time,
         );
-        return duplicate ? ['Questo workout è già programmato nello stesso orario.'] : [];
+        return duplicate ? ['messages.duplicateSchedule'] : [];
       },
     },
     {
       name: 'validatePause',
       implementation: (duration: number) =>
-        Number(duration) > 0 ? [] : ['Inserisci una durata della pausa maggiore di zero.'],
+        Number(duration) > 0 ? [] : ['messages.pausePositive'],
     },
     {
       name: 'estimateWorkoutDuration',

@@ -1,9 +1,9 @@
 <template>
   <WorkoutCreatorFirstStep v-if="isCreatingWorkoutCreatorStep || currentWorkoutCreatorStep" />
   <section v-else class="flex flex-col items-center gap-6">
-    <GttInputField id="workout_name" label="Nome workout" compact v-model="workoutName" />
+    <GttInputField id="workout_name" :label="tr('ui.workout_name')" compact v-model="workoutName" />
     <p v-if="workoutCreatorDraft.steps.length" class="text-sm text-base-content/65">
-      Durata stimata: {{ estimatedDurationLabel }}
+      {{ tr('messages.estimatedDuration', { duration: estimatedDurationLabel }) }}
     </p>
     <ol class="workout-stepper">
       <li
@@ -28,8 +28,8 @@
           v-if="!hasWarmup"
           class="btn btn-square btn-outline btn-error"
           type="button"
-          aria-label="Aggiungi warm-up"
-          title="Aggiungi warm-up"
+          :aria-label="tr('ui.add_warm_up')"
+          :title="tr('ui.add_warm_up')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.WARMUP)"
         >
           <Flame :size="28" />
@@ -37,8 +37,8 @@
         <button
           class="btn btn-square btn-outline btn-info"
           type="button"
-          aria-label="Aggiungi esercizio"
-          title="Aggiungi esercizio"
+          :aria-label="tr('ui.add_exercise')"
+          :title="tr('ui.add_exercise')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.EXERCISE)"
         >
           <Dumbbell :size="28" />
@@ -46,8 +46,8 @@
         <button
           class="btn btn-square btn-outline btn-primary"
           type="button"
-          aria-label="Aggiungi pausa"
-          title="Aggiungi pausa"
+          :aria-label="tr('ui.add_rest')"
+          :title="tr('ui.add_rest')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.PAUSE)"
         >
           <Pause :size="28" />
@@ -55,8 +55,8 @@
         <button
           class="btn btn-square btn-outline btn-warning"
           type="button"
-          aria-label="Aggiungi stretching"
-          title="Aggiungi stretching"
+          :aria-label="tr('ui.add_stretching')"
+          :title="tr('ui.add_stretching')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.STRETCHING)"
         >
           <LineSquiggle :size="28" />
@@ -67,6 +67,7 @@
 </template>
 
 <script setup lang="ts">
+import { tr } from '@/localization';
 import { computed } from 'vue';
 import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
 import WorkoutCreatorFirstStep from './creator/WorkoutCreatorFirstStep.vue';
@@ -83,7 +84,7 @@ import { estimateWorkoutDuration } from '@/wavebinder/duration';
 
 const estimatedDurationLabel = computed(() => {
   const seconds = estimateWorkoutDuration(workoutCreatorDraft.value.steps);
-  return seconds > 0 ? `~${Math.ceil(seconds / 60)} min` : 'durata libera';
+  return seconds > 0 ? `~${Math.ceil(seconds / 60)} min` : tr('ui.untimed');
 });
 
 const hasWarmup = computed(() =>
@@ -114,10 +115,10 @@ const editStep = (index: number) => {
 const stepLabel = (type: WorkoutCreatorStepAction) =>
   ({
     WARMUP: 'Warm-up',
-    EXERCISE: 'Esercizio',
-    PAUSE: 'Pausa',
+    EXERCISE: tr('ui.exercise'),
+    PAUSE: tr('ui.rest'),
     STRETCHING: 'Stretching',
-    SETPAUSE: 'Pausa tra serie',
+    SETPAUSE: tr('ui.rest_between_sets'),
   })[type];
 
 const stepColorClass = (type: WorkoutCreatorStepAction) =>
