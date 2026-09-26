@@ -20,6 +20,7 @@ import {
 } from '@/wavebinder/exerciseStep';
 import { exercisesRef } from './exercises';
 import { wb } from '@/wavebinder';
+import { estimateWorkoutDuration } from '@/wavebinder/duration';
 
 export interface WorkoutCreatorDraft {
   name: string;
@@ -92,6 +93,7 @@ export type WorkoutPlaybackCheckpoint = {
   isStarting: boolean;
   startCountdown: number;
   pausedForBackground?: boolean;
+  appliedResetId?: string;
 };
 
 const workoutPlaybackKey = 'gtt:workout-playback';
@@ -327,34 +329,7 @@ export const workoutVisibleSteps = (workout: Workout) =>
   workout.steps.filter((step) => step.type !== WORKOUT_CREATOR_STEP_ACTION.SETPAUSE);
 
 export const workoutEstimatedDuration = (workout: Workout) =>
-  workout.steps.reduce((total, step) => {
-    if (
-      step.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE ||
-      step.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE
-    ) {
-      return total + Number(step.pauseDuration ?? 0);
-    }
-    if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
-      const value = step.exerciseModeType === 'duration'
-        ? Number(step.exerciseDuration ?? 0)
-        : Number(step.exerciseRepetitions ?? 0) * (step.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS);
-      return (
-        total +
-        value * Number(step.sets ?? 1) +
-        Number(step.pauseBetweenSetsDuration ?? 0) * Math.max(0, Number(step.sets ?? 1) - 1)
-      );
-    }
-    if (step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP) {
-      return total + (step.warmupExercises ?? []).reduce((sum, exercise) => sum + (
-        exercise.modeType === 'repetitions'
-          ? Number(exercise.repetitions ?? 0) * (exercise.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS)
-          : Number(exercise.duration ?? 0)
-      ), 0);
-    }
-    return total + (step.stretchingExercises ?? []).reduce(
-      (sum, exercise) => sum + Number(exercise.duration ?? 0), 0,
-    );
-  }, 0);
+  estimateWorkoutDuration(workout.steps);
 
 export const startWorkoutSession = (workoutId: string) => {
   const workout = workoutsRef.value.find((item) => item.id === workoutId);

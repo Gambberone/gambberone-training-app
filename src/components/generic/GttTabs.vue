@@ -1,6 +1,7 @@
 <template>
   <div class="flex w-full flex-col gap-2" :class="{ 'h-full min-h-0': props.scrollContent }">
-    <div class="w-full overflow-x-auto">
+    <div class="flex shrink-0 items-center gap-4">
+    <div class="min-w-0 flex-1 overflow-x-auto">
       <div role="tablist" class="tabs tabs-box min-w-full w-max flex-nowrap">
         <a
           v-for="tab in props.tabs"
@@ -13,6 +14,8 @@
           {{ tab.label }}
         </a>
       </div>
+    </div>
+    <slot name="actions" />
     </div>
     <div
       v-if="activeTab"

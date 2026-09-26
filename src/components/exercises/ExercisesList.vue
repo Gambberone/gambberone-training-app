@@ -1,7 +1,8 @@
 <template>
-  <div class="grid gap-3 md:grid-cols-2">
+  <div class="grid items-start gap-3 md:grid-cols-2">
+    <div v-for="(column, index) in exerciseColumns" :key="index" class="flex min-w-0 flex-col gap-3" :class="index === 1 ? 'hidden md:flex' : ''">
     <article
-      v-for="{ muscleGroup, cardClass, textClass, badgeClass } in exerciseCards"
+      v-for="{ muscleGroup, cardClass, textClass, badgeClass } in column"
       :key="muscleGroup.id"
       class="card card-border overflow-hidden bg-base-100 shadow-sm"
       :class="cardClass"
@@ -62,8 +63,9 @@
         </div>
       </div>
     </article>
+    </div>
   </div>
-  <GttBottomAction label="Aggiungi esercizio" @click="isExercisesCreatorEditorModalOpen = true" />
+  <GttBottomAction desktop-target="#workouts-desktop-action" label="Aggiungi esercizio" @click="isExercisesCreatorEditorModalOpen = true" />
   <ExerciseCreatorModal
     v-model="isExercisesCreatorEditorModalOpen"
     :exercise="selectedExerciseForEdit"
@@ -86,7 +88,7 @@
 
 <script setup lang="ts">
 import { Dumbbell, Pencil, Trash } from '@lucide/vue';
-import { ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import {
   MUSCLE_GROUPS,
   muscleGroups,
@@ -135,6 +137,22 @@ const exerciseSections = [
 const exerciseCards = exerciseSections.flatMap(({ groups, cardClass, textClass, badgeClass }) =>
   groups.map((muscleGroup) => ({ muscleGroup, cardClass, textClass, badgeClass })),
 );
+
+// Preserve the mobile order while giving each desktop column its own flow.
+const isTwoColumnLayout = ref(false);
+let columnMediaQuery: MediaQueryList | undefined;
+const updateColumnLayout = () => {
+  isTwoColumnLayout.value = columnMediaQuery?.matches ?? false;
+};
+onMounted(() => {
+  columnMediaQuery = window.matchMedia('(min-width: 768px)');
+  updateColumnLayout();
+  columnMediaQuery.addEventListener('change', updateColumnLayout);
+});
+onUnmounted(() => columnMediaQuery?.removeEventListener('change', updateColumnLayout));
+const exerciseColumns = computed(() => isTwoColumnLayout.value
+  ? [exerciseCards.filter((_, index) => index % 2 === 0), exerciseCards.filter((_, index) => index % 2 === 1)]
+  : [exerciseCards]);
 
 function exercisesForMuscleGroup(muscleGroupId: MuscleGroup['id']) {
   return exercisesRef.value.filter((exercise) => exercise.muscleGroupId === muscleGroupId);

@@ -8,6 +8,9 @@
         v-model="activeTab"
         scroll-content
     >
+        <template #actions>
+            <div id="workouts-desktop-action" class="hidden shrink-0 self-stretch lg:flex [&>div]:flex [&>div]:h-full [&_button]:h-full" />
+        </template>
         <template #workouts>
             <WorkoutList />
         </template>

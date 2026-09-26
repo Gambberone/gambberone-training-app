@@ -7,7 +7,7 @@ import LICENSE from './license.json';
 import PROTO_NODES from './protonodes.json';
 import { exercisesRef } from '@/stores/exercises';
 import type { Exercise } from '@/domain/exercises';
-import { DEFAULT_REPETITION_INTERVAL_SECONDS, type StretchingExercise, type WarmupExercise, type WorkoutCreatorStep, type WorkoutSession } from '@/constants';
+import { DEFAULT_REPETITION_INTERVAL_SECONDS, WORKOUT_CREATOR_STEP_ACTION, type ExerciseModeType, type StretchingExercise, type WarmupExercise, type WorkoutCreatorStep, type WorkoutSession } from '@/constants';
 import type { ScheduledWorkout } from '@/stores/workoutCreator';
 
 const licenseServerUrl = import.meta.env.VITE_WAVEBINDER_LICENSE_SERVER_URL?.replace(/\/$/, '');
@@ -44,7 +44,9 @@ export const wb = new WaveBinder(
       name: 'validateExerciseStep',
       implementation: (
         selectedExercise: Exercise | null,
+        exerciseMode: ExerciseModeType,
         exerciseValue: number,
+        repetitionIntervalSeconds: number,
         sets: number,
         hasSetPause: boolean,
         pauseBetweenSetsDuration: number,
@@ -54,8 +56,11 @@ export const wb = new WaveBinder(
         if (!Number.isFinite(Number(exerciseValue)) || Number(exerciseValue) <= 0) {
           errors.push('Inserisci un valore maggiore di zero.');
         }
+        if (exerciseMode === 'repetitions' && (!Number.isInteger(Number(repetitionIntervalSeconds)) || Number(repetitionIntervalSeconds) < 1)) {
+          errors.push('L’intervallo tra le ripetizioni deve essere di almeno un secondo.');
+        }
         if (!Number.isInteger(Number(sets)) || Number(sets) < 1) errors.push('I set devono essere almeno uno.');
-        if (hasSetPause && Number(sets) > 1 && Number(pauseBetweenSetsDuration) <= 0) {
+        if (hasSetPause && Number(sets) > 1 && (!Number.isFinite(Number(pauseBetweenSetsDuration)) || Number(pauseBetweenSetsDuration) <= 0)) {
           errors.push('Inserisci la durata della pausa tra i set.');
         }
         return errors;
@@ -109,6 +114,31 @@ export const wb = new WaveBinder(
       name: 'validatePause',
       implementation: (duration: number) =>
         Number(duration) > 0 ? [] : ['Inserisci una durata della pausa maggiore di zero.'],
+    },
+    {
+      name: 'estimateWorkoutDuration',
+      implementation: (steps: WorkoutCreatorStep[] | null) =>
+        (steps ?? []).reduce((total, step) => {
+          if (step.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE) return total;
+          if (step.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE) return total + Number(step.pauseDuration ?? 0);
+          if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
+            const value = step.exerciseModeType === 'duration'
+              ? Number(step.exerciseDuration ?? 0)
+              : Number(step.exerciseRepetitions ?? 0) * (step.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS);
+            const sets = Number(step.sets ?? 1);
+            return total + value * sets + Number(step.pauseBetweenSetsDuration ?? 0) * Math.max(0, sets - 1);
+          }
+          if (step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP) {
+            return total + (step.warmupExercises ?? []).reduce((sum, exercise) => sum + (
+              exercise.modeType === 'repetitions'
+                ? Number(exercise.repetitions ?? 0) * (exercise.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS)
+                : Number(exercise.duration ?? 0)
+            ), 0);
+          }
+          return total + (step.stretchingExercises ?? []).reduce(
+            (sum, exercise) => sum + Number(exercise.duration ?? 0), 0,
+          );
+        }, 0),
     },
     {
       name: 'getSessionProgress',

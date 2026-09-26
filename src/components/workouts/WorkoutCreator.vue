@@ -2,6 +2,9 @@
   <WorkoutCreatorFirstStep v-if="isCreatingWorkoutCreatorStep || currentWorkoutCreatorStep" />
   <section v-else class="flex flex-col items-center gap-6">
     <GttInputField id="workout_name" label="Nome workout" compact v-model="workoutName" />
+    <p v-if="workoutCreatorDraft.steps.length" class="text-sm text-base-content/65">
+      Durata stimata: {{ estimatedDurationLabel }}
+    </p>
     <ol class="workout-stepper">
       <li
         v-for="step in visibleSteps"
@@ -76,6 +79,12 @@ import {
   startWorkoutCreatorStep,
   workoutCreatorDraft,
 } from '@/stores/workoutCreator';
+import { estimateWorkoutDuration } from '@/wavebinder/duration';
+
+const estimatedDurationLabel = computed(() => {
+  const seconds = estimateWorkoutDuration(workoutCreatorDraft.value.steps);
+  return seconds > 0 ? `~${Math.ceil(seconds / 60)} min` : 'durata libera';
+});
 
 const hasWarmup = computed(() =>
   workoutCreatorDraft.value.steps.some((step) => step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP),

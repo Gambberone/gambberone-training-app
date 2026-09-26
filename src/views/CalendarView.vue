@@ -1,5 +1,5 @@
 <template>
-  <section class="mx-auto max-w-5xl">
+  <section class="mx-auto w-full max-w-7xl">
     <header class="mb-5">
       <div class="flex items-center justify-between gap-3">
         <h1 class="text-2xl font-bold text-primary capitalize">{{ calendarLabel }}</h1>

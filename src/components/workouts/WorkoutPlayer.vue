@@ -53,10 +53,10 @@
         </template>
         <template v-else>
           <p
-            class="flex h-16 items-center justify-center text-2xl font-bold sm:h-20 sm:text-3xl"
+            class="flex min-h-20 items-center justify-center text-3xl font-bold leading-tight sm:min-h-24 sm:text-4xl"
             :class="currentSegment.colorClass"
           >
-            <span class="line-clamp-2">{{ currentSegment.name }}</span>
+            <span class="min-w-0 break-words">{{ currentSegment.name }}</span>
           </p>
           <div
             class="relative mt-3 grid aspect-square w-[calc(100%-1rem)] max-w-84 shrink-0 self-center place-items-center sm:max-w-md lg:max-w-120"
@@ -122,9 +122,19 @@
         </template>
       </div>
 
-      <div v-if="upcomingSegment" class="rounded-box border border-base-300 bg-base-100 px-4 py-3">
-        <div class="flex items-center justify-between gap-3">
-          <div class="min-w-0">
+      <div class="rounded-box border border-base-300 bg-base-100 px-4 py-3">
+        <div class="grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-3 text-center">
+          <button
+            class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
+            type="button"
+            :disabled="isStarting || !previousSegment"
+            :aria-label="previousSegment ? `Torna a ${previousSegment.name}` : 'Nessuno step precedente'"
+            title="Torna allo step precedente"
+            @click="skipToPreviousSegment"
+          >
+            <SkipBack :size="24" aria-hidden="true" />
+          </button>
+          <div v-if="upcomingSegment" class="min-w-0 flex-1">
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/55">
               Prossimo step
             </p>
@@ -133,23 +143,22 @@
               }}<span v-if="upcomingSegment.setLabel"> · {{ upcomingSegment.setLabel }}</span>
             </p>
           </div>
+          <div v-else class="min-w-0 flex-1 text-success">
+            <p class="text-xs font-semibold uppercase tracking-wider">Ultimo step</p>
+            <p class="mt-1 font-bold">Al termine il workout sarà completato.</p>
+          </div>
           <button
-            v-if="!isStarting"
+            :disabled="isStarting || !upcomingSegment"
             class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
             type="button"
-            :aria-label="`Avvia ora ${upcomingSegment.name}`"
+            :aria-label="upcomingSegment ? `Avvia ora ${upcomingSegment.name}` : 'Nessuno step successivo'"
             title="Avvia il prossimo step"
             @click="skipToNextSegment"
           >
-            <Play :size="30" aria-hidden="true" />
+            <SkipForward :size="24" aria-hidden="true" />
           </button>
         </div>
       </div>
-      <div v-else class="rounded-box border border-success/30 bg-success/10 px-4 py-3 text-success">
-        <p class="text-xs font-semibold uppercase tracking-wider">Ultimo step</p>
-        <p class="mt-1 font-bold">Al termine il workout sarà completato.</p>
-      </div>
-
       <div class="player-actions grid grid-cols-3 gap-2">
         <button
           class="btn btn-primary btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
@@ -184,7 +193,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
-import { Maximize, Minimize, Minimize2, Pause, Play, RotateCcw, Square } from '@lucide/vue';
+import { Maximize, Minimize, Minimize2, Pause, Play, RotateCcw, SkipBack, SkipForward, Square } from '@lucide/vue';
 import {
   DEFAULT_REPETITION_INTERVAL_SECONDS,
   WORKOUT_CREATOR_STEP_ACTION,
@@ -227,6 +236,7 @@ const startCountdown = ref(3);
 const isStarting = ref(true);
 const isPaused = ref(false);
 let pausedForBackground = false;
+let appliedResetId: string | undefined;
 const playerElement = ref<HTMLElement>();
 const isFullscreen = ref(false);
 const { keepScreenAwake } = useWorkoutPreferences();
@@ -344,6 +354,7 @@ const currentSegment = computed<PlayerSegment>(
       target: 1,
     },
 );
+const previousSegment = computed(() => segments.value[currentSegmentIndex.value - 1]);
 const nextSegment = computed(() => segments.value[currentSegmentIndex.value + 1]);
 const upcomingSegment = computed(() =>
   isStarting.value ? currentSegment.value : nextSegment.value,
@@ -416,6 +427,7 @@ function savePlayback() {
     isStarting: isStarting.value,
     startCountdown: startCountdown.value,
     pausedForBackground,
+    ...(appliedResetId ? { appliedResetId } : {}),
   });
   lastCheckpointAt = Date.now();
 }
@@ -448,6 +460,7 @@ function restorePlayback() {
     isStarting.value = checkpoint.isStarting;
     startCountdown.value = checkpoint.startCountdown;
     pausedForBackground = checkpoint.pausedForBackground === true;
+    appliedResetId = checkpoint.appliedResetId;
   } else {
     const savedStepIndex = activeWorkoutSessionRef.value?.currentStepIndex ?? 0;
     if (savedStepIndex === 0) return false;
@@ -508,10 +521,14 @@ function startSegment() {
   signalTimer(true, false);
 }
 
+function skipToPreviousSegment() {
+  if (isStarting.value || !previousSegment.value) return;
+  publishSegmentChange(currentSegmentIndex.value - 1, false, 'skip');
+}
+
 function skipToNextSegment() {
   if (isStarting.value || !nextSegment.value) return;
-  currentSegmentIndex.value += 1;
-  startSegment();
+  publishSegmentChange(currentSegmentIndex.value + 1, false, 'skip');
 }
 
 function tick() {
@@ -519,7 +536,10 @@ function tick() {
   elapsedMilliseconds.value = Date.now() - segmentStartedAt;
   const remainingCount = isRepetitions.value
     ? currentSegment.value.target - currentRepetition.value + 1
-    : Math.max(0, Math.ceil((segmentDurationMilliseconds.value - elapsedMilliseconds.value) / 1000));
+    : Math.max(
+        0,
+        Math.ceil((segmentDurationMilliseconds.value - elapsedMilliseconds.value) / 1000),
+      );
   if (remainingCount !== lastRemainingCount) {
     lastRemainingCount = remainingCount;
     if (remainingCount > 0 && remainingCount <= 3) signalTimer();
@@ -576,8 +596,7 @@ async function syncWakeLock() {
     const lock = await navigator.wakeLock.request('screen');
     if (isUnmounted || !keepScreenAwake.value || document.visibilityState !== 'visible') {
       await lock.release();
-    }
-    else wakeLock = lock;
+    } else wakeLock = lock;
   } catch {
     // The device can refuse a screen wake lock, for example in power saving mode.
   }
@@ -618,20 +637,60 @@ function togglePause() {
   setPaused(!isPaused.value);
 }
 
-function resetCurrentSegment() {
-  if (isStarting.value) {
-    stopCountdown();
-    startCountdown.value = 3;
-    if (!isPaused.value) runCountdown();
-    savePlayback();
+function applySegmentReset() {
+  const session = activeWorkoutSessionRef.value;
+  const reset = session?.segmentReset;
+  if (!session || session.id !== sessionId || !reset || reset.id === appliedResetId) return;
+  if (
+    !Number.isInteger(reset.segmentIndex) ||
+    reset.segmentIndex < 0 ||
+    reset.segmentIndex >= segments.value.length
+  )
     return;
-  }
 
+  if (!isPaused.value && !isStarting.value) updateTotalElapsed();
+  stopTimer();
+  stopCountdown();
+  appliedResetId = reset.id;
+  currentSegmentIndex.value = reset.segmentIndex;
+  isStarting.value = reset.isStarting;
+  startCountdown.value = 3;
   segmentStartedAt = Date.now();
   elapsedMilliseconds.value = 0;
   lastRemainingCount = 0;
+  isPaused.value = session.isPaused === true || document.visibilityState === 'hidden';
+  pausedForBackground = document.visibilityState === 'hidden' && session.isPaused !== true;
+  lastTotalTickAt = isPaused.value || isStarting.value ? 0 : Date.now();
+  if (!isPaused.value) {
+    if (isStarting.value) runCountdown();
+    else runSegmentTimer();
+  }
   savePlayback();
+  if (reset.action === 'skip' && document.visibilityState === 'visible') signalTimer(true, false);
 }
+
+function publishSegmentChange(segmentIndex: number, starting: boolean, action: 'reset' | 'skip') {
+  const session = activeWorkoutSessionRef.value;
+  const segment = segments.value[segmentIndex];
+  if (!session || session.id !== sessionId || !segment) return;
+  // Publish the destination and command together so every device sees the same series.
+  activeWorkoutSessionRef.value = {
+    ...session,
+    currentStepIndex: segment.sourceStepIndex,
+    segmentReset: {
+      id: crypto.randomUUID(),
+      segmentIndex,
+      isStarting: starting,
+      action,
+    },
+  };
+}
+
+function resetCurrentSegment() {
+  publishSegmentChange(currentSegmentIndex.value, isStarting.value, 'reset');
+}
+
+watch(() => activeWorkoutSessionRef.value?.segmentReset?.id, applySegmentReset, { flush: 'sync' });
 
 watch(workoutPlayerPauseRequestRef, togglePause);
 watch(
@@ -689,11 +748,13 @@ onMounted(() => {
   window.addEventListener('focus', resumeAfterBackground);
   if (!segments.value.length) return completeWorkoutSession();
   if (restorePlayback()) {
+    applySegmentReset();
     if (pausedForBackground) resumeAfterBackground();
     else if (activeWorkoutSessionRef.value?.isPaused === false) setPaused(false, false);
     return;
   }
   beginWorkout(activeWorkoutSessionRef.value?.isPaused === true);
+  applySegmentReset();
 });
 onBeforeUnmount(() => {
   isUnmounted = true;

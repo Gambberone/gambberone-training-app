@@ -32,7 +32,9 @@
     "type": "SINGLE",
     "dep": [],
     "defaultValue": "repetitions",
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "exerciseValue",
@@ -40,7 +42,9 @@
     "type": "SINGLE",
     "dep": [],
     "defaultValue": 0,
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "repetitionIntervalSeconds",
@@ -48,7 +52,9 @@
     "type": "SINGLE",
     "dep": [],
     "defaultValue": 3,
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "sets",
@@ -56,7 +62,9 @@
     "type": "SINGLE",
     "dep": [],
     "defaultValue": 1,
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "hasSetPause",
@@ -64,7 +72,9 @@
     "type": "SINGLE",
     "dep": [],
     "defaultValue": false,
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "pauseBetweenSetsDuration",
@@ -72,45 +82,137 @@
     "type": "SINGLE",
     "dep": [],
     "defaultValue": 0,
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "isPauseAvailable",
     "path": "/isPauseAvailable",
     "type": "SINGLE",
-    "dep": [{ "nodeName": "sets", "parameterName": "sets", "isOptional": false, "onUpdate": true, "type": "BODY" }],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "isPauseAvailable" }
+    "dep": [
+      {
+        "nodeName": "sets",
+        "parameterName": "sets",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "isPauseAvailable"
+    }
   },
   {
     "name": "effectivePauseDuration",
     "path": "/effectivePauseDuration",
     "type": "SINGLE",
     "dep": [
-      { "nodeName": "isPauseAvailable", "parameterName": "isPauseAvailable", "isOptional": false, "onUpdate": true, "type": "BODY" },
-      { "nodeName": "hasSetPause", "parameterName": "hasSetPause", "isOptional": false, "onUpdate": true, "type": "BODY" },
-      { "nodeName": "pauseBetweenSetsDuration", "parameterName": "pauseBetweenSetsDuration", "isOptional": false, "onUpdate": true, "type": "BODY" }
+      {
+        "nodeName": "isPauseAvailable",
+        "parameterName": "isPauseAvailable",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "hasSetPause",
+        "parameterName": "hasSetPause",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "pauseBetweenSetsDuration",
+        "parameterName": "pauseBetweenSetsDuration",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
     ],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "effectivePauseDuration" }
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "effectivePauseDuration"
+    }
   },
   {
     "name": "validationErrors",
     "path": "/validationErrors",
     "type": "SINGLE",
     "dep": [
-      { "nodeName": "selectedExercise", "parameterName": "selectedExercise", "isOptional": false, "onUpdate": true, "type": "BODY" },
-      { "nodeName": "exerciseValue", "parameterName": "exerciseValue", "isOptional": false, "onUpdate": true, "type": "BODY" },
-      { "nodeName": "sets", "parameterName": "sets", "isOptional": false, "onUpdate": true, "type": "BODY" },
-      { "nodeName": "hasSetPause", "parameterName": "hasSetPause", "isOptional": false, "onUpdate": true, "type": "BODY" },
-      { "nodeName": "pauseBetweenSetsDuration", "parameterName": "pauseBetweenSetsDuration", "isOptional": false, "onUpdate": true, "type": "BODY" }
+      {
+        "nodeName": "selectedExercise",
+        "parameterName": "selectedExercise",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "exerciseMode",
+        "parameterName": "exerciseMode",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "exerciseValue",
+        "parameterName": "exerciseValue",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "repetitionIntervalSeconds",
+        "parameterName": "repetitionIntervalSeconds",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "sets",
+        "parameterName": "sets",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "hasSetPause",
+        "parameterName": "hasSetPause",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "pauseBetweenSetsDuration",
+        "parameterName": "pauseBetweenSetsDuration",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
     ],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateExerciseStep" }
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "validateExerciseStep"
+    }
   },
   {
     "name": "isStepValid",
     "path": "/isStepValid",
     "type": "SINGLE",
-    "dep": [{ "nodeName": "validationErrors", "parameterName": "validationErrors", "isOptional": false, "onUpdate": true, "type": "BODY" }],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "isStepValid" }
+    "dep": [
+      {
+        "nodeName": "validationErrors",
+        "parameterName": "validationErrors",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "isStepValid"
+    }
   },
   {
     "name": "warmupExercises",
@@ -122,16 +224,31 @@
       "path": "/warmupExercise",
       "type": "SINGLE",
       "dep": [],
-      "la": { "type": "USER_SELECTION" }
+      "la": {
+        "type": "USER_SELECTION"
+      }
     },
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "warmupValidationErrors",
     "path": "/warmupValidationErrors",
     "type": "SINGLE",
-    "dep": [{ "nodeName": "warmupExercises", "parameterName": "exercises", "isOptional": false, "onUpdate": true, "type": "BODY" }],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateWarmupExercises" }
+    "dep": [
+      {
+        "nodeName": "warmupExercises",
+        "parameterName": "exercises",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "validateWarmupExercises"
+    }
   },
   {
     "name": "stretchingExercises",
@@ -143,23 +260,40 @@
       "path": "/stretchingExercise",
       "type": "SINGLE",
       "dep": [],
-      "la": { "type": "USER_SELECTION" }
+      "la": {
+        "type": "USER_SELECTION"
+      }
     },
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "stretchingValidationErrors",
     "path": "/stretchingValidationErrors",
     "type": "SINGLE",
-    "dep": [{ "nodeName": "stretchingExercises", "parameterName": "exercises", "isOptional": false, "onUpdate": true, "type": "BODY" }],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateStretchingExercises" }
+    "dep": [
+      {
+        "nodeName": "stretchingExercises",
+        "parameterName": "exercises",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "validateStretchingExercises"
+    }
   },
   {
     "name": "scheduleInput",
     "path": "/scheduleInput",
     "type": "SINGLE",
     "dep": [],
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "pauseDuration",
@@ -167,34 +301,99 @@
     "type": "SINGLE",
     "dep": [],
     "defaultValue": 0,
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "pauseValidationErrors",
     "path": "/pauseValidationErrors",
     "type": "SINGLE",
-    "dep": [{ "nodeName": "pauseDuration", "parameterName": "duration", "isOptional": false, "onUpdate": true, "type": "BODY" }],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validatePause" }
+    "dep": [
+      {
+        "nodeName": "pauseDuration",
+        "parameterName": "duration",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "validatePause"
+    }
   },
   {
     "name": "scheduleValidationErrors",
     "path": "/scheduleValidationErrors",
     "type": "SINGLE",
-    "dep": [{ "nodeName": "scheduleInput", "parameterName": "input", "isOptional": false, "onUpdate": true, "type": "BODY" }],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "validateSchedule" }
+    "dep": [
+      {
+        "nodeName": "scheduleInput",
+        "parameterName": "input",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "validateSchedule"
+    }
+  },
+  {
+    "name": "workoutDurationSteps",
+    "path": "/workoutDurationSteps",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": [],
+    "la": {
+      "type": "USER_SELECTION"
+    }
+  },
+  {
+    "name": "workoutEstimatedDuration",
+    "path": "/workoutEstimatedDuration",
+    "type": "SINGLE",
+    "dep": [
+      {
+        "nodeName": "workoutDurationSteps",
+        "parameterName": "steps",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "estimateWorkoutDuration"
+    }
   },
   {
     "name": "sessionInput",
     "path": "/sessionInput",
     "type": "SINGLE",
     "dep": [],
-    "la": { "type": "USER_SELECTION" }
+    "la": {
+      "type": "USER_SELECTION"
+    }
   },
   {
     "name": "sessionProgress",
     "path": "/sessionProgress",
     "type": "SINGLE",
-    "dep": [{ "nodeName": "sessionInput", "parameterName": "input", "isOptional": false, "onUpdate": true, "type": "BODY" }],
-    "la": { "type": "CUSTOM_FUNCTION", "functionName": "getSessionProgress" }
+    "dep": [
+      {
+        "nodeName": "sessionInput",
+        "parameterName": "input",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "getSessionProgress"
+    }
   }
 ]

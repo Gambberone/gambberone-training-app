@@ -53,7 +53,7 @@
       >? Verranno rimosse anche le programmazioni nel calendario.
     </p>
   </GttModal>
-  <GttBottomAction label="Crea workout" @click="showWorkoutCreatorModal = true" />
+  <GttBottomAction desktop-target="#workouts-desktop-action" label="Crea workout" @click="showWorkoutCreatorModal = true" />
 </template>
 
 <script setup lang="ts">

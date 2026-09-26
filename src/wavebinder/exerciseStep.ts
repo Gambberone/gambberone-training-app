@@ -47,27 +47,7 @@ export const resetExerciseStep = () => {
 export const exerciseStepIsValid = () => Boolean(getExerciseStepNode('isStepValid').getNodeValue());
 
 export const exerciseStepValidationErrors = () =>
-  {
-    const errors: string[] = [];
-    const exercise = selectedExerciseNode().getNodeValue() as Exercise | null;
-    const value = Number(getExerciseStepNode('exerciseValue').getNodeValue());
-    const sets = Number(getExerciseStepNode('sets').getNodeValue());
-    const mode = getExerciseStepNode('exerciseMode').getNodeValue() as ExerciseModeType;
-    const repetitionInterval = Number(getExerciseStepNode('repetitionIntervalSeconds').getNodeValue());
-    const hasSetPause = Boolean(getExerciseStepNode('hasSetPause').getNodeValue());
-    const pauseDuration = Number(getExerciseStepNode('pauseBetweenSetsDuration').getNodeValue());
-
-    if (!exercise) errors.push('Seleziona un esercizio.');
-    if (!Number.isFinite(value) || value <= 0) errors.push('Inserisci un valore maggiore di zero.');
-    if (mode === 'repetitions' && (!Number.isInteger(repetitionInterval) || repetitionInterval < 1)) {
-      errors.push('L’intervallo tra le ripetizioni deve essere di almeno un secondo.');
-    }
-    if (!Number.isInteger(sets) || sets < 1) errors.push('I set devono essere almeno uno.');
-    if (hasSetPause && sets > 1 && (!Number.isFinite(pauseDuration) || pauseDuration <= 0)) {
-      errors.push('Inserisci la durata della pausa tra i set.');
-    }
-    return errors;
-  };
+  (getExerciseStepNode('validationErrors').getNodeValue() as string[] | null) ?? [];
 
 export const exerciseStepToDraftChanges = (): Partial<WorkoutCreatorStep> => {
   const exercise = selectedExerciseNode().getNodeValue() as Exercise | null;

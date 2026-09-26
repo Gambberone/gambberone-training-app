@@ -159,3 +159,74 @@ body,
   transform: translateX(-50%);
   background-color: var(--color-base-200);
 }
+
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4
+ * Navigation scope: existing theme, desktop rail, mobile dock. */
+@media (min-width: 1024px) {
+  .app-layout {
+    flex-direction: row;
+  }
+
+  .app-content {
+    order: 1;
+  }
+
+  .app-content > main {
+    padding: 1.5rem 2rem;
+  }
+
+  .app-dock {
+    order: 0;
+    display: flex;
+    width: 5rem;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 1.5rem 0.75rem;
+    border-right: 1px solid var(--color-base-200);
+    background: var(--color-base-100);
+  }
+
+  .app-dock::before,
+  .app-dock > a::before,
+  .app-dock > a::after {
+    display: none;
+  }
+
+  .app-dock > a {
+    display: flex;
+    flex: 0 0 auto;
+    width: 3.25rem;
+    height: 3.25rem;
+    min-height: 3.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-box);
+    color: color-mix(in srgb, var(--color-base-content) 65%, transparent);
+  }
+
+  .app-dock > a:hover {
+    background: var(--color-base-200);
+    color: var(--color-base-content);
+  }
+
+  .app-dock > a.dock-active {
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    color: var(--color-primary);
+  }
+
+  .app-dock > a:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+
+  .app-dock > a:active {
+    transform: scale(0.96);
+  }
+
+  .app-dock > .app-nav-account {
+    margin-top: auto;
+  }
+}
