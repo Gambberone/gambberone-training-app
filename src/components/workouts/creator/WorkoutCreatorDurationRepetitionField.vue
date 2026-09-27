@@ -1,63 +1,10 @@
 <template>
-  <GttFieldWrapper :id="props.id" :label="props.label" compact>
-    <div class="join w-full">
-      <button
-        class="btn join-item btn-primary shadow-none"
-        type="button"
-        :aria-label="tr('ui.decrease_duration')"
-        @click="decrease(true)"
-      >
-        -10
-      </button>
-      <button
-        class="btn join-item text-primary shadow-none"
-        type="button"
-        :aria-label="tr('ui.decrease_duration')"
-        @click="decrease(false)"
-      >
-        <Minus />
-      </button>
-      <input
-        :id="props.id"
-        v-model="modelValue"
-        type="number"
-        min="0"
-        class="input join-item flex-1 text-2xl text-center text-primary font-semibold focus:outline-none focus:ring-0 focus:border-base-300 border-base-300 shadow-2xs"
-      />
-      <button
-        class="btn join-item text-primary shadow-none"
-        type="button"
-        :aria-label="tr('ui.increase_duration')"
-        @click="increase(false)"
-      >
-        <Plus />
-      </button>
-      <button
-        class="btn join-item btn-primary shadow-none"
-        type="button"
-        :aria-label="tr('ui.decrease_duration')"
-        @click="increase(true)"
-      >
-        +10
-      </button>
-    </div>
-  </GttFieldWrapper>
+  <GttNumberStepper v-model="modelValue" :id="props.id" :label="props.label" :disabled="props.disabled" :large-step="10" />
 </template>
 
 <script setup lang="ts">
-import { tr } from '@/localization';
-import { Minus, Plus } from '@lucide/vue';
-import GttFieldWrapper from '@/components/generic/form/GttFieldWrapper.vue';
-import { type FieldProps } from '@/components/generic/form/form.types.ts';
-
+import GttNumberStepper from '@/components/generic/form/GttNumberStepper.vue';
+import type { FieldProps } from '@/components/generic/form/form.types';
 const props = defineProps<FieldProps>();
 const modelValue = defineModel<string>({ default: '0' });
-
-const increase = (increaseByTen: boolean) => {
-  modelValue.value = String(Number(modelValue.value || 0) + (increaseByTen ? 10 : 1));
-};
-
-const decrease = (decreaseByTen: boolean) => {
-  modelValue.value = String(Math.max(0, Number(modelValue.value || 0) - (decreaseByTen ? 10 : 1)));
-};
 </script>

@@ -6,8 +6,8 @@ import EXT_API_CONFIG from './extapi.json';
 import LICENSE from './license.json';
 import PROTO_NODES from './protonodes.json';
 import { exercisesRef } from '@/stores/exercises';
-import type { Exercise } from '@/domain/exercises';
-import { DEFAULT_REPETITION_INTERVAL_SECONDS, WORKOUT_CREATOR_STEP_ACTION, type ExerciseModeType, type StretchingExercise, type WarmupExercise, type WorkoutCreatorStep, type WorkoutSession } from '@/constants';
+import { validateExerciseStep } from '@/domain/workoutValidation';
+import { DEFAULT_REPETITION_INTERVAL_SECONDS, WORKOUT_CREATOR_STEP_ACTION, type StretchingExercise, type WarmupExercise, type WorkoutCreatorStep, type WorkoutSession } from '@/constants';
 import { scheduleValidationErrors } from './schedule';
 
 const licenseServerUrl = import.meta.env.VITE_WAVEBINDER_LICENSE_SERVER_URL?.replace(/\/$/, '');
@@ -42,29 +42,7 @@ export const wb = new WaveBinder(
     },
     {
       name: 'validateExerciseStep',
-      implementation: (
-        selectedExercise: Exercise | null,
-        exerciseMode: ExerciseModeType,
-        exerciseValue: number,
-        repetitionIntervalSeconds: number,
-        sets: number,
-        hasSetPause: boolean,
-        pauseBetweenSetsDuration: number,
-      ) => {
-        const errors: string[] = [];
-        if (!selectedExercise) errors.push('messages.enterExercise');
-        if (!Number.isFinite(Number(exerciseValue)) || Number(exerciseValue) <= 0) {
-          errors.push('messages.positiveValue');
-        }
-        if (exerciseMode === 'repetitions' && (!Number.isInteger(Number(repetitionIntervalSeconds)) || Number(repetitionIntervalSeconds) < 1)) {
-          errors.push('messages.intervalError');
-        }
-        if (!Number.isInteger(Number(sets)) || Number(sets) < 1) errors.push('messages.setsError');
-        if (hasSetPause && Number(sets) > 1 && (!Number.isFinite(Number(pauseBetweenSetsDuration)) || Number(pauseBetweenSetsDuration) <= 0)) {
-          errors.push('messages.pauseError');
-        }
-        return errors;
-      },
+      implementation: validateExerciseStep,
     },
     {
       name: 'isStepValid',

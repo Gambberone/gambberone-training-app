@@ -8,10 +8,10 @@
   >
     <div
       class="modal-box flex max-h-[calc(100dvh-2rem)] flex-col"
-      :class="{
+      :class="[props.contentClass, {
         'w-[95dvw] h-[95dvh]': props.full,
         'w-screen! h-screen! max-w-none! max-h-none! rounded-none': isFullScreen,
-      }"
+      }]"
     >
       <div class="modal-top relative z-10 flex items-center bg-base-100/85 backdrop-blur-sm">
         <div class="flex flex-1 items-center">
@@ -89,6 +89,7 @@ interface ModalAction {
 }
 
 interface ModalProps {
+  contentClass?: string;
   full?: boolean;
   closeOnAction?: boolean;
   title?: string;

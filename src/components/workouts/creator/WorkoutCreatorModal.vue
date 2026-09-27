@@ -3,15 +3,16 @@
     v-model="isOpen"
     full
     :title="modalTitle"
-    :actions="stepActions"
+    :actions="[]"
+    :content-class="isDesktop ? 'max-w-6xl!' : 'w-screen! h-dvh! max-w-none! max-h-none! rounded-none! p-4!'"
     :close-on-action="false"
     :before-close="requestClose"
-    :go-back="Boolean(currentWorkoutCreatorStep)"
+    :go-back="!isDesktop && Boolean(currentWorkoutCreatorStep)"
     @action="handleAction"
     @go-back="requestGoBack"
-    enable-full-screen
+    :enable-full-screen="isDesktop"
   >
-    <WorkoutCreator />
+    <WorkoutCreatorDesktop :exercise-errors="exerciseValidationErrors ?? []" @save="handleAction('save-workout')" @cancel-step="requestGoBack" />
   </GttModal>
   <GttModal
     v-model="isDiscardStepConfirmationOpen"
@@ -42,50 +43,45 @@ import { tr } from '@/localization';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GttModal from '@/components/generic/GttModal.vue';
-import WorkoutCreator from '@/components/workouts/WorkoutCreator.vue';
+import WorkoutCreatorDesktop from './WorkoutCreatorDesktop.vue';
 import {
-  createWorkoutCreatorStep,
   createWorkout,
   currentWorkoutCreatorStep,
-  editingWorkoutCreatorStepIndex,
-  isCurrentWorkoutCreatorStepValid,
-  isCreatingWorkoutCreatorStep,
   loadWorkoutCreator,
   resetWorkoutCreator,
-  removeWorkoutCreatorStep,
   returnToWorkoutCreatorOverview,
   type Workout,
   updateWorkout,
   workoutCreatorDraft,
 } from '@/stores/workoutCreator';
 import { getExerciseStepNode, selectedExerciseNode } from '@/wavebinder/exerciseStep';
-import { useWaveBinderNode } from '@/composables/useWaveBinderNode';
+import { useExerciseStepValidation } from '@/composables/useExerciseStepValidation';
 import { showToast } from '@/composables/toast';
+
+const desktopMedia = window.matchMedia('(min-width: 1024px)');
+const isDesktop = ref(desktopMedia.matches);
+const updateDesktop = () => { isDesktop.value = desktopMedia.matches; };
+desktopMedia.addEventListener('change', updateDesktop);
+onBeforeUnmount(() => desktopMedia.removeEventListener('change', updateDesktop));
 
 const isOpen = defineModel<boolean>({ default: false });
 const props = defineProps<{
   workout?: Workout;
 }>();
-const exerciseValidationErrors = useWaveBinderNode<string[]>(
-  getExerciseStepNode('validationErrors'),
-);
+const exerciseValidationErrors = useExerciseStepValidation();
 const router = useRouter();
 const resetDelayMs = 250;
 let resetTimeout: ReturnType<typeof setTimeout> | undefined;
 const isDiscardConfirmationOpen = ref(false);
 const isDiscardStepConfirmationOpen = ref(false);
-let initialCreatorState: string | undefined;
+let initialDraftState: string | undefined;
 let initialStepState: string | undefined;
 
-const creatorState = () =>
-  JSON.stringify({
-    draft: workoutCreatorDraft.value,
-    currentStep: currentWorkoutCreatorStep.value,
-    isCreatingStep: isCreatingWorkoutCreatorStep.value,
-  });
-
 const hasUnsavedChanges = () =>
-  initialCreatorState !== undefined && creatorState() !== initialCreatorState;
+  initialDraftState !== undefined && (
+    JSON.stringify(workoutCreatorDraft.value) !== initialDraftState ||
+    Boolean(currentWorkoutCreatorStep.value && currentStepState() !== initialStepState)
+  );
 
 const currentStepState = () => {
   const step = currentWorkoutCreatorStep.value;
@@ -129,7 +125,7 @@ watch(isOpen, (open, wasOpen) => {
     } else {
       resetWorkoutCreator();
     }
-    initialCreatorState = creatorState();
+    initialDraftState = JSON.stringify(workoutCreatorDraft.value);
   }
 
   if (wasOpen && !open) {
@@ -170,41 +166,10 @@ onBeforeUnmount(() => {
 
 const modalTitle = computed(
   () =>
-    (currentWorkoutCreatorStep.value ? tr(`stepTypes.${currentWorkoutCreatorStep.value.type}`) : undefined) ??
+    (!isDesktop.value && currentWorkoutCreatorStep.value ? tr(`stepTypes.${currentWorkoutCreatorStep.value.type}`) : undefined) ??
     (props.workout ? tr('ui.edit_workout') : tr('ui.workout_editor')),
 );
-const stepActions = computed(() => {
-  if (currentWorkoutCreatorStep.value) {
-    const isExerciseStep = currentWorkoutCreatorStep.value.type === 'EXERCISE';
-    return [
-      ...(editingWorkoutCreatorStepIndex.value === undefined
-        ? []
-        : [{ id: 'delete-step', label: tr('ui.delete_step'), color: 'error' as const }]),
-      {
-        id: 'create-step',
-        label: editingWorkoutCreatorStepIndex.value === undefined ? tr('ui.create_step') : tr('ui.save_step'),
-        color: 'primary',
-        disabled: isExerciseStep
-          ? (exerciseValidationErrors.value?.length ?? 0) > 0
-          : !isCurrentWorkoutCreatorStepValid(),
-      },
-    ];
-  }
-
-  return workoutCreatorDraft.value.steps.length > 0 && workoutCreatorDraft.value.name.trim()
-    ? [
-        {
-          id: 'save-workout',
-          label: props.workout ? tr('ui.save_workout') : tr('ui.create_workout'),
-          color: 'primary',
-        },
-      ]
-    : [];
-});
-
 const handleAction = (actionId: string) => {
-  if (actionId === 'create-step') createWorkoutCreatorStep();
-  if (actionId === 'delete-step') removeWorkoutCreatorStep();
   if (actionId === 'save-workout') {
     if (props.workout) {
       updateWorkout(props.workout.id);
