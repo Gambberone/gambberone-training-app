@@ -45,6 +45,7 @@ export interface WorkoutCreatorStep {
 }
 
 export type WorkoutSession = {
+  scheduledWorkoutId?: string;
   id: string;
   workoutId: string;
   startedAt: string;

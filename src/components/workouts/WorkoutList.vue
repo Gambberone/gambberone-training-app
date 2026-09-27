@@ -19,25 +19,15 @@
         <h3 class="text-sm font-semibold">{{ tr('workoutCards.timeline') }}</h3>
         <div class="flex gap-1" :aria-label="tr('workoutCards.timeline')">
           <GttTooltip v-for="step in timelineBars(workout)" :key="step.index"
-            
             class="min-w-0 py-2 focus-visible:outline-2 focus-visible:outline-primary"
             :style="{ flex: `${step.weight} 1 0%` }"
             :text="stepDetails(workout, step)"
+            :text-color="step.textColor"
             :aria-label="stepDetails(workout, step)">
             <span class="block h-2 rounded-sm" :class="step.barClass" />
           </GttTooltip>
         </div>
-        <ol class="workout-step-tags flex gap-1.5 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
-          <li v-for="step in timelineSteps(workout)" :key="step.index" class="min-w-0 shrink-0 lg:shrink">
-            <GttTooltip 
-              class="inline-flex min-w-0 items-center gap-1 rounded-field px-2 py-1 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary"
-              :class="step.badgeClass"
-              :text="stepDetails(workout, step)" :aria-label="stepDetails(workout, step)">
-              <component :is="step.icon" class="size-3.5 shrink-0" aria-hidden="true" />
-              <span class="whitespace-nowrap text-left lg:whitespace-normal lg:break-words">{{ step.label }} <span class="opacity-70">({{ step.index + 1 }}/{{ visibleStepCount(workout) }})</span></span>
-            </GttTooltip>
-          </li>
-        </ol>
+
       </div>
       <dl v-if="targetGroups(workout).length" class="block">
         <dt class="text-sm font-semibold">{{ tr('workoutCards.targets') }}</dt>
@@ -95,7 +85,7 @@
 
 <script setup lang="ts">
 import { tr, appLocale, localizedExerciseName } from '@/localization';
-import { Dumbbell, Play, Trash2, Pencil, Flame, Pause, LineSquiggle } from '@lucide/vue';
+import { Dumbbell, Play, Trash2, Pencil } from '@lucide/vue';
 import { ref } from 'vue';
 import { estimateWorkoutDuration } from '@/wavebinder/duration';
 import { WORKOUT_CREATOR_STEP_ACTION } from '@/constants';
@@ -122,10 +112,10 @@ const visibleStepCount = (workout: Workout) =>
   workout.steps.filter((step) => step.type !== WORKOUT_CREATOR_STEP_ACTION.SETPAUSE).length;
 
 const phaseStyles = {
-  WARMUP: { icon: Flame, barClass: 'bg-error/70', badgeClass: 'bg-error/15 text-error' },
-  EXERCISE: { icon: Dumbbell, barClass: 'bg-primary/70', badgeClass: 'bg-primary/15 text-primary' },
-  PAUSE: { icon: Pause, barClass: 'bg-info/60', badgeClass: 'bg-info/15 text-info' },
-  STRETCHING: { icon: LineSquiggle, barClass: 'bg-warning/70', badgeClass: 'bg-warning/15 text-warning' },
+  WARMUP: { barClass: 'bg-error/70', textColor: 'var(--color-error)' },
+  EXERCISE: { barClass: 'bg-primary/70', textColor: 'var(--color-primary)' },
+  PAUSE: { barClass: 'bg-info/60', textColor: 'var(--color-info)' },
+  STRETCHING: { barClass: 'bg-warning/70', textColor: 'var(--color-warning)' },
 };
 const timelineSteps = (workout: Workout) => workout.steps
   .filter((step) => step.type !== 'SETPAUSE')
@@ -135,7 +125,12 @@ const timelineSteps = (workout: Workout) => workout.steps
     const label = exercise ? localizedExerciseName(exercise) : tr(`stepTypes.${type}`);
     const seconds = estimateWorkoutDuration([step]);
     const duration = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
-    return { index, label, duration, ...phaseStyles[type] };
+    const detail = type === 'EXERCISE'
+      ? tr('workoutCards.setCount', { count: step.sets ?? 1 })
+      : type === 'WARMUP' || type === 'STRETCHING'
+        ? tr('workoutCards.exerciseCount', { count: (type === 'WARMUP' ? step.warmupExercises : step.stretchingExercises)?.length ?? 0 })
+        : '';
+    return { index, label, detail, duration, ...phaseStyles[type] };
   });
 const timelineBars = (workout: Workout) => {
   const steps = timelineSteps(workout);
@@ -145,12 +140,12 @@ const timelineBars = (workout: Workout) => {
 };
 const stepDetails = (workout: Workout, step: ReturnType<typeof timelineSteps>[number]) => {
   const total = timelineSteps(workout).reduce((sum, item) => sum + item.duration, 0);
-  if (!total) return `${step.label} · ${tr('ui.untimed')}`;
+  const name = [step.label, step.detail].filter(Boolean).join(' · ');
+  if (!total) return `${name} · ${tr('ui.untimed')}`;
   const minutes = Math.floor(step.duration / 60);
   const seconds = Math.round(step.duration % 60);
   const duration = minutes ? `${minutes} min${seconds ? ` ${seconds} s` : ''}` : `${seconds} s`;
-  const percent = new Intl.NumberFormat(appLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(step.duration / total);
-  return tr('workoutCards.stepDetails', { name: step.label, duration, percent });
+  return tr('workoutCards.stepDetails', { name, duration });
 };
 const targetGroups = (workout: Workout) => {
   const exerciseIds = workout.steps.filter((step) => step.type === 'EXERCISE').map((step) => step.exerciseId);
@@ -210,13 +205,3 @@ const handleWorkoutElimination = (actionId: string) => {
   workoutToRemove.value = undefined;
 };
 </script>
-
-
-<style scoped>
-@media (max-width: 1023px) {
-  .workout-step-tags {
-    padding-right: 1.5rem;
-    mask-image: linear-gradient(to right, black calc(100% - 1rem), transparent);
-  }
-}
-</style>

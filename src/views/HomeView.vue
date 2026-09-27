@@ -31,7 +31,7 @@
               class="badge badge-primary badge-outline absolute top-4 right-0 h-auto gap-1.5 px-3 py-2 text-base font-semibold"
             >
               <Clock3 :size="18" />
-              {{ scheduledWorkout.time }}
+              {{ scheduledWorkout.time }}<span v-if="isAgendaWorkoutExpired(scheduledWorkout, currentTime)" class="text-warning"> · {{ t('home.expired') }}</span>
             </span>
             <div class="flex flex-col gap-4">
               <div class="flex items-start gap-4">
@@ -55,7 +55,7 @@
                 <button
                   class="btn btn-primary btn-sm"
                   type="button"
-                  @click="startWorkout(scheduledWorkout.workoutId)"
+                  @click="startWorkout(scheduledWorkout.workoutId, scheduledWorkout.id)"
                 >
                   <Play :size="17" />
                   {{ t('home.start') }}
@@ -124,10 +124,12 @@
         id="home-agenda-days"
         class="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))] lg:items-stretch lg:gap-2"
       >
-        <RouterLink
+        <button
           v-for="day in weekDays"
           :key="day.key"
-          to="/calendar"
+          type="button"
+          aria-haspopup="dialog"
+          @click="openAgendaDay(day.key)"
           :aria-label="
             t('home.dayLabel', {
               day: day.label,
@@ -136,7 +138,7 @@
               completed: day.completed.length,
             })
           "
-          class="flex min-w-0 flex-col rounded-box border"
+          class="flex h-72 min-w-0 flex-col rounded-box border text-left"
           :class="[
             day.key === todayKey
               ? 'gap-3 border-primary bg-primary/10 p-4 text-primary '
@@ -145,42 +147,64 @@
         >
           <span class="text-xs capitalize text-base-content/60">{{ day.label }}</span>
           <span class="font-bold" :class="day.key === todayKey ? 'text-2xl' : 'text-lg'">{{ day.number }}</span>
-          <div v-if="day.completed.length" class="space-y-3">
-            <div v-for="session in day.completed" :key="session.id" class="text-sm">
-              <p class="break-words font-semibold text-base-content">
-                {{ workoutName(session.workoutId) }}
-              </p>
-              <p class="mt-1 text-xs text-primary">
-                {{ t('home.completed') }} · {{ sessionMinutes(session) }} min
-              </p>
-            </div>
-          </div>
+          <p v-if="day.completed.length" class="line-clamp-2 text-xs font-medium text-primary">
+            ✓ {{ t('home.completedSummary', { count: day.completed.length, minutes: day.completed.reduce((total, session) => total + sessionMinutes(session), 0) }, day.completed.length) }}
+          </p>
           <div v-if="day.scheduled.length" class="space-y-3">
-            <div v-for="workout in day.scheduled" :key="workout.id" class="text-sm">
-              <p class="break-words font-semibold text-base-content">
+            <div v-for="workout in day.scheduled.slice(0, 2)" :key="workout.id" class="text-sm">
+              <p class="truncate font-semibold text-base-content">
                 {{ workoutName(workout.workoutId) }}
               </p>
-              <p class="mt-1 text-xs text-base-content/60">
-                {{ t('home.scheduled') }}<span v-if="workout.time"> · {{ workout.time }}</span>
+              <p class="mt-1 text-xs" :class="isAgendaWorkoutExpired(workout, currentTime) ? 'text-warning' : 'text-base-content/60'">
+                {{ t(isAgendaWorkoutExpired(workout, currentTime) ? 'home.expired' : 'home.scheduled') }}<span v-if="workout.time"> · {{ workout.time }}</span>
               </p>
             </div>
           </div>
+          <span v-if="day.scheduled.length > 2" class="text-xs font-semibold text-primary">
+            {{ t('messages.calendarMore', { count: day.scheduled.length - 2 }) }}
+          </span>
           <span
             v-if="!day.completed.length && !day.scheduled.length"
             class="text-sm text-base-content/45"
             >{{ t(day.key > todayKey ? 'home.emptyFuture' : 'home.empty') }}</span
           >
-        </RouterLink>
+        </button>
       </div>
 
     </section>
     </div>
+    <GttModal v-model="isAgendaDayOpen" :title="agendaDayLabel">
+      <div v-if="selectedAgendaDay" class="space-y-5">
+        <section v-if="selectedAgendaDay.scheduled.length" class="space-y-2">
+          <h3 class="font-semibold">{{ t('home.scheduledHeading') }}</h3>
+          <div v-for="workout in selectedAgendaDay.scheduled" :key="workout.id" class="flex items-center gap-3 rounded-box bg-base-200 p-3">
+            <Dumbbell :size="18" class="shrink-0 text-primary" />
+            <span class="min-w-0 flex-1 break-words font-medium">{{ workoutName(workout.workoutId) }}</span>
+            <span class="shrink-0 text-sm" :class="isAgendaWorkoutExpired(workout, currentTime) ? 'text-warning' : 'text-base-content/60'">
+              {{ t(isAgendaWorkoutExpired(workout, currentTime) ? 'home.expired' : 'home.scheduled') }}<span v-if="workout.time"> · {{ workout.time }}</span>
+            </span>
+          </div>
+        </section>
+        <section v-if="selectedAgendaDay.completed.length" class="space-y-2">
+          <h3 class="font-semibold">{{ t('home.completedHeading') }}</h3>
+          <div v-for="session in selectedAgendaDay.completed" :key="session.id" class="rounded-box bg-base-200 p-3">
+            <p class="break-words font-medium">{{ workoutName(session.workoutId) }}</p>
+            <p class="mt-1 text-sm text-primary">{{ t('home.completed') }} · {{ sessionMinutes(session) }} min</p>
+          </div>
+        </section>
+        <p v-if="!selectedAgendaDay.scheduled.length && !selectedAgendaDay.completed.length" class="text-sm text-base-content/60">
+          {{ t(selectedAgendaDay.key > todayKey ? 'home.emptyFuture' : 'home.empty') }}
+        </p>
+      </div>
+    </GttModal>
   </section>
 </template>
 
 <script setup lang="ts">
 import { ArrowRight, CalendarPlus, Clock3, Dumbbell, FaceGrinning, Play } from '@lucide/vue';
-import { computed, defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent, ref, onMounted, onUnmounted } from 'vue';
+import { pendingAgendaWorkouts, isAgendaWorkoutExpired } from '@/domain/agenda';
+import GttModal from '@/components/generic/GttModal.vue';
 const WorkoutTrend = defineAsyncComponent(() => import('@/components/home/WorkoutTrend.vue'));
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
@@ -197,7 +221,12 @@ import {
 const { currentUser } = useAuth();
 
 const pad = (value: number) => String(value).padStart(2, '0');
+const currentTime = ref(Date.now());
+let agendaClock: ReturnType<typeof setInterval>;
+onMounted(() => { agendaClock = setInterval(() => { currentTime.value = Date.now(); }, 15000); });
+onUnmounted(() => clearInterval(agendaClock));
 const now = new Date();
+const pendingWorkouts = computed(() => pendingAgendaWorkouts(scheduledWorkoutsRef.value, workoutSessionsRef.value));
 const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
 const todayLabel = computed(() =>
@@ -224,7 +253,7 @@ const userName = computed(() => {
 });
 
 const todayWorkouts = computed(() =>
-  scheduledWorkoutsRef.value.filter((scheduledWorkout) => scheduledWorkout.date === todayKey),
+  pendingWorkouts.value.filter((scheduledWorkout) => scheduledWorkout.date === todayKey),
 );
 
 function workoutName(workoutId: string) {
@@ -257,10 +286,25 @@ const weekDays = computed(() =>
       completed: workoutSessionsRef.value.filter(
         (session) => session.completedAt && localKey(new Date(session.completedAt)) === key,
       ),
-      scheduled: scheduledWorkoutsRef.value.filter((item) => item.date === key),
+      scheduled: pendingWorkouts.value.filter((item) => item.date === key).sort((a, b) => {
+        if (!a.time) return b.time ? 1 : 0;
+        if (!b.time) return -1;
+        return a.time.localeCompare(b.time);
+      }),
     };
   }),
 );
+const isAgendaDayOpen = ref(false);
+const selectedAgendaDate = ref<string>();
+const selectedAgendaDay = computed(() => weekDays.value.find((day) => day.key === selectedAgendaDate.value));
+const agendaDayLabel = computed(() => selectedAgendaDate.value
+  ? new Intl.DateTimeFormat(locale.value, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${selectedAgendaDate.value}T12:00:00`))
+  : '');
+function openAgendaDay(date: string) {
+  selectedAgendaDate.value = date;
+  isAgendaDayOpen.value = true;
+}
+
 const weekSessions = computed(() =>
   workoutSessionsRef.value.filter(
     (session) =>
@@ -285,7 +329,7 @@ function workoutLabel(index: number) {
   return index === 0 ? t('home.focus') : t('home.number', { number: index + 1 });
 }
 
-function startWorkout(workoutId: string) {
-  startWorkoutSession(workoutId);
+function startWorkout(workoutId: string, scheduledWorkoutId?: string) {
+  startWorkoutSession(workoutId, scheduledWorkoutId);
 }
 </script>

@@ -6,14 +6,14 @@
   </button>
   <Teleport to="body">
     <div ref="popover" :id="tooltipId" popover="manual" role="tooltip"
-      class="gtt-floating-tooltip" :style="{ left: `${left}px`, top: `${top}px` }">{{ text }}</div>
+      class="gtt-floating-tooltip" :style="{ left: `${left}px`, top: `${top}px`, color: textColor }">{{ text }}</div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
 import { nextTick, onMounted, onBeforeUnmount, ref, useId } from 'vue';
 defineOptions({ inheritAttrs: false });
-defineProps<{ text: string }>();
+defineProps<{ text: string; textColor?: string }>();
 const tooltipId = useId();
 const popover = ref<HTMLDivElement>();
 const visible = ref(false);

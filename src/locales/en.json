@@ -1,5 +1,9 @@
 {
   "home": {
+    "expired": "Expired",
+    "completedSummary": "{count} workout · {minutes} min | {count} workouts · {minutes} min",
+    "scheduledHeading": "Scheduled",
+    "completedHeading": "Completed",
     "intro": "Here's what's planned for today.",
     "rest": "Recovery day",
     "restDescription": "No workouts scheduled: enjoy your rest, or plan your next challenge.",
@@ -423,6 +427,8 @@
     "targets": "Target areas",
     "neverCompleted": "Not completed yet",
     "lastCompleted": "Last completed: {date}",
-    "stepDetails": "{name} · {duration} · {percent} of workout"
+    "setCount": "{count} set | {count} sets",
+    "exerciseCount": "{count} exercise | {count} exercises",
+    "stepDetails": "{name} · {duration}"
   }
 }

@@ -1,5 +1,9 @@
 {
   "home": {
+    "expired": "Scaduto",
+    "completedSummary": "{count} allenamento · {minutes} min | {count} allenamenti · {minutes} min",
+    "scheduledHeading": "Programmati",
+    "completedHeading": "Completati",
     "intro": "Ecco cosa ti aspetta oggi.",
     "rest": "Oggi si recupera",
     "restDescription": "Nessun workout in programma: goditi il riposo, oppure pianifica la tua prossima sfida.",
@@ -423,6 +427,8 @@
     "targets": "Gruppi coinvolti",
     "neverCompleted": "Non ancora completato",
     "lastCompleted": "Ultimo completamento: {date}",
-    "stepDetails": "{name} · {duration} · {percent} del workout"
+    "setCount": "{count} set",
+    "exerciseCount": "{count} esercizio | {count} esercizi",
+    "stepDetails": "{name} · {duration}"
   }
 }

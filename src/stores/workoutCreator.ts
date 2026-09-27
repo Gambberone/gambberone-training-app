@@ -331,13 +331,14 @@ export const workoutVisibleSteps = (workout: Workout) =>
 export const workoutEstimatedDuration = (workout: Workout) =>
   estimateWorkoutDuration(workout.steps);
 
-export const startWorkoutSession = (workoutId: string) => {
+export const startWorkoutSession = (workoutId: string, scheduledWorkoutId?: string) => {
   const workout = workoutsRef.value.find((item) => item.id === workoutId);
   if (!workout) return;
   clearWorkoutPlaybackCheckpoint();
   activeWorkoutSessionRef.value = {
     id: crypto.randomUUID(),
     workoutId,
+    ...(scheduledWorkoutId ? { scheduledWorkoutId } : {}),
     startedAt: new Date().toISOString(),
     isPaused: false,
     currentStepIndex: 0,
