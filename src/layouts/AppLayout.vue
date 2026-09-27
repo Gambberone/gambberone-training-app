@@ -52,12 +52,12 @@
     </div>
     <main
       class="min-h-0 flex-1 p-4"
-      :class="route.name === 'workouts' ? 'overflow-hidden' : 'overflow-y-auto'"
+      :class="['workouts', 'calendar'].includes(String(route.name)) ? 'overflow-hidden' : 'overflow-y-auto'"
     >
       <!-- <div class="w-full flex">
                 <span class="text-2xl font-semibold text-primary">{{ route.meta.title }}</span>
             </div> -->
-      <div class="pt-3" :class="route.name === 'workouts' ? 'h-full min-h-0' : 'min-h-full'">
+      <div class="pt-3" :class="['workouts', 'calendar'].includes(String(route.name)) ? 'h-full min-h-0' : 'min-h-full'">
         <router-view />
       </div>
     </main>

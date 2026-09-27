@@ -1,6 +1,10 @@
 import { tr } from '@/localization';
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
   sendEmailVerification,
   onAuthStateChanged,
   sendPasswordResetEmail,
@@ -12,6 +16,7 @@ import {
 import { computed, readonly, ref, triggerRef } from 'vue';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase';
+import { deleteAccountData, resetDeletedAccountData } from '@/services/firestoreSync';
 
 const allowedPhotoTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const maxPhotoSize = 5 * 1024 * 1024;
@@ -106,6 +111,20 @@ export function useAuth() {
       if (!user) throw new Error('No authenticated user');
       await setDoc(profilePhotoDocument(user.uid), { photoDataUrl: null }, { merge: true });
       profilePhoto.value = null;
+    },
+    changePassword: async (currentPassword: string, newPassword: string) => {
+      const user = auth.currentUser;
+      if (!user?.email) throw new Error('No authenticated user');
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword));
+      await updatePassword(user, newPassword);
+    },
+    deleteAccount: async (password: string) => {
+      const user = auth.currentUser;
+      if (!user?.email) throw new Error('No authenticated user');
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+      await deleteAccountData(user.uid);
+      await deleteUser(user);
+      resetDeletedAccountData();
     },
     signOut: () => signOut(auth),
   };

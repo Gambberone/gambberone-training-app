@@ -36,7 +36,7 @@ watch(
     v-show="isWorkoutPlayerOpenRef"
     class="fixed inset-0 z-50 overflow-y-auto bg-base-100/95 p-4 backdrop-blur-sm"
   >
-    <div class="mx-auto min-h-full max-w-2xl py-3">
+    <div class="mx-auto min-h-full max-w-2xl py-3 lg:max-w-7xl lg:py-0">
       <WorkoutPlayer :key="activeWorkoutSessionRef.id" :workout="activeWorkout" @minimize="minimizeWorkoutPlayer" />
     </div>
   </div>

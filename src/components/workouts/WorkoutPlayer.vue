@@ -1,7 +1,7 @@
 <template>
   <article ref="playerElement" class="workout-player card bg-base-100 shadow-sm">
-    <div class="card-body gap-5 p-5">
-      <div class="flex items-center justify-between gap-3">
+    <div class="player-body card-body gap-5 p-5">
+      <div class="player-header flex items-center justify-between gap-3">
         <div>
           <p class="text-sm font-semibold text-primary">
             {{ tr('messages.inProgress') }} · <span class="font-mono tabular-nums">{{ totalElapsedLabel }}</span>
@@ -34,7 +34,7 @@
         </div>
       </div>
 
-      <div class="h-2 overflow-hidden rounded-full bg-base-200">
+      <div class="player-progress h-2 overflow-hidden rounded-full bg-base-200">
         <div
           class="h-full bg-primary transition-all duration-200"
           :style="{ width: `${workoutProgress}%` }"
@@ -42,7 +42,7 @@
       </div>
 
       <div
-        class="flex min-h-80 flex-col justify-center rounded-box bg-base-200 p-3 text-center sm:p-8"
+        class="player-stage flex min-h-80 flex-col justify-center rounded-box bg-base-200 p-3 text-center sm:p-8"
       >
         <template v-if="isStarting">
           <p class="text-base font-semibold uppercase tracking-wider text-primary">{{ tr('ui.get_ready') }}</p>
@@ -53,18 +53,18 @@
         </template>
         <template v-else>
           <p
-            class="flex min-h-20 items-center justify-center text-3xl font-bold leading-tight sm:min-h-24 sm:text-4xl"
+            class="player-step-name flex items-center justify-center text-3xl font-bold leading-tight sm:text-4xl"
             :class="currentSegment.colorClass"
           >
             <span class="min-w-0 break-words">{{ currentSegment.name }}</span>
           </p>
           <div
-            class="relative mt-3 grid aspect-square w-[calc(100%-1rem)] max-w-84 shrink-0 self-center place-items-center sm:max-w-md lg:max-w-120"
+            class="player-ring relative mt-3 grid aspect-square w-full max-w-84 shrink-0 self-center place-items-center sm:max-w-md"
             :class="currentSegment.colorClass"
           >
             <span
               v-if="currentSegment.setLabel"
-              class="absolute top-6 text-base font-bold sm:text-lg"
+              class="absolute inset-x-[15%] top-[19%] text-center text-base font-bold leading-tight sm:text-lg"
             >
               {{ currentSegment.setLabel }}
             </span>
@@ -83,7 +83,7 @@
                 stroke-width="4.5"
               />
               <circle
-                class="transition-[stroke-dashoffset] duration-100"
+                ref="progressCircle"
                 cx="50"
                 cy="50"
                 r="46"
@@ -93,7 +93,7 @@
                 stroke-linecap="round"
                 pathLength="100"
                 stroke-dasharray="100"
-                :stroke-dashoffset="100 - segmentProgress"
+                stroke-dashoffset="100"
                 transform="rotate(-90 50 50)"
               />
             </svg>
@@ -111,81 +111,84 @@
                 >{{ counterLabel.split(':')[1] }}
               </template>
             </p>
-          </div>
-          <p
-            class="mt-2 flex h-10 items-center justify-center text-base text-base-content/60 sm:h-12 sm:text-lg"
-          >
-            <span v-if="isRepetitions"
-              >{{ tr('messages.repetitionInterval', { seconds: repetitionIntervalSeconds }) }}</span
+            <p
+              v-if="isRepetitions"
+              class="player-cadence absolute inset-x-[15%] bottom-[19%] text-sm leading-tight text-base-content/60 sm:text-base"
             >
-          </p>
+              {{ tr('messages.repetitionInterval', { seconds: repetitionIntervalSeconds }) }}
+            </p>
+          </div>
         </template>
       </div>
 
-      <div class="rounded-box border border-base-300 bg-base-100 px-4 py-3">
-        <div class="grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-3 text-center">
-          <button
-            class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
-            type="button"
-            :disabled="isStarting || !previousSegment"
-            :aria-label="previousSegment ? tr('messages.previousNamed', { name: previousSegment.name }) : tr('ui.no_previous_step')"
-            :title="tr('ui.go_to_the_previous_step')"
-            @click="skipToPreviousSegment"
+      <div class="player-sidebar flex flex-col gap-4">
+        <div class="player-next rounded-box border border-base-300 bg-base-100 px-4 py-3">
+          <p
+            class="player-next-label text-center text-xs font-semibold uppercase tracking-wider"
+            :class="upcomingSegment ? 'text-base-content/55' : 'text-success'"
           >
-            <SkipBack :size="24" aria-hidden="true" />
+            {{ upcomingSegment ? tr('ui.next_step') : tr('ui.last_step') }}
+          </p>
+          <div class="grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-3 text-center">
+            <button
+              class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
+              type="button"
+              :disabled="isStarting || !previousSegment"
+              :aria-label="previousSegment ? tr('messages.previousNamed', { name: previousSegment.name }) : tr('ui.no_previous_step')"
+              :title="tr('ui.go_to_the_previous_step')"
+              @click="skipToPreviousSegment"
+            >
+              <SkipBack :size="24" aria-hidden="true" />
+            </button>
+            <div v-if="upcomingSegment" class="min-w-0 flex-1">
+              <p class="text-lg font-bold leading-tight sm:text-xl" :class="upcomingSegment.colorClass">
+                {{ upcomingSegment.name
+                }}<span v-if="upcomingSegment.setLabel"> · {{ upcomingSegment.setLabel }}</span>
+              </p>
+            </div>
+            <div v-else class="min-w-0 flex-1 text-success">
+              <p class="font-bold">{{ tr('ui.the_workout_will_be_completed_after_this_step') }}</p>
+            </div>
+            <button
+              :disabled="isStarting || !upcomingSegment"
+              class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
+              type="button"
+              :aria-label="upcomingSegment ? tr('messages.startNamed', { name: upcomingSegment.name }) : tr('ui.no_next_step')"
+              :title="tr('ui.start_the_next_step')"
+              @click="skipToNextSegment"
+            >
+              <SkipForward :size="24" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+        <div class="player-actions grid grid-cols-3 gap-2">
+          <button
+            class="btn btn-primary btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+            type="button"
+            :aria-label="tr('ui.restart_the_current_segment')"
+            @click="resetCurrentSegment"
+          >
+            <RotateCcw class="size-4 sm:size-5" aria-hidden="true" />
+            {{ tr('ui.reset') }}
           </button>
-          <div v-if="upcomingSegment" class="min-w-0 flex-1">
-            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/55">
-              {{ tr('ui.next_step') }}
-            </p>
-            <p class="mt-1 font-bold" :class="upcomingSegment.colorClass">
-              {{ upcomingSegment.typeLabel }} · {{ upcomingSegment.name
-              }}<span v-if="upcomingSegment.setLabel"> · {{ upcomingSegment.setLabel }}</span>
-            </p>
-          </div>
-          <div v-else class="min-w-0 flex-1 text-success">
-            <p class="text-xs font-semibold uppercase tracking-wider">{{ tr('ui.last_step') }}</p>
-            <p class="mt-1 font-bold">{{ tr('ui.the_workout_will_be_completed_after_this_step') }}</p>
-          </div>
           <button
-            :disabled="isStarting || !upcomingSegment"
-            class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
+            class="btn btn-info btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
-            :aria-label="upcomingSegment ? tr('messages.startNamed', { name: upcomingSegment.name }) : tr('ui.no_next_step')"
-            :title="tr('ui.start_the_next_step')"
-            @click="skipToNextSegment"
+            @click="togglePause"
           >
-            <SkipForward :size="24" aria-hidden="true" />
+            <Play v-if="isPaused" class="size-4 sm:size-5" aria-hidden="true" />
+            <Pause v-else class="size-4 sm:size-5" aria-hidden="true" />
+            {{ isPaused ? tr('ui.resume') : tr('ui.pause') }}
+          </button>
+          <button
+            class="btn btn-error btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+            type="button"
+            @click="abandonWorkoutSession"
+          >
+            <Square class="size-4 sm:size-5" aria-hidden="true" />
+            {{ tr('ui.abandon') }}
           </button>
         </div>
-      </div>
-      <div class="player-actions grid grid-cols-3 gap-2">
-        <button
-          class="btn btn-primary btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
-          type="button"
-          :aria-label="tr('ui.restart_the_current_segment')"
-          @click="resetCurrentSegment"
-        >
-          <RotateCcw class="size-4 sm:size-5" aria-hidden="true" />
-          {{ tr('ui.reset') }}
-        </button>
-        <button
-          class="btn btn-info btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
-          type="button"
-          @click="togglePause"
-        >
-          <Play v-if="isPaused" class="size-4 sm:size-5" aria-hidden="true" />
-          <Pause v-else class="size-4 sm:size-5" aria-hidden="true" />
-          {{ isPaused ? tr('ui.resume') : tr('ui.pause') }}
-        </button>
-        <button
-          class="btn btn-error btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
-          type="button"
-          @click="abandonWorkoutSession"
-        >
-          <Square class="size-4 sm:size-5" aria-hidden="true" />
-          {{ tr('ui.abandon') }}
-        </button>
       </div>
     </div>
   </article>
@@ -239,6 +242,8 @@ const isPaused = ref(false);
 let pausedForBackground = false;
 let appliedResetId: string | undefined;
 const playerElement = ref<HTMLElement>();
+const progressCircle = ref<SVGCircleElement>();
+let ringFrame: number | undefined;
 const isFullscreen = ref(false);
 const { keepScreenAwake } = useWorkoutPreferences();
 let wakeLock: WakeLockSentinel | undefined;
@@ -402,9 +407,15 @@ const workoutProgress = computed(() =>
       100
     : 0,
 );
-const segmentProgress = computed(() =>
-  Math.min(100, (elapsedMilliseconds.value / segmentDurationMilliseconds.value) * 100),
-);
+// Draw from the same clock as playback, without rerendering the player every frame.
+function drawRing() {
+  const elapsed = isStarting.value ? 0 : isPaused.value
+    ? elapsedMilliseconds.value
+    : Math.max(0, Date.now() - segmentStartedAt);
+  const progress = Math.min(1, elapsed / segmentDurationMilliseconds.value);
+  progressCircle.value?.setAttribute('stroke-dashoffset', String(100 * (1 - progress)));
+  ringFrame = window.requestAnimationFrame(drawRing);
+}
 
 watchEffect(() => {
   workoutPlayerStatusRef.value = {
@@ -578,7 +589,7 @@ function runCountdown() {
   countdownTimer = window.setInterval(() => {
     startCountdown.value -= 1;
     if (startCountdown.value > 0) signalTimer();
-    else if (startCountdown.value === 0) signalTimer(true, false);
+    else if (startCountdown.value === 0) signalTimer(true, true, 'go');
     savePlayback();
     if (startCountdown.value >= 0) return;
     stopCountdown();
@@ -742,6 +753,7 @@ function beginWorkout(paused = false) {
 
 onMounted(() => {
   isUnmounted = false;
+  ringFrame = window.requestAnimationFrame(drawRing);
   void syncWakeLock();
   document.addEventListener('fullscreenchange', syncFullscreenState);
   document.addEventListener('visibilitychange', checkpointWhenHidden);
@@ -761,6 +773,7 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
   isUnmounted = true;
+  if (ringFrame !== undefined) window.cancelAnimationFrame(ringFrame);
   void wakeLock?.release().catch(() => {});
   wakeLock = undefined;
   checkpointAtExit();
@@ -786,22 +799,67 @@ watch(
 </script>
 
 <style scoped>
+/* Hallmark · component: workout player · theme: existing app
+ * pre-emit critique: P4 H5 E4 S5 R5 V4 */
+.player-header > div:first-child { min-width: 0; }
+.player-header h2, .player-step-name, .player-next p { overflow-wrap: anywhere; }
+.player-next {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 9rem;
+  padding: 2.5rem 1rem;
+}
+.player-next-label {
+  position: absolute;
+  top: .75rem;
+  inset-inline: 1rem;
+}
+.player-ring { container-type: inline-size; }
+.player-ring > p:first-of-type { font-size: clamp(3rem, 23cqw, 9rem); }
+.player-ring:has(.player-cadence) > p:first-of-type { font-size: clamp(2.5rem, 20cqw, 7rem); }
 .workout-player:fullscreen {
-  width: min(100%, 48rem);
+  width: 100%;
   height: 100%;
   max-width: none;
+  overflow-y: auto;
   border: 0;
   border-radius: 0;
   background: var(--color-base-100);
 }
-
-.workout-player:fullscreen .card-body {
-  justify-content: flex-start;
+.workout-player:fullscreen .player-body {
+  width: 100%;
+  min-width: 0;
   min-height: 100%;
-  padding: 2rem;
+  box-sizing: border-box;
 }
-
-.workout-player:fullscreen .player-actions {
-  margin-top: auto;
+@media (min-width: 1024px) {
+  .player-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 1rem 1.5rem;
+    padding: 1.5rem;
+  }
+  .player-header, .player-progress { grid-column: 1 / -1; }
+  .player-stage {
+    min-height: 0;
+    padding: 1.25rem;
+    gap: .5rem;
+  }
+  .player-step-name { font-size: clamp(1.5rem, 2.5vw, 2.25rem); }
+  .player-ring { width: min(100%, clamp(15rem, calc(100dvh - 17rem), 34rem)); margin-top: .5rem; }
+  .player-sidebar { justify-content: center; min-width: 0; }
+  .player-actions { grid-template-columns: 1fr; }
+  .player-actions .btn { min-height: 3rem; }
+  .workout-player:fullscreen .player-body {
+    max-width: none;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  }
+  .workout-player:fullscreen .player-ring {
+    width: min(100%, clamp(15rem, calc(100dvh - 15rem), 42rem));
+    max-width: none;
+  }
 }
 </style>

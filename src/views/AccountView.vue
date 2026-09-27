@@ -1,182 +1,305 @@
 <template>
-  <section class="mx-auto max-w-2xl">
+  <section class="mx-auto w-full max-w-6xl">
     <header class="mb-7">
       <p class="mb-1 text-sm font-semibold text-primary">{{ t('account.preferences') }}</p>
       <h1 class="text-3xl font-bold tracking-tight text-base-content">{{ t('account.title') }}</h1>
       <p class="mt-2 text-base-content/65">{{ t('account.intro') }}</p>
     </header>
 
-    <article class="card border border-base-300 bg-base-100 shadow-sm">
-      <form class="card-body gap-4 p-5" @submit.prevent="saveName">
-        <div>
-          <h2 class="font-bold text-base-content">{{ t('account.profile') }}</h2>
-          <p class="mt-1 text-sm text-base-content/65">{{ t('account.profileDescription') }}</p>
-        </div>
-        <div class="flex items-center gap-4">
-          <div
-            class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-primary"
+    <div class="grid items-start gap-4 lg:grid-cols-2">
+      <div class="min-w-0 space-y-4">
+        <details class="card border border-base-300 bg-base-100 shadow-sm" open>
+          <summary
+            class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
-            <img
-              v-if="profilePhoto"
-              :src="profilePhoto"
-              :alt="t('account.photo')"
-              class="h-full w-full object-cover"
+            <span>{{ t('account.profile') }}</span>
+            <ChevronDown
+              class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
+              aria-hidden="true"
             />
-            <UserRound v-else class="size-8" aria-hidden="true" />
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <label class="btn btn-outline btn-sm" :class="{ 'btn-disabled': isSavingPhoto }">
-              <span v-if="isSavingPhoto" class="loading loading-spinner loading-xs" />
-              {{ profilePhoto ? t('account.changePhoto') : t('account.uploadPhoto') }}
+          </summary>
+          <form class="card-body gap-4 px-5 pb-5 pt-0" @submit.prevent="saveName">
+            <div>
+              <p class="mt-1 text-sm text-base-content/65">{{ t('account.profileDescription') }}</p>
+            </div>
+            <AccountPhoto />
+            <GttInputField
+              id="account-display-name"
+              v-model="displayName"
+              :label="t('account.displayName')"
+              :error="nameError"
+              :placeholder="t('account.namePlaceholder')"
+              autocomplete="nickname"
+              maxlength="60"
+              required
+              compact
+            />
+            <div>
+              <p class="text-sm font-semibold">{{ t('ui.email') }}</p>
+              <p class="mt-1 break-all text-sm text-base-content/65">{{ currentUser?.email }}</p>
+            </div>
+            <button
+              class="btn btn-primary self-end"
+              type="submit"
+              :disabled="
+                isSavingName ||
+                !displayName.trim() ||
+                displayName.trim() === (currentUser?.displayName ?? '')
+              "
+            >
+              <span v-if="isSavingName" class="loading loading-spinner loading-sm" />
+              {{ t('account.saveName') }}
+            </button>
+            <div class="divider my-0" />
+            <button
+              class="btn btn-outline btn-error w-full"
+              type="button"
+              :disabled="isDeletingAccount || isChangingPassword"
+              @click="logout"
+            >
+              {{ t('account.logout') }}
+            </button>
+          </form>
+        </details>
+      </div>
+      <div class="min-w-0 space-y-4">
+        <details class="card border border-base-300 bg-base-100 shadow-sm">
+          <summary
+            class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          >
+            <span>{{ t('account.personalization') }}</span>
+            <ChevronDown
+              class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
+              aria-hidden="true"
+            />
+          </summary>
+          <div class="card-body gap-4 px-5 pb-5 pt-0">
+            <div>
+              <p class="mt-1 text-sm text-base-content/65">
+                {{ t('account.personalizationDescription') }}
+              </p>
+            </div>
+            <GttSelectField
+              id="account-theme"
+              :model-value="themePreference"
+              :label="t('account.theme')"
+              :options="themeOptions"
+              compact
+              @update:model-value="setTheme"
+            />
+            <GttSelectField
+              id="account-language"
+              :model-value="locale"
+              :label="t('account.language')"
+              :options="languageOptions"
+              :disabled="!isLanguageReady || isSavingLanguage"
+              :error="languageError ? t('account.languageError') : undefined"
+              compact
+              @update:model-value="(value) => value && changeLanguage(value)"
+            />
+            <div class="divider my-0" />
+            <label class="flex cursor-pointer items-center justify-between gap-4">
+              <span>
+                <span class="block font-semibold text-base-content">{{ t('account.sounds') }}</span>
+                <span class="mt-1 block text-sm text-base-content/65">{{
+                  t('account.soundsDescription')
+                }}</span>
+              </span>
+              <input v-model="timerSounds" type="checkbox" class="toggle toggle-primary shrink-0" />
+            </label>
+            <div class="divider my-0" />
+            <label class="flex cursor-pointer items-center justify-between gap-4">
+              <span>
+                <span class="block font-semibold text-base-content">{{
+                  t('account.vibration')
+                }}</span>
+                <span class="mt-1 block text-sm text-base-content/65">{{
+                  t('account.vibrationDescription')
+                }}</span>
+              </span>
               <input
-                class="sr-only"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                :disabled="isSavingPhoto"
-                :aria-label="t('account.choosePhoto')"
-                @change="savePhoto"
+                v-model="timerVibration"
+                type="checkbox"
+                class="toggle toggle-primary shrink-0"
               />
             </label>
-            <button
-              v-if="profilePhoto"
-              class="btn btn-ghost btn-sm"
-              type="button"
-              :disabled="isSavingPhoto"
-              @click="removePhoto"
-            >
-              {{ t('account.removePhoto') }}
-            </button>
+            <div class="divider my-0" />
+            <label class="flex cursor-pointer items-center justify-between gap-4">
+              <span>
+                <span class="block font-semibold text-base-content">{{ t('account.screen') }}</span>
+                <span class="mt-1 block text-sm text-base-content/65">{{
+                  t('account.screenDescription')
+                }}</span>
+              </span>
+              <input
+                v-model="keepScreenAwake"
+                type="checkbox"
+                class="toggle toggle-primary shrink-0"
+              />
+            </label>
           </div>
-        </div>
-        <p class="text-xs text-base-content/60">{{ t('account.photoHint') }}</p>
-        <p v-if="photoError" class="text-sm text-error" role="alert">{{ photoError }}</p>
-        <GttInputField
-          id="account-display-name"
-          v-model="displayName"
-          :label="t('account.displayName')"
-          :error="nameError"
-          :placeholder="t('account.namePlaceholder')"
-          autocomplete="nickname"
-          maxlength="60"
-          required
-          compact
-        />
-        <button
-          class="btn btn-primary self-end"
-          type="submit"
-          :disabled="
-            isSavingName ||
-            !displayName.trim() ||
-            displayName.trim() === (currentUser?.displayName ?? '')
-          "
-        >
-          <span v-if="isSavingName" class="loading loading-spinner loading-sm" />
-          {{ t('account.saveName') }}
-        </button>
-      </form>
-    </article>
-
-    <article class="card mt-4 border border-base-300 bg-base-100 shadow-sm">
-      <div class="card-body gap-3 p-5">
-        <h2 class="font-bold">{{ t('tour.help') }}</h2>
-        <p class="text-sm text-base-content/65">{{ t('tour.replayDescription') }}</p>
-        <button
-          class="btn btn-outline self-start"
-          type="button"
-          :disabled="isTourRunning || !!activeWorkoutSessionRef"
-          @click="startTour"
-        >
-          {{ t('tour.replay') }}
-        </button>
-        <p v-if="activeWorkoutSessionRef" class="text-sm text-base-content/60">
-          {{ t('tour.workoutActive') }}
-        </p>
-        <p v-if="tourError" class="text-sm text-error" role="alert">{{ t('tour.error') }}</p>
+        </details>
+        <details class="card border border-base-300 bg-base-100 shadow-sm">
+          <summary
+            class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          >
+            <span>{{ t('tour.help') }}</span>
+            <ChevronDown
+              class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
+              aria-hidden="true"
+            />
+          </summary>
+          <div class="card-body gap-3 px-5 pb-5 pt-0">
+            <p class="text-sm text-base-content/65">{{ t('tour.replayDescription') }}</p>
+            <button
+              class="btn btn-outline self-start"
+              type="button"
+              :disabled="isTourRunning || !!activeWorkoutSessionRef"
+              @click="startTour"
+            >
+              {{ t('tour.replay') }}
+            </button>
+            <p v-if="activeWorkoutSessionRef" class="text-sm text-base-content/60">
+              {{ t('tour.workoutActive') }}
+            </p>
+            <p v-if="tourError" class="text-sm text-error" role="alert">{{ t('tour.error') }}</p>
+          </div>
+        </details>
+        <details class="card border border-base-300 bg-base-100 shadow-sm">
+          <summary
+            class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          >
+            <span>{{ t('account.changePassword') }}</span>
+            <ChevronDown
+              class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
+              aria-hidden="true"
+            />
+          </summary>
+          <form class="card-body gap-4 px-5 pb-5 pt-0" @submit.prevent="savePassword">
+            <GttInputField
+              id="account-current-password"
+              v-model="currentPassword"
+              :label="t('account.currentPassword')"
+              type="password"
+              autocomplete="current-password"
+              :disabled="isChangingPassword || isDeletingAccount"
+              required
+              compact
+            />
+            <GttInputField
+              id="account-new-password"
+              v-model="newPassword"
+              :label="t('account.newPassword')"
+              type="password"
+              autocomplete="new-password"
+              minlength="6"
+              :disabled="isChangingPassword || isDeletingAccount"
+              required
+              compact
+            />
+            <GttInputField
+              id="account-confirm-password"
+              v-model="confirmPassword"
+              :label="t('ui.confirm_password')"
+              type="password"
+              autocomplete="new-password"
+              minlength="6"
+              :disabled="isChangingPassword || isDeletingAccount"
+              required
+              compact
+            />
+            <p v-if="passwordError" class="text-sm text-error" role="alert">{{ passwordError }}</p>
+            <button
+              class="btn btn-primary self-end"
+              type="submit"
+              :disabled="isChangingPassword || isDeletingAccount"
+            >
+              <span v-if="isChangingPassword" class="loading loading-spinner loading-sm" />
+              {{ t('account.changePassword') }}
+            </button>
+          </form>
+        </details>
+        <details class="card border border-error/30 bg-base-100 shadow-sm">
+          <summary
+            class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          >
+            <span class="text-error">{{ t('account.deleteAccount') }}</span>
+            <ChevronDown
+              class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
+              aria-hidden="true"
+            />
+          </summary>
+          <div class="card-body gap-4 px-5 pb-5 pt-0">
+            <p class="text-sm text-base-content/65">{{ t('account.deleteDescription') }}</p>
+            <button
+              v-if="!showDeleteConfirmation"
+              class="btn btn-outline btn-error self-start"
+              type="button"
+              :disabled="isChangingPassword"
+              @click="showDeleteConfirmation = true"
+            >
+              {{ t('account.deleteAccount') }}
+            </button>
+            <form v-else class="flex flex-col gap-4" @submit.prevent="confirmDeleteAccount">
+              <GttInputField
+                id="account-delete-password"
+                v-model="deletePassword"
+                :label="t('account.currentPassword')"
+                type="password"
+                autocomplete="current-password"
+                :disabled="isDeletingAccount"
+                required
+                compact
+              />
+              <label class="flex items-center gap-3">
+                <input
+                  v-model="deleteConfirmed"
+                  type="checkbox"
+                  class="checkbox checkbox-error shrink-0"
+                  :disabled="isDeletingAccount"
+                  required
+                />
+                <span class="text-sm">{{ t('account.deleteConfirmation') }}</span>
+              </label>
+              <p v-if="deleteError" class="text-sm text-error" role="alert">{{ deleteError }}</p>
+              <div class="flex flex-wrap justify-end gap-2">
+                <button
+                  class="btn btn-ghost"
+                  type="button"
+                  :disabled="isDeletingAccount"
+                  @click="cancelDelete"
+                >
+                  {{ t('account.cancel') }}
+                </button>
+                <button
+                  class="btn btn-error"
+                  type="submit"
+                  :disabled="
+                    isDeletingAccount || !deleteConfirmed || !deletePassword || isChangingPassword
+                  "
+                >
+                  <span v-if="isDeletingAccount" class="loading loading-spinner loading-sm" />
+                  {{ t('account.deletePermanently') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </details>
       </div>
-    </article>
-
-    <article class="card mt-4 border border-base-300 bg-base-100 shadow-sm">
-      <div class="card-body gap-4 p-5">
-        <div>
-          <h2 class="font-bold text-base-content">{{ t('account.personalization') }}</h2>
-          <p class="mt-1 text-sm text-base-content/65">
-            {{ t('account.personalizationDescription') }}
-          </p>
-        </div>
-        <GttSelectField
-          id="account-theme"
-          :model-value="themePreference"
-          :label="t('account.theme')"
-          :options="themeOptions"
-          compact
-          @update:model-value="setTheme"
-        />
-        <GttSelectField
-          id="account-language"
-          :model-value="locale"
-          :label="t('account.language')"
-          :options="languageOptions"
-          :disabled="!isLanguageReady || isSavingLanguage"
-          :error="languageError ? t('account.languageError') : undefined"
-          compact
-          @update:model-value="value => value && changeLanguage(value)"
-        />
-        <div class="divider my-0" />
-        <label class="flex cursor-pointer items-center justify-between gap-4">
-          <span>
-            <span class="block font-semibold text-base-content">{{ t('account.sounds') }}</span>
-            <span class="mt-1 block text-sm text-base-content/65">{{
-              t('account.soundsDescription')
-            }}</span>
-          </span>
-          <input v-model="timerSounds" type="checkbox" class="toggle toggle-primary shrink-0" />
-        </label>
-        <div class="divider my-0" />
-        <label class="flex cursor-pointer items-center justify-between gap-4">
-          <span>
-            <span class="block font-semibold text-base-content">{{ t('account.vibration') }}</span>
-            <span class="mt-1 block text-sm text-base-content/65">{{
-              t('account.vibrationDescription')
-            }}</span>
-          </span>
-          <input v-model="timerVibration" type="checkbox" class="toggle toggle-primary shrink-0" />
-        </label>
-        <div class="divider my-0" />
-        <label class="flex cursor-pointer items-center justify-between gap-4">
-          <span>
-            <span class="block font-semibold text-base-content">{{ t('account.screen') }}</span>
-            <span class="mt-1 block text-sm text-base-content/65">{{
-              t('account.screenDescription')
-            }}</span>
-          </span>
-          <input v-model="keepScreenAwake" type="checkbox" class="toggle toggle-primary shrink-0" />
-        </label>
-      </div>
-    </article>
-
-    <article class="card mt-4 border border-base-300 bg-base-100 shadow-sm">
-      <div class="card-body gap-4 p-5">
-        <div>
-          <h2 class="font-bold text-base-content">{{ t('account.session') }}</h2>
-          <p class="mt-1 text-sm text-base-content/65">{{ currentUser?.email }}</p>
-        </div>
-        <button class="btn btn-outline btn-error w-full" type="button" @click="logout">
-          {{ t('account.logout') }}
-        </button>
-      </div>
-    </article>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import AccountPhoto from '@/components/account/AccountPhoto.vue';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
-import { UserRound } from '@lucide/vue';
+import { ChevronDown } from '@lucide/vue';
 import { useRouter } from 'vue-router';
-import { useAuth } from '@/composables/useAuth';
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
 import { useAppTour } from '@/composables/useAppTour';
 import { activeWorkoutSessionRef } from '@/stores/workoutCreator';
 import { useLanguage } from '@/composables/useLanguage';
@@ -191,26 +314,20 @@ const themeOptions = computed(() => [
   { id: 'light', label: t('account.light') },
   { id: 'dark', label: t('account.dark') },
 ]);
-const languageOptions = [{ id: 'it', label: 'Italiano' }, { id: 'en', label: 'English' }];
+const languageOptions = [
+  { id: 'it', label: 'Italiano' },
+  { id: 'en', label: 'English' },
+];
 function setTheme(value?: string) {
   if (value === 'auto' || value === 'light' || value === 'dark') themePreference.value = value;
 }
 const { isLanguageReady, isSavingLanguage, languageError, changeLanguage } = useLanguage();
 const { timerSounds, timerVibration, keepScreenAwake } = useWorkoutPreferences();
-const {
-  currentUser,
-  profilePhoto,
-  signOut,
-  updateDisplayName,
-  updateProfilePhoto,
-  removeProfilePhoto,
-} = useAuth();
+const { changePassword, deleteAccount, currentUser, signOut, updateDisplayName } = useAuth();
 const router = useRouter();
 const displayName = ref(currentUser.value?.displayName ?? '');
 const isSavingName = ref(false);
 const nameError = ref('');
-const photoError = ref('');
-const isSavingPhoto = ref(false);
 
 watch(currentUser, (user) => {
   displayName.value = user?.displayName ?? '';
@@ -233,44 +350,65 @@ async function saveName() {
   }
 }
 
-async function savePhoto(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
-  input.value = '';
-  if (!file || isSavingPhoto.value) return;
+const currentPassword = ref('');
+const newPassword = ref('');
+const confirmPassword = ref('');
+const passwordError = ref('');
+const isChangingPassword = ref(false);
+const showDeleteConfirmation = ref(false);
+const deletePassword = ref('');
+const deleteConfirmed = ref(false);
+const deleteError = ref('');
+const isDeletingAccount = ref(false);
 
-  photoError.value = '';
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-    photoError.value = t('account.photoFormat');
+async function savePassword() {
+  if (isChangingPassword.value || isDeletingAccount.value) return;
+  passwordError.value = '';
+  if (newPassword.value !== confirmPassword.value) {
+    passwordError.value = t('ui.passwords_do_not_match');
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    photoError.value = t('account.photoSize');
+  if (newPassword.value.length < 6) {
+    passwordError.value = t('ui.password_must_contain_at_least_6_characters');
     return;
   }
-
-  isSavingPhoto.value = true;
+  isChangingPassword.value = true;
   try {
-    await updateProfilePhoto(file);
-    showToast({ title: t('account.photoSaved') });
-  } catch {
-    photoError.value = t('account.photoError');
+    await changePassword(currentPassword.value, newPassword.value);
+    currentPassword.value = newPassword.value = confirmPassword.value = '';
+    showToast({ title: t('account.passwordSaved') });
+  } catch (error) {
+    passwordError.value = authErrorMessage(error);
   } finally {
-    isSavingPhoto.value = false;
+    isChangingPassword.value = false;
   }
 }
 
-async function removePhoto() {
-  if (isSavingPhoto.value) return;
-  isSavingPhoto.value = true;
-  photoError.value = '';
+function cancelDelete() {
+  showDeleteConfirmation.value = false;
+  deletePassword.value = '';
+  deleteConfirmed.value = false;
+  deleteError.value = '';
+}
+
+async function confirmDeleteAccount() {
+  if (
+    !deleteConfirmed.value ||
+    !deletePassword.value ||
+    isDeletingAccount.value ||
+    isChangingPassword.value
+  )
+    return;
+  isDeletingAccount.value = true;
+  deleteError.value = '';
   try {
-    await removeProfilePhoto();
-    showToast({ title: t('account.photoRemoved') });
-  } catch {
-    photoError.value = t('account.removeError');
+    await deleteAccount(deletePassword.value);
+    await router.replace({ name: 'login' });
+  } catch (error) {
+    deleteError.value = authErrorMessage(error);
   } finally {
-    isSavingPhoto.value = false;
+    deletePassword.value = '';
+    isDeletingAccount.value = false;
   }
 }
 
@@ -279,3 +417,17 @@ async function logout() {
   await router.replace({ name: 'login' });
 }
 </script>
+
+<style scoped>
+.account-card-summary {
+  list-style: none;
+}
+
+.account-card-summary::-webkit-details-marker {
+  display: none;
+}
+
+details[open] > .account-card-summary .account-card-chevron {
+  transform: rotate(180deg);
+}
+</style>

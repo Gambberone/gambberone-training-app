@@ -7,6 +7,7 @@ import {
   onSnapshot,
   setDoc,
   writeBatch,
+  waitForPendingWrites,
 } from 'firebase/firestore';
 import { watch, type Ref } from 'vue';
 import { auth, db } from '@/firebase';
@@ -170,4 +171,37 @@ export function startFirestoreSync() {
       console.error('Unable to initialize Firestore synchronization', error);
     }
   });
+}
+
+// Stop local synchronization before removing documents so snapshots cannot recreate them.
+export async function deleteAccountData(userId: string) {
+  activeUserId = null;
+  unsubscribeCallbacks.forEach((unsubscribe) => unsubscribe());
+  unsubscribeCallbacks = [];
+  try {
+    await waitForPendingWrites(db);
+    for (const name of [...collections.map((item) => item.name), 'state', 'settings']) {
+      const snapshot = await getDocs(collection(userDocument(userId), name));
+      for (let offset = 0; offset < snapshot.docs.length; offset += 400) {
+        const batch = writeBatch(db);
+        snapshot.docs.slice(offset, offset + 400).forEach((item) => batch.delete(item.ref));
+        await batch.commit();
+      }
+    }
+    const batch = writeBatch(db);
+    batch.delete(userDocument(userId));
+    await batch.commit();
+  } catch (error) {
+    if (auth.currentUser?.uid === userId) {
+      activeUserId = userId;
+      subscribeToUserData(userId);
+    }
+    throw error;
+  }
+}
+
+export function resetDeletedAccountData() {
+  collections.forEach(({ state }) => { state.value = []; });
+  activeWorkoutSessionRef.value = null;
+  localStorage.removeItem('gtt:workout-playback');
 }

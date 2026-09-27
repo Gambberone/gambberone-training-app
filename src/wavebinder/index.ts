@@ -8,7 +8,7 @@ import PROTO_NODES from './protonodes.json';
 import { exercisesRef } from '@/stores/exercises';
 import type { Exercise } from '@/domain/exercises';
 import { DEFAULT_REPETITION_INTERVAL_SECONDS, WORKOUT_CREATOR_STEP_ACTION, type ExerciseModeType, type StretchingExercise, type WarmupExercise, type WorkoutCreatorStep, type WorkoutSession } from '@/constants';
-import type { ScheduledWorkout } from '@/stores/workoutCreator';
+import { scheduleValidationErrors } from './schedule';
 
 const licenseServerUrl = import.meta.env.VITE_WAVEBINDER_LICENSE_SERVER_URL?.replace(/\/$/, '');
 
@@ -97,18 +97,7 @@ export const wb = new WaveBinder(
     },
     {
       name: 'validateSchedule',
-      implementation: (input: {
-        date?: string;
-        workoutId?: string;
-        time?: string;
-        scheduled?: ScheduledWorkout[];
-      } | null) => {
-        if (!input?.date || !input.workoutId) return ['messages.scheduleRequired'];
-        const duplicate = input.scheduled?.some(
-          (item) => item.date === input.date && item.workoutId === input.workoutId && item.time === input.time,
-        );
-        return duplicate ? ['messages.duplicateSchedule'] : [];
-      },
+      implementation: scheduleValidationErrors,
     },
     {
       name: 'validatePause',

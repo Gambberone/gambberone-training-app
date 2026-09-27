@@ -59,16 +59,15 @@
           {{ tr('workoutCards.edit') }}
         </button>
       </div>
-      <details data-workout-menu class="dropdown dropdown-end absolute right-3 top-3" @keydown.esc="($event.currentTarget as HTMLDetailsElement).open = false">
-        <summary class="btn btn-square btn-ghost btn-sm list-none [&::-webkit-details-marker]:hidden" :aria-label="tr('workoutCards.actions', { name: workout.name })">
-          <Ellipsis class="size-5" aria-hidden="true" />
-        </summary>
-        <ul class="dropdown-content menu z-10 mt-1 w-44 rounded-box border border-base-300 bg-base-100 p-1 shadow-lg">
-          <li><button class="text-error" type="button" @click="askToRemoveWorkout(workout); ($event.currentTarget as HTMLElement).closest('details')?.removeAttribute('open')">
-            <Trash2 class="size-4" aria-hidden="true" />{{ tr('ui.delete') }}
-          </button></li>
-        </ul>
-      </details>
+      <button
+        class="btn btn-square btn-ghost btn-sm absolute right-3 top-3 text-error"
+        type="button"
+        :aria-label="tr('messages.deleteNamed', { name: workout.name })"
+        :title="tr('ui.delete')"
+        @click="askToRemoveWorkout(workout)"
+      >
+        <Trash2 class="size-5" aria-hidden="true" />
+      </button>
     </li>
   </ul>
   <p v-else class="py-8 text-center text-base-content/60">{{ tr('ui.you_have_not_created_any_workouts_yet') }}</p>
@@ -96,8 +95,8 @@
 
 <script setup lang="ts">
 import { tr, appLocale, localizedExerciseName } from '@/localization';
-import { Dumbbell, Play, Trash2, Pencil, Ellipsis, Flame, Pause, LineSquiggle } from '@lucide/vue';
-import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { Dumbbell, Play, Trash2, Pencil, Flame, Pause, LineSquiggle } from '@lucide/vue';
+import { ref } from 'vue';
 import { estimateWorkoutDuration } from '@/wavebinder/duration';
 import { WORKOUT_CREATOR_STEP_ACTION } from '@/constants';
 import {
@@ -113,16 +112,6 @@ import GttTooltip from '@/components/generic/GttTooltip.vue';
 import GttBottomAction from '@/components/generic/GttBottomAction.vue';
 import GttModal from '@/components/generic/GttModal.vue';
 import WorkoutCreatorModal from './creator/WorkoutCreatorModal.vue';
-
-function closeMenusOnOutsideClick(event: PointerEvent) {
-  const target = event.target;
-  if (!(target instanceof Node)) return;
-  document.querySelectorAll<HTMLDetailsElement>('details[data-workout-menu][open]').forEach((menu) => {
-    if (!menu.contains(target)) menu.open = false;
-  });
-}
-onMounted(() => document.addEventListener('pointerdown', closeMenusOnOutsideClick));
-onBeforeUnmount(() => document.removeEventListener('pointerdown', closeMenusOnOutsideClick));
 
 const showWorkoutCreatorModal = ref(false);
 const selectedWorkoutForEdit = ref<Workout>();

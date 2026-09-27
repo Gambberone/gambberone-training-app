@@ -1,6 +1,6 @@
 <template>
-  <section class="mx-auto w-full max-w-7xl">
-    <header class="mb-5">
+  <section class="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-col">
+    <header class="mb-5 shrink-0">
       <div class="flex items-center justify-between gap-3">
         <h1 class="text-2xl font-bold text-primary capitalize">{{ calendarLabel }}</h1>
         <div class="flex items-center gap-1">
@@ -201,7 +201,13 @@ const weekDays = computed<CalendarDay[]>(() => {
 });
 
 function workoutsForDate(date: string) {
-  return scheduledWorkoutsRef.value.filter((scheduledWorkout) => scheduledWorkout.date === date);
+  return scheduledWorkoutsRef.value
+    .filter((scheduledWorkout) => scheduledWorkout.date === date)
+    .sort((a, b) => {
+      if (!a.time) return b.time ? 1 : 0;
+      if (!b.time) return -1;
+      return a.time.localeCompare(b.time);
+    });
 }
 function workoutName(workoutId: string) {
   return workoutsRef.value.find((workout) => workout.id === workoutId)?.name ?? tr('ui.deleted_workout');
@@ -235,6 +241,10 @@ function onDayModalUpdate(isOpen: boolean) {
 
 <style scoped>
 .calendar {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
   overflow: hidden;
 }
 .calendar-weekdays,
@@ -242,7 +252,13 @@ function onDayModalUpdate(isOpen: boolean) {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
+.calendar-grid {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+}
 .calendar-weekdays {
+  flex-shrink: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--color-base-content) 12%, transparent);
 }
 .calendar-weekdays span {
@@ -254,7 +270,9 @@ function onDayModalUpdate(isOpen: boolean) {
 }
 .calendar-day {
   display: flex;
-  min-height: 7.5rem;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -288,12 +306,17 @@ function onDayModalUpdate(isOpen: boolean) {
   color: var(--color-primary-content);
 }
 .week-calendar {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
   overflow: hidden;
 }
 .week-day-row {
   display: flex;
   width: 100%;
-  min-height: 3.75rem;
+  min-height: 0;
+  overflow: hidden;
   align-items: center;
   gap: 1rem;
   border-bottom: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
@@ -350,10 +373,11 @@ function onDayModalUpdate(isOpen: boolean) {
   width: 100%;
   gap: 0.25rem;
   margin-top: 0.3rem;
+  flex-shrink: 0;
 }
 .calendar-event {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   overflow: hidden;
   border-radius: 0.25rem;
   background: color-mix(in srgb, var(--color-primary) 18%, transparent);
@@ -364,11 +388,14 @@ function onDayModalUpdate(isOpen: boolean) {
   line-height: 1.1;
 }
 .calendar-event-name {
+  min-width: 0;
+  flex: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
 .calendar-event-time {
+  flex-shrink: 0;
   font-weight: 400;
 }
 .calendar-more {
@@ -379,7 +406,6 @@ function onDayModalUpdate(isOpen: boolean) {
 }
 @media (max-width: 480px) {
   .calendar-day {
-    min-height: 5.5rem;
     padding: 0.25rem;
   }
   .calendar-weekdays span {
