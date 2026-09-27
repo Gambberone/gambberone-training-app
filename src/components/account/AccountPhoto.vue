@@ -20,17 +20,15 @@
       class="btn btn-outline btn-sm"
       type="button"
       :disabled="busy"
-      @click="fileInput?.click()"
+      @click="fileInput?.open()"
     >
       {{ t('account.uploadPhoto') }}
     </button>
     <p v-else class="text-sm text-base-content/60">{{ t('account.viewPhotoHint') }}</p>
-    <input
+    <GttFileField
       ref="fileInput"
-      class="sr-only"
-      type="file"
       accept="image/jpeg,image/png,image/webp"
-      :aria-label="t('account.choosePhoto')"
+      :label="t('account.choosePhoto')"
       :disabled="busy"
       @change="selectPhoto"
     />
@@ -57,7 +55,7 @@
       />
       <p v-if="error" class="text-sm text-error" role="alert">{{ error }}</p>
       <div class="flex flex-wrap justify-center gap-3">
-        <button class="btn btn-primary" type="button" :disabled="busy" @click="fileInput?.click()">
+        <button class="btn btn-primary" type="button" :disabled="busy" @click="fileInput?.open()">
           {{ t('account.changePhoto') }}
         </button>
         <button
@@ -90,40 +88,31 @@
           class="pointer-events-none absolute inset-0 rounded-full border-2 border-white/80 shadow-[0_0_0_100px_rgba(0,0,0,0.3)]"
         />
       </div>
-      <label class="flex flex-col gap-2 text-sm font-semibold"
-        >{{ t('account.cropZoom') }}
-        <input
-          v-model.number="zoom"
-          type="range"
-          min="1"
-          max="3"
-          step="0.01"
-          class="range range-primary"
-          :disabled="busy"
-        />
-      </label>
-      <label class="flex flex-col gap-2 text-sm font-semibold"
-        >{{ t('account.cropHorizontal') }}
-        <input
-          v-model.number="horizontal"
-          type="range"
-          min="0"
-          max="100"
-          class="range range-primary"
-          :disabled="busy"
-        />
-      </label>
-      <label class="flex flex-col gap-2 text-sm font-semibold"
-        >{{ t('account.cropVertical') }}
-        <input
-          v-model.number="vertical"
-          type="range"
-          min="0"
-          max="100"
-          class="range range-primary"
-          :disabled="busy"
-        />
-      </label>
+      <GttRangeField
+        id="crop-zoom"
+        v-model="zoom"
+        :label="t('account.cropZoom')"
+        :min="1"
+        :max="3"
+        :step="0.01"
+        :disabled="busy"
+      />
+      <GttRangeField
+        id="crop-horizontal"
+        v-model="horizontal"
+        :label="t('account.cropHorizontal')"
+        :min="0"
+        :max="100"
+        :disabled="busy"
+      />
+      <GttRangeField
+        id="crop-vertical"
+        v-model="vertical"
+        :label="t('account.cropVertical')"
+        :min="0"
+        :max="100"
+        :disabled="busy"
+      />
       <p v-if="error" class="text-sm text-error" role="alert">{{ error }}</p>
       <div class="flex justify-end gap-2">
         <button class="btn btn-ghost" type="button" :disabled="busy" @click="cropOpen = false">
@@ -149,12 +138,14 @@ import { nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { UserRound } from '@lucide/vue';
 import GttModal from '@/components/generic/GttModal.vue';
+import GttFileField from '@/components/generic/form/GttFileField.vue';
+import GttRangeField from '@/components/generic/form/GttRangeField.vue';
 import { useAuth } from '@/composables/useAuth';
 import { showToast } from '@/composables/toast';
 
 const { t } = useI18n();
 const { profilePhoto, updateProfilePhoto, removeProfilePhoto } = useAuth();
-const fileInput = ref<HTMLInputElement>();
+const fileInput = ref<InstanceType<typeof GttFileField>>();
 const preview = ref<HTMLCanvasElement>();
 const sourceImage = shallowRef<HTMLImageElement>();
 const viewerOpen = ref(false);
@@ -190,11 +181,8 @@ function drawCrop() {
 }
 watch([zoom, horizontal, vertical], drawCrop, { flush: 'post' });
 
-async function selectPhoto(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
-  input.value = '';
-  if (!file || busy.value) return;
+async function selectPhoto(file: File) {
+  if (busy.value) return;
   error.value = '';
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
     error.value = t('account.photoFormat');

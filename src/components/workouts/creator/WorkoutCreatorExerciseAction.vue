@@ -31,10 +31,7 @@
       </div>
     </fieldset>
     <div v-if="selectedExercise" class="grid grid-cols-1 items-end gap-3 border-t border-base-300 pt-4 sm:grid-cols-2">
-      <label class="flex items-center gap-3 pb-2 text-sm">
-        <input v-model="hasSetPause" type="checkbox" class="toggle toggle-sm toggle-primary" :disabled="!isPauseAvailable" />
-        {{ tr('ui.rest_between_sets') }}
-      </label>
+      <GttToggleField id="desktop-set-pause-toggle" v-model="hasSetPause" :label="tr('ui.rest_between_sets')" :disabled="!isPauseAvailable" small class="pb-2" />
       <GttNumberStepper v-if="hasSetPause && isPauseAvailable" id="desktop-set-pause" v-model="pauseBetweenSetsDuration" :large-step="10" :label="tr('ui.rest_duration_seconds')" compact />
     </div>
     <details v-if="selectedExercise && isRepetitions" class="border-t border-base-300 pt-3">
@@ -69,11 +66,7 @@
         v-model="exerciseValue"
         :label="isRepetitions ? tr('ui.repetitions') : tr('ui.duration_seconds')"
       />
-      <label class="label">
-        {{ tr('ui.timed') }}
-        <input v-model="isRepetitions" type="checkbox" class="toggle toggle-sm toggle-neutral" />
-        {{ tr('ui.repetitions') }}
-      </label>
+      <GttToggleField id="exercise-mode-toggle" v-model="isRepetitions" :off-label="tr('ui.timed')" :label="tr('ui.repetitions')" small inline />
     </div>
     <WorkoutCreatorDurationRepetitionField
       v-if="isRepetitions"
@@ -83,15 +76,7 @@
     />
     <WorkoutCreatorDurationRepetitionField id="exercise_sets" v-model="sets" :label="tr('ui.sets')" />
     <div class="flex flex-col gap-1">
-      <label class="label">
-        {{ tr('ui.rest_between_sets') }}
-        <input
-          v-model="hasSetPause"
-          type="checkbox"
-          class="toggle toggle-sm toggle-neutral"
-          :disabled="!isPauseAvailable"
-        />
-      </label>
+      <GttToggleField id="exercise-set-pause-toggle" v-model="hasSetPause" :label="tr('ui.rest_between_sets')" :disabled="!isPauseAvailable" small />
       <WorkoutCreatorDurationRepetitionField
         v-if="hasSetPause && isPauseAvailable"
         id="exercise_set_pause"
@@ -114,6 +99,7 @@ import { Check } from '@lucide/vue';
 import { exercisesRef } from '@/stores/exercises';
 import GttNumberStepper from '@/components/generic/form/GttNumberStepper.vue';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
+import GttToggleField from '@/components/generic/form/GttToggleField.vue';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
 import WorkoutCreatorDurationRepetitionField from './WorkoutCreatorDurationRepetitionField.vue';
 

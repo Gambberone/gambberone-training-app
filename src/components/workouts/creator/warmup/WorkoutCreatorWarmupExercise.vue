@@ -14,11 +14,7 @@
       v-model="warmupValue"
       :label="isRepetitions ? tr('ui.repetitions') : tr('ui.duration_seconds')"
     />
-    <label class="label">
-      {{ tr('ui.timed') }}
-      <input v-model="isRepetitions" type="checkbox" class="toggle toggle-sm toggle-neutral" />
-      {{ tr('ui.repetitions') }}
-    </label>
+    <GttToggleField :id="`warmup_mode_${warmupExercise.id}`" v-model="isRepetitions" :off-label="tr('ui.timed')" :label="tr('ui.repetitions')" small inline />
   </div>
   <WorkoutCreatorDurationRepetitionField
     v-if="isRepetitions"
@@ -35,6 +31,7 @@ import type { WarmupExercise } from '@/constants/workout.ts';
 import type { Exercise } from '@/domain/exercises.ts';
 import { exercisesRef } from '@/stores/exercises.ts';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
+import GttToggleField from '@/components/generic/form/GttToggleField.vue';
 import WorkoutCreatorDurationRepetitionField from '@/components/workouts/creator/WorkoutCreatorDurationRepetitionField.vue';
 
 const warmupExercise = defineModel<WarmupExercise>({ required: true });

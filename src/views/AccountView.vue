@@ -98,45 +98,11 @@
               @update:model-value="(value) => value && changeLanguage(value)"
             />
             <div class="divider my-0" />
-            <label class="flex cursor-pointer items-center justify-between gap-4">
-              <span>
-                <span class="block font-semibold text-base-content">{{ t('account.sounds') }}</span>
-                <span class="mt-1 block text-sm text-base-content/65">{{
-                  t('account.soundsDescription')
-                }}</span>
-              </span>
-              <input v-model="timerSounds" type="checkbox" class="toggle toggle-primary shrink-0" />
-            </label>
+            <GttToggleField id="account-sounds" v-model="timerSounds" :label="t('account.sounds')" :hint="t('account.soundsDescription')" />
             <div class="divider my-0" />
-            <label class="flex cursor-pointer items-center justify-between gap-4">
-              <span>
-                <span class="block font-semibold text-base-content">{{
-                  t('account.vibration')
-                }}</span>
-                <span class="mt-1 block text-sm text-base-content/65">{{
-                  t('account.vibrationDescription')
-                }}</span>
-              </span>
-              <input
-                v-model="timerVibration"
-                type="checkbox"
-                class="toggle toggle-primary shrink-0"
-              />
-            </label>
+            <GttToggleField id="account-vibration" v-model="timerVibration" :label="t('account.vibration')" :hint="t('account.vibrationDescription')" />
             <div class="divider my-0" />
-            <label class="flex cursor-pointer items-center justify-between gap-4">
-              <span>
-                <span class="block font-semibold text-base-content">{{ t('account.screen') }}</span>
-                <span class="mt-1 block text-sm text-base-content/65">{{
-                  t('account.screenDescription')
-                }}</span>
-              </span>
-              <input
-                v-model="keepScreenAwake"
-                type="checkbox"
-                class="toggle toggle-primary shrink-0"
-              />
-            </label>
+            <GttToggleField id="account-screen" v-model="keepScreenAwake" :label="t('account.screen')" :hint="t('account.screenDescription')" />
           </div>
         </details>
         <details class="card border border-base-300 bg-base-100 shadow-sm">
@@ -251,16 +217,7 @@
                 required
                 compact
               />
-              <label class="flex items-center gap-3">
-                <input
-                  v-model="deleteConfirmed"
-                  type="checkbox"
-                  class="checkbox checkbox-error shrink-0"
-                  :disabled="isDeletingAccount"
-                  required
-                />
-                <span class="text-sm">{{ t('account.deleteConfirmation') }}</span>
-              </label>
+              <GttCheckboxField id="account-delete-confirmed" v-model="deleteConfirmed" :label="t('account.deleteConfirmation')" :disabled="isDeletingAccount" required />
               <p v-if="deleteError" class="text-sm text-error" role="alert">{{ deleteError }}</p>
               <div class="flex flex-wrap justify-end gap-2">
                 <button
@@ -294,6 +251,8 @@
 import AccountPhoto from '@/components/account/AccountPhoto.vue';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
+import GttToggleField from '@/components/generic/form/GttToggleField.vue';
+import GttCheckboxField from '@/components/generic/form/GttCheckboxField.vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
