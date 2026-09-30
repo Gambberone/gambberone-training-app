@@ -121,6 +121,22 @@
       </router-link>
 
       <router-link
+        to="/friends"
+        :aria-label="pendingFriendsCount ? tr('friends.pendingIndicator', { count: pendingFriendsCount }) : tr('friends.title')"
+        :title="tr('friends.title')"
+        :class="{ 'dock-active': route.name === 'friends' }"
+      >
+        <span class="indicator">
+          <span
+            v-if="pendingFriendsCount"
+            class="indicator-item badge badge-primary badge-xs min-w-4 px-1 text-primary-content"
+            aria-hidden="true"
+          >{{ pendingFriendsCount > 9 ? '9+' : pendingFriendsCount }}</span>
+          <UsersRound />
+        </span>
+      </router-link>
+
+      <router-link
         data-tour="nav-history"
         to="/history"
         :aria-label="tr('ui.history')"
@@ -156,6 +172,7 @@
 <script setup lang="ts">
 import { useAuth } from '@/composables/useAuth';
 import { tr } from '@/localization';
+import { listenFriendships, listenSharedWorkouts } from '@/services/friends';
 import {
   abandonWorkoutSession,
   activeWorkoutSessionRef,
@@ -174,12 +191,43 @@ import {
   RotateCcwClock,
   Square,
   UserRound,
+  UsersRound,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const { profilePhoto } = useAuth();
+const { currentUser, profilePhoto } = useAuth();
+const pendingRequestsCount = ref(0);
+const sharedWorkoutsCount = ref(0);
+const pendingFriendsCount = computed(() => pendingRequestsCount.value + sharedWorkoutsCount.value);
+let stopFriendListeners: (() => void)[] = [];
+watch(
+  () => currentUser.value?.uid,
+  (userId) => {
+    stopFriendListeners.forEach((stop) => stop());
+    stopFriendListeners = [];
+    pendingRequestsCount.value = 0;
+    sharedWorkoutsCount.value = 0;
+    if (!userId) return;
+    stopFriendListeners = [
+      listenFriendships(
+        (friends) => {
+          pendingRequestsCount.value = friends.filter(
+            (friend) => friend.status === 'pending' && friend.recipient === userId,
+          ).length;
+        },
+        (error) => console.error('Unable to load friend requests', error),
+      ),
+      listenSharedWorkouts(
+        (workouts) => { sharedWorkoutsCount.value = workouts.length; },
+        (error) => console.error('Unable to load shared workouts', error),
+      ),
+    ];
+  },
+  { immediate: true },
+);
+onUnmounted(() => stopFriendListeners.forEach((stop) => stop()));
 const activeWorkout = computed(() =>
   workoutsRef.value.find((workout) => workout.id === activeWorkoutSessionRef.value?.workoutId),
 );

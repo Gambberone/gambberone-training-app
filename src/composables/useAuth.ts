@@ -57,6 +57,9 @@ export const authReady = new Promise<void>((resolve) => {
     isAuthReady.value = true;
     resolve();
     if (user) {
+      void setDoc(doc(db, 'publicProfiles', user.uid), {
+        displayName: user.displayName || user.uid,
+      }, { merge: true }).catch((error) => console.error('Unable to publish public profile', error));
       stopProfilePhotoListener = onSnapshot(
         profilePhotoDocument(user.uid),
         (snapshot) => {
@@ -95,6 +98,7 @@ export function useAuth() {
       await updateProfile(user, { displayName });
       currentUser.value = user;
       triggerRef(currentUser);
+      await setDoc(doc(db, 'publicProfiles', user.uid), { displayName }, { merge: true });
     },
     updateProfilePhoto: async (file: File) => {
       const user = auth.currentUser;
@@ -127,6 +131,17 @@ export function useAuth() {
       if (!user?.email) throw new Error('No authenticated user');
       await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
       await deleteAccountData(user.uid);
+      {
+        const { collection, getDocs, query, where, writeBatch } = await import('firebase/firestore');
+        const matches = await getDocs(query(collection(db, 'friendships'), where('participants', 'array-contains', user.uid)));
+        for (let offset = 0; offset < matches.docs.length; offset += 400) {
+          const batch = writeBatch(db);
+          matches.docs.slice(offset, offset + 400).forEach((item) => batch.delete(item.ref));
+          await batch.commit();
+        }
+      }
+      const { deleteDoc } = await import('firebase/firestore');
+      await deleteDoc(doc(db, 'publicProfiles', user.uid));
       await deleteUser(user);
       resetDeletedAccountData();
     },

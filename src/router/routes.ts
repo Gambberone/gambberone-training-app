@@ -59,6 +59,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/WorkoutsView.vue'),
       },
       {
+        path: 'friends',
+        name: 'friends',
+        meta: { title: 'Amici' },
+        component: () => import('@/views/FriendsView.vue'),
+      },
+      {
         path: 'history',
         name: 'history',
         meta: {

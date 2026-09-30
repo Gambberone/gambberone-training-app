@@ -182,7 +182,7 @@ export async function deleteAccountData(userId: string) {
   unsubscribeCallbacks = [];
   try {
     await waitForPendingWrites(db);
-    for (const name of [...collections.map((item) => item.name), 'state', 'settings']) {
+    for (const name of [...collections.map((item) => item.name), 'state', 'settings', 'sharedWorkouts']) {
       const snapshot = await getDocs(collection(userDocument(userId), name));
       for (let offset = 0; offset < snapshot.docs.length; offset += 400) {
         const batch = writeBatch(db);

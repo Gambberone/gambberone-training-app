@@ -35,6 +35,28 @@ export default defineConfig({
     vue(),
     tailwindcss(),
     {
+      name: 'clear-legacy-dev-service-worker',
+      apply: 'serve',
+      transformIndexHtml: {
+        order: 'pre',
+        handler() {
+          return [{
+            tag: 'script',
+            injectTo: 'head-prepend',
+            children: `if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(async (registrations) => {
+                const rootScope = new URL('/', location.href).href;
+                const oldRegistrations = registrations.filter((registration) => registration.scope === rootScope);
+                if (!oldRegistrations.length) return;
+                await Promise.all(oldRegistrations.map((registration) => registration.unregister()));
+                if (navigator.serviceWorker.controller) location.reload();
+              }).catch(() => {});
+            }`,
+          }];
+        },
+      },
+    },
+    {
       name: 'app-version',
       apply: 'build',
       generateBundle() {
