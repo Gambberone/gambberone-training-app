@@ -8,7 +8,16 @@
         </p>
       </div>
 
-      <GttInputField id="recovery-email" :label="tr('ui.email')" compact v-model="email" type="email" autocomplete="email" :placeholder="tr('ui.name_email_com')" required>
+      <GttInputField
+        id="recovery-email"
+        :label="tr('ui.email')"
+        compact
+        v-model="email"
+        type="email"
+        autocomplete="email"
+        :placeholder="tr('ui.name_email_com')"
+        required
+      >
         <template #prefix><Mail :size="18" class="text-base-content/55" /></template>
       </GttInputField>
 
@@ -19,22 +28,24 @@
         {{ errorMessage }}
       </p>
 
-      <button class="btn btn-primary w-full" type="submit" :disabled="isSubmitting">
+      <GttButton color="primary" class="w-full" type="submit" :disabled="isSubmitting">
         <span v-if="isSubmitting" class="loading loading-spinner loading-sm" />
         {{ tr('ui.send_recovery_link') }}
-      </button>
+      </GttButton>
 
-      <RouterLink class="btn btn-ghost btn-sm" to="/auth/login">{{ tr('ui.back_to_sign_in') }}</RouterLink>
+      <RouterLink class="btn btn-ghost btn-sm" to="/auth/login">{{
+        tr('ui.back_to_sign_in')
+      }}</RouterLink>
     </form>
   </section>
 </template>
 
 <script setup lang="ts">
 import GttInputField from '@/components/generic/form/GttInputField.vue';
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
 import { tr } from '@/localization';
 import { Mail } from '@lucide/vue';
 import { ref } from 'vue';
-import { authErrorMessage, useAuth } from '@/composables/useAuth';
 
 const email = ref('');
 const isSubmitting = ref(false);

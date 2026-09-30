@@ -53,8 +53,16 @@ export const exercises: Exercise[] = [
   { id: 'jumping-jack', name: 'Jumping jack', muscleGroupId: MUSCLE_GROUPS.WARMUP },
   { id: 'skip-alto', name: 'Skip alto', muscleGroupId: MUSCLE_GROUPS.WARMUP },
   { id: 'calci-ai-glutei', name: 'Calci ai glutei', muscleGroupId: MUSCLE_GROUPS.WARMUP },
-  { id: 'circonduzioni-braccia', name: 'Circonduzioni delle braccia', muscleGroupId: MUSCLE_GROUPS.WARMUP },
-  { id: 'circonduzioni-spalle', name: 'Circonduzioni delle spalle', muscleGroupId: MUSCLE_GROUPS.WARMUP },
+  {
+    id: 'circonduzioni-braccia',
+    name: 'Circonduzioni delle braccia',
+    muscleGroupId: MUSCLE_GROUPS.WARMUP,
+  },
+  {
+    id: 'circonduzioni-spalle',
+    name: 'Circonduzioni delle spalle',
+    muscleGroupId: MUSCLE_GROUPS.WARMUP,
+  },
   { id: 'rotazioni-busto', name: 'Rotazioni del busto', muscleGroupId: MUSCLE_GROUPS.WARMUP },
   { id: 'slanci-gambe', name: 'Slanci delle gambe', muscleGroupId: MUSCLE_GROUPS.WARMUP },
   { id: 'squat-corpo-libero', name: 'Squat a corpo libero', muscleGroupId: MUSCLE_GROUPS.WARMUP },
@@ -64,15 +72,39 @@ export const exercises: Exercise[] = [
   { id: 'cat-cow', name: 'Cat-cow', muscleGroupId: MUSCLE_GROUPS.WARMUP },
 
   // Stretching
-  { id: 'stretching-quadricipiti', name: 'Stretching quadricipiti', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
-  { id: 'stretching-femorali', name: 'Stretching femorali', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
-  { id: 'stretching-polpacci', name: 'Stretching polpacci', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
-  { id: 'stretching-flessori-anca', name: 'Stretching flessori dell’anca', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
+  {
+    id: 'stretching-quadricipiti',
+    name: 'Stretching quadricipiti',
+    muscleGroupId: MUSCLE_GROUPS.STRETCHING,
+  },
+  {
+    id: 'stretching-femorali',
+    name: 'Stretching femorali',
+    muscleGroupId: MUSCLE_GROUPS.STRETCHING,
+  },
+  {
+    id: 'stretching-polpacci',
+    name: 'Stretching polpacci',
+    muscleGroupId: MUSCLE_GROUPS.STRETCHING,
+  },
+  {
+    id: 'stretching-flessori-anca',
+    name: 'Stretching flessori dell’anca',
+    muscleGroupId: MUSCLE_GROUPS.STRETCHING,
+  },
   { id: 'stretching-glutei', name: 'Stretching glutei', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
-  { id: 'stretching-pettorali', name: 'Stretching pettorali', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
+  {
+    id: 'stretching-pettorali',
+    name: 'Stretching pettorali',
+    muscleGroupId: MUSCLE_GROUPS.STRETCHING,
+  },
   { id: 'stretching-dorsali', name: 'Stretching dorsali', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
   { id: 'stretching-spalle', name: 'Stretching spalle', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
-  { id: 'stretching-tricipiti', name: 'Stretching tricipiti', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
+  {
+    id: 'stretching-tricipiti',
+    name: 'Stretching tricipiti',
+    muscleGroupId: MUSCLE_GROUPS.STRETCHING,
+  },
   { id: 'stretching-collo', name: 'Stretching collo', muscleGroupId: MUSCLE_GROUPS.STRETCHING },
 
   // Addominali
@@ -86,14 +118,22 @@ export const exercises: Exercise[] = [
   { id: 'curl-manubri', name: 'Curl con manubri', muscleGroupId: MUSCLE_GROUPS.BICEPS },
   { id: 'curl-bilanciere', name: 'Curl con bilanciere', muscleGroupId: MUSCLE_GROUPS.BICEPS },
   { id: 'hammer-curl', name: 'Hammer curl', muscleGroupId: MUSCLE_GROUPS.BICEPS },
-  { id: 'curl-panca-inclinata', name: 'Curl su panca inclinata', muscleGroupId: MUSCLE_GROUPS.BICEPS },
+  {
+    id: 'curl-panca-inclinata',
+    name: 'Curl su panca inclinata',
+    muscleGroupId: MUSCLE_GROUPS.BICEPS,
+  },
   { id: 'curl-cavi', name: 'Curl ai cavi', muscleGroupId: MUSCLE_GROUPS.BICEPS },
 
   // Tricipiti
   { id: 'push-down', name: 'Push down', muscleGroupId: MUSCLE_GROUPS.TRICEPS },
   { id: 'french-press', name: 'French press', muscleGroupId: MUSCLE_GROUPS.TRICEPS },
   { id: 'dip-panca', name: 'Dip alla panca', muscleGroupId: MUSCLE_GROUPS.TRICEPS },
-  { id: 'estensioni-tricipiti-cavo', name: 'Estensioni tricipiti al cavo', muscleGroupId: MUSCLE_GROUPS.TRICEPS },
+  {
+    id: 'estensioni-tricipiti-cavo',
+    name: 'Estensioni tricipiti al cavo',
+    muscleGroupId: MUSCLE_GROUPS.TRICEPS,
+  },
 
   // Spalle
   { id: 'military-press', name: 'Military press', muscleGroupId: MUSCLE_GROUPS.SHOULDERS },
@@ -109,8 +149,16 @@ export const exercises: Exercise[] = [
   { id: 'pullover-cavi', name: 'Pullover ai cavi', muscleGroupId: MUSCLE_GROUPS.BACK },
 
   // Petto
-  { id: 'panca-piana-bilanciere', name: 'Panca piana con bilanciere', muscleGroupId: MUSCLE_GROUPS.CHEST },
-  { id: 'panca-inclinata-manubri', name: 'Panca inclinata con manubri', muscleGroupId: MUSCLE_GROUPS.CHEST },
+  {
+    id: 'panca-piana-bilanciere',
+    name: 'Panca piana con bilanciere',
+    muscleGroupId: MUSCLE_GROUPS.CHEST,
+  },
+  {
+    id: 'panca-inclinata-manubri',
+    name: 'Panca inclinata con manubri',
+    muscleGroupId: MUSCLE_GROUPS.CHEST,
+  },
   { id: 'croci-manubri', name: 'Croci con manubri', muscleGroupId: MUSCLE_GROUPS.CHEST },
   { id: 'push-up', name: 'Push-up', muscleGroupId: MUSCLE_GROUPS.CHEST },
   { id: 'chest-press', name: 'Chest press', muscleGroupId: MUSCLE_GROUPS.CHEST },

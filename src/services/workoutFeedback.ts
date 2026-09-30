@@ -23,10 +23,7 @@ export function signalTimer(change = false, sound = true, tone: 'beep' | 'go' = 
     if (isGo) {
       volume.gain.setValueAtTime(0.18, audioContext.currentTime + duration - 0.06);
     }
-    volume.gain.exponentialRampToValueAtTime(
-      0.0001,
-      audioContext.currentTime + duration,
-    );
+    volume.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
     oscillator.connect(volume);
     volume.connect(audioContext.destination);
     oscillator.start();

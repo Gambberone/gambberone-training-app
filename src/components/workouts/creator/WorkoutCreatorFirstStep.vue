@@ -9,34 +9,34 @@
           </div>
         </div>
         <div class="grid w-full grid-cols-1 gap-3">
-          <button
-            class="btn flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-error"
+          <GttButton
+            class="flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-error"
             type="button"
             @click="selectStep(WORKOUT_CREATOR_STEP_ACTION.WARMUP)"
           >
             <Flame :size="50" /> {{ tr('ui.warm_up') }}
-          </button>
-          <button
-            class="btn flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-warning"
+          </GttButton>
+          <GttButton
+            class="flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-warning"
             type="button"
             @click="selectStep(WORKOUT_CREATOR_STEP_ACTION.STRETCHING)"
           >
             <LineSquiggle :size="50" /> {{ tr('ui.stretching') }}
-          </button>
-          <button
-            class="btn flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-info"
+          </GttButton>
+          <GttButton
+            class="flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-info"
             type="button"
             @click="selectStep(WORKOUT_CREATOR_STEP_ACTION.EXERCISE)"
           >
             <Dumbbell :size="50" /> {{ tr('ui.exercise') }}
-          </button>
-          <button
-            class="btn flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-primary"
+          </GttButton>
+          <GttButton
+            class="flex h-auto min-h-20 w-full flex-col gap-2 py-4 text-xl text-primary"
             type="button"
             @click="selectStep(WORKOUT_CREATOR_STEP_ACTION.PAUSE)"
           >
             <Pause :size="50" /> {{ tr('ui.rest') }}
-          </button>
+          </GttButton>
         </div>
       </div>
     </Transition>
@@ -58,20 +58,20 @@
 </template>
 
 <script setup lang="ts">
-import { tr } from '@/localization';
-import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
+import GttInputField from '@/components/generic/form/GttInputField.vue';
 import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '@/constants';
-import WorkoutCreatorStretchingAction from './WorkoutCreatorStretchingAction.vue';
-import WorkoutCreatorExerciseAction from './WorkoutCreatorExerciseAction.vue';
-import WorkoutCreatorPauseAction from './WorkoutCreatorPauseAction.vue';
-import WorkoutCreatorWarmupAction from './warmup/WorkoutCreatorWarmupAction.vue';
+import { tr } from '@/localization';
 import {
   currentWorkoutCreatorStep,
   startWorkoutCreatorStep,
   workoutCreatorDraft,
 } from '@/stores/workoutCreator';
-import GttInputField from '@/components/generic/form/GttInputField.vue';
+import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
 import { computed } from 'vue';
+import WorkoutCreatorExerciseAction from './WorkoutCreatorExerciseAction.vue';
+import WorkoutCreatorPauseAction from './WorkoutCreatorPauseAction.vue';
+import WorkoutCreatorStretchingAction from './WorkoutCreatorStretchingAction.vue';
+import WorkoutCreatorWarmupAction from './warmup/WorkoutCreatorWarmupAction.vue';
 
 const workoutName = computed({
   get: () => workoutCreatorDraft.value.name,
@@ -89,7 +89,10 @@ const selectStep = (action: WorkoutCreatorStepAction) => {
 .creator-reveal-enter-active,
 .creator-reveal-leave-active {
   overflow: hidden;
-  transition: max-height 300ms ease, transform 300ms ease, opacity 250ms ease;
+  transition:
+    max-height 300ms ease,
+    transform 300ms ease,
+    opacity 250ms ease;
 }
 
 .creator-reveal-enter-from,

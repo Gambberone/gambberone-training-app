@@ -24,55 +24,52 @@
         <span>{{ stepLabel(step.type) }}</span>
       </li>
       <li class="flex w-full max-w-md justify-center gap-3">
-        <button
+        <GttButton shape="square" mode="outline" color="error"
           v-if="!hasWarmup"
-          class="btn btn-square btn-outline btn-error"
+          
           type="button"
           :aria-label="tr('ui.add_warm_up')"
           :title="tr('ui.add_warm_up')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.WARMUP)"
         >
           <Flame :size="28" />
-        </button>
-        <button
-          class="btn btn-square btn-outline btn-info"
+        </GttButton>
+        <GttButton shape="square" mode="outline" color="info"
+          
           type="button"
           :aria-label="tr('ui.add_exercise')"
           :title="tr('ui.add_exercise')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.EXERCISE)"
         >
           <Dumbbell :size="28" />
-        </button>
-        <button
-          class="btn btn-square btn-outline btn-primary"
+        </GttButton>
+        <GttButton shape="square" mode="outline" color="primary"
+          
           type="button"
           :aria-label="tr('ui.add_rest')"
           :title="tr('ui.add_rest')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.PAUSE)"
         >
           <Pause :size="28" />
-        </button>
-        <button
-          class="btn btn-square btn-outline btn-warning"
+        </GttButton>
+        <GttButton shape="square" mode="outline" color="warning"
+          
           type="button"
           :aria-label="tr('ui.add_stretching')"
           :title="tr('ui.add_stretching')"
           @click="addStep(WORKOUT_CREATOR_STEP_ACTION.STRETCHING)"
         >
           <LineSquiggle :size="28" />
-        </button>
+        </GttButton>
       </li>
     </ol>
   </section>
 </template>
 
 <script setup lang="ts">
-import { tr } from '@/localization';
-import { computed } from 'vue';
-import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
-import WorkoutCreatorFirstStep from './creator/WorkoutCreatorFirstStep.vue';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
 import { WORKOUT_CREATOR_STEP_ACTION, type WorkoutCreatorStepAction } from '@/constants';
+import { tr } from '@/localization';
 import {
   currentWorkoutCreatorStep,
   editWorkoutCreatorStep,
@@ -81,6 +78,9 @@ import {
   workoutCreatorDraft,
 } from '@/stores/workoutCreator';
 import { estimateWorkoutDuration } from '@/wavebinder/duration';
+import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
+import { computed } from 'vue';
+import WorkoutCreatorFirstStep from './creator/WorkoutCreatorFirstStep.vue';
 
 const estimatedDurationLabel = computed(() => {
   const seconds = estimateWorkoutDuration(workoutCreatorDraft.value.steps);

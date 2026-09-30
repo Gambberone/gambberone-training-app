@@ -10,7 +10,8 @@ export type ScheduleInput = {
 export const scheduleValidationErrors = (input: ScheduleInput | null): string[] => {
   if (!input?.date || !input.workoutId) return ['messages.scheduleRequired'];
   const duplicate = input.scheduled?.some(
-    (item) => item.date === input.date && item.workoutId === input.workoutId && item.time === input.time,
+    (item) =>
+      item.date === input.date && item.workoutId === input.workoutId && item.time === input.time,
   );
   return duplicate ? ['messages.duplicateSchedule'] : [];
 };

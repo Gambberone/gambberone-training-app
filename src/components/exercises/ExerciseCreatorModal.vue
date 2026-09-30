@@ -28,21 +28,22 @@
 </template>
 
 <script setup lang="ts">
-import { tr } from '@/localization';
-import { computed, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { muscleGroups, type Exercise, type MuscleGroupType } from '@/domain/exercises.ts';
-import { exercisesRef } from '@/stores/exercises';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
-import GttModal from '@/components/generic/GttModal.vue';
+import { muscleGroups, type Exercise, type MuscleGroupType } from '@/domain/exercises.ts';
+import { tr } from '@/localization';
+import { exercisesRef } from '@/stores/exercises';
+import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 interface ExerciseCreatorEditorProps {
   exercise: Exercise | null;
 }
 
 const { t } = useI18n();
-const localizedMuscleGroups = computed(() => muscleGroups.map(({ id }) => ({ id, name: t(`muscleGroups.${id}`) })));
+const localizedMuscleGroups = computed(() =>
+  muscleGroups.map(({ id }) => ({ id, name: t(`muscleGroups.${id}`) })),
+);
 const isOpen = defineModel<boolean>({ default: false });
 const props = defineProps<ExerciseCreatorEditorProps>();
 
@@ -83,7 +84,9 @@ const modalActions = computed(() => {
     : [{ id: 'create', label: tr('ui.create'), color: 'primary' }];
 });
 
-const modalTitle = computed(() => (props.exercise ? tr('ui.edit_exercise') : tr('ui.create_exercise')));
+const modalTitle = computed(() =>
+  props.exercise ? tr('ui.edit_exercise') : tr('ui.create_exercise'),
+);
 
 const handleAction = (actionId: string) => {
   if (actionId !== 'create' && actionId !== 'save') {

@@ -75,7 +75,6 @@
     "cropHorizontal": "Posizione orizzontale",
     "cropVertical": "Posizione verticale",
     "savePhoto": "Salva foto",
-
     "changePassword": "Cambia password",
     "currentPassword": "Password attuale",
     "newPassword": "Nuova password",
@@ -85,7 +84,6 @@
     "deleteConfirmation": "Confermo di voler eliminare definitivamente il mio account e tutti i suoi dati.",
     "cancel": "Annulla",
     "deletePermanently": "Elimina definitivamente",
-
     "vibrationDescription": "Vibra durante il conto alla rovescia e al cambio di step, se supportato.",
     "screenDescription": "Evita lo spegnimento dello schermo durante il workout, se supportato.",
     "soundsDescription": "Segnali sonori quando mancano 3, 2 e 1 secondi o ripetizioni.",

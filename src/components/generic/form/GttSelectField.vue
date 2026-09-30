@@ -22,16 +22,16 @@
           {{ props.valueKey ? option[props.valueKey] : option.label }}
         </option>
       </select>
-      <button
+      <GttButton color="primary"
         v-if="props.splitAction"
-        class="btn btn-primary join-item"
+        class="join-item"
         type="button"
         :disabled="!modelValue || props.disabled"
         :aria-label="props.splitActionLabel"
         @click="emit('action')"
       >
         <slot name="split-action">{{ tr('ui.add') }}</slot>
-      </button>
+      </GttButton>
     </div>
   </GttFieldWrapper>
 </template>

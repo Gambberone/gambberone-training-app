@@ -8,12 +8,22 @@ const localDate = (value: string) => {
 
 export function pendingAgendaWorkouts(scheduled: ScheduledWorkout[], sessions: WorkoutSession[]) {
   const completed = sessions.filter((session) => session.completedAt);
-  const matched = new Set(completed.flatMap((session) => session.scheduledWorkoutId ? [session.scheduledWorkoutId] : []));
-  const remaining = scheduled.filter((item) => !matched.has(item.id)).sort((a, b) =>
-    a.date.localeCompare(b.date) || (a.time || '24:00').localeCompare(b.time || '24:00'),
+  const matched = new Set(
+    completed.flatMap((session) =>
+      session.scheduledWorkoutId ? [session.scheduledWorkoutId] : [],
+    ),
   );
+  const remaining = scheduled
+    .filter((item) => !matched.has(item.id))
+    .sort(
+      (a, b) =>
+        a.date.localeCompare(b.date) || (a.time || '24:00').localeCompare(b.time || '24:00'),
+    );
   for (const session of completed.filter((item) => !item.scheduledWorkoutId)) {
-    const index = remaining.findIndex((item) => item.workoutId === session.workoutId && item.date === localDate(session.completedAt!));
+    const index = remaining.findIndex(
+      (item) =>
+        item.workoutId === session.workoutId && item.date === localDate(session.completedAt!),
+    );
     if (index >= 0) remaining.splice(index, 1);
   }
   return remaining;

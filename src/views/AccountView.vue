@@ -38,8 +38,8 @@
               <p class="text-sm font-semibold">{{ t('ui.email') }}</p>
               <p class="mt-1 break-all text-sm text-base-content/65">{{ currentUser?.email }}</p>
             </div>
-            <button
-              class="btn btn-primary self-end"
+            <GttButton color="primary"
+              class="self-end"
               type="submit"
               :disabled="
                 isSavingName ||
@@ -49,16 +49,16 @@
             >
               <span v-if="isSavingName" class="loading loading-spinner loading-sm" />
               {{ t('account.saveName') }}
-            </button>
+            </GttButton>
             <div class="divider my-0" />
-            <button
-              class="btn btn-outline btn-error w-full"
+            <GttButton mode="outline" color="error"
+              class="w-full"
               type="button"
               :disabled="isDeletingAccount || isChangingPassword"
               @click="logout"
             >
               {{ t('account.logout') }}
-            </button>
+            </GttButton>
           </form>
         </details>
       </div>
@@ -98,11 +98,26 @@
               @update:model-value="(value) => value && changeLanguage(value)"
             />
             <div class="divider my-0" />
-            <GttToggleField id="account-sounds" v-model="timerSounds" :label="t('account.sounds')" :hint="t('account.soundsDescription')" />
+            <GttToggleField
+              id="account-sounds"
+              v-model="timerSounds"
+              :label="t('account.sounds')"
+              :hint="t('account.soundsDescription')"
+            />
             <div class="divider my-0" />
-            <GttToggleField id="account-vibration" v-model="timerVibration" :label="t('account.vibration')" :hint="t('account.vibrationDescription')" />
+            <GttToggleField
+              id="account-vibration"
+              v-model="timerVibration"
+              :label="t('account.vibration')"
+              :hint="t('account.vibrationDescription')"
+            />
             <div class="divider my-0" />
-            <GttToggleField id="account-screen" v-model="keepScreenAwake" :label="t('account.screen')" :hint="t('account.screenDescription')" />
+            <GttToggleField
+              id="account-screen"
+              v-model="keepScreenAwake"
+              :label="t('account.screen')"
+              :hint="t('account.screenDescription')"
+            />
           </div>
         </details>
         <details class="card border border-base-300 bg-base-100 shadow-sm">
@@ -117,14 +132,14 @@
           </summary>
           <div class="card-body gap-3 px-5 pb-5 pt-0">
             <p class="text-sm text-base-content/65">{{ t('tour.replayDescription') }}</p>
-            <button
-              class="btn btn-outline self-start"
+            <GttButton mode="outline"
+              class="self-start"
               type="button"
               :disabled="isTourRunning || !!activeWorkoutSessionRef"
               @click="startTour"
             >
               {{ t('tour.replay') }}
-            </button>
+            </GttButton>
             <p v-if="activeWorkoutSessionRef" class="text-sm text-base-content/60">
               {{ t('tour.workoutActive') }}
             </p>
@@ -175,14 +190,14 @@
               compact
             />
             <p v-if="passwordError" class="text-sm text-error" role="alert">{{ passwordError }}</p>
-            <button
-              class="btn btn-primary self-end"
+            <GttButton color="primary"
+              class="self-end"
               type="submit"
               :disabled="isChangingPassword || isDeletingAccount"
             >
               <span v-if="isChangingPassword" class="loading loading-spinner loading-sm" />
               {{ t('account.changePassword') }}
-            </button>
+            </GttButton>
           </form>
         </details>
         <details class="card border border-error/30 bg-base-100 shadow-sm">
@@ -197,15 +212,15 @@
           </summary>
           <div class="card-body gap-4 px-5 pb-5 pt-0">
             <p class="text-sm text-base-content/65">{{ t('account.deleteDescription') }}</p>
-            <button
+            <GttButton mode="outline" color="error"
               v-if="!showDeleteConfirmation"
-              class="btn btn-outline btn-error self-start"
+              class="self-start"
               type="button"
               :disabled="isChangingPassword"
               @click="showDeleteConfirmation = true"
             >
               {{ t('account.deleteAccount') }}
-            </button>
+            </GttButton>
             <form v-else class="flex flex-col gap-4" @submit.prevent="confirmDeleteAccount">
               <GttInputField
                 id="account-delete-password"
@@ -217,19 +232,25 @@
                 required
                 compact
               />
-              <GttCheckboxField id="account-delete-confirmed" v-model="deleteConfirmed" :label="t('account.deleteConfirmation')" :disabled="isDeletingAccount" required />
+              <GttCheckboxField
+                id="account-delete-confirmed"
+                v-model="deleteConfirmed"
+                :label="t('account.deleteConfirmation')"
+                :disabled="isDeletingAccount"
+                required
+              />
               <p v-if="deleteError" class="text-sm text-error" role="alert">{{ deleteError }}</p>
               <div class="flex flex-wrap justify-end gap-2">
-                <button
-                  class="btn btn-ghost"
+                <GttButton mode="ghost"
+                  
                   type="button"
                   :disabled="isDeletingAccount"
                   @click="cancelDelete"
                 >
                   {{ t('account.cancel') }}
-                </button>
-                <button
-                  class="btn btn-error"
+                </GttButton>
+                <GttButton color="error"
+                  
                   type="submit"
                   :disabled="
                     isDeletingAccount || !deleteConfirmed || !deletePassword || isChangingPassword
@@ -237,7 +258,7 @@
                 >
                   <span v-if="isDeletingAccount" class="loading loading-spinner loading-sm" />
                   {{ t('account.deletePermanently') }}
-                </button>
+                </GttButton>
               </div>
             </form>
           </div>
@@ -249,22 +270,22 @@
 
 <script setup lang="ts">
 import AccountPhoto from '@/components/account/AccountPhoto.vue';
+import GttCheckboxField from '@/components/generic/form/GttCheckboxField.vue';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
 import GttToggleField from '@/components/generic/form/GttToggleField.vue';
-import GttCheckboxField from '@/components/generic/form/GttCheckboxField.vue';
-import { computed, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-const { t, locale } = useI18n();
-import { ChevronDown } from '@lucide/vue';
-import { useRouter } from 'vue-router';
-import { authErrorMessage, useAuth } from '@/composables/useAuth';
+import { showToast } from '@/composables/toast';
 import { useAppTour } from '@/composables/useAppTour';
-import { activeWorkoutSessionRef } from '@/stores/workoutCreator';
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
 import { useLanguage } from '@/composables/useLanguage';
 import { useTheme } from '@/composables/useTheme';
 import { useWorkoutPreferences } from '@/composables/useWorkoutPreferences';
-import { showToast } from '@/composables/toast';
+import { activeWorkoutSessionRef } from '@/stores/workoutCreator';
+import { ChevronDown } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+const { t, locale } = useI18n();
 
 const { startTour, isTourRunning, tourError } = useAppTour();
 const { themePreference } = useTheme();

@@ -4,7 +4,8 @@
       <div class="player-header flex items-center justify-between gap-3">
         <div>
           <p class="text-sm font-semibold text-primary">
-            {{ tr('messages.inProgress') }} · <span class="font-mono tabular-nums">{{ totalElapsedLabel }}</span>
+            {{ tr('messages.inProgress') }} ·
+            <span class="font-mono tabular-nums">{{ totalElapsedLabel }}</span>
           </p>
           <h2 class="text-xl font-bold">{{ workout.name }}</h2>
         </div>
@@ -12,17 +13,17 @@
           <span class="badge badge-primary"
             >{{ currentSegmentIndex + 1 }}/{{ segments.length }}</span
           >
-          <button
-            class="btn btn-square btn-ghost btn-sm"
+          <GttButton shape="square" mode="ghost" size="sm"
+            
             type="button"
             :aria-label="tr('ui.minimize_player')"
             :title="tr('ui.continue_in_the_background')"
             @click="minimizePlayer"
           >
             <Minimize2 class="size-5" aria-hidden="true" />
-          </button>
-          <button
-            class="btn btn-square btn-ghost btn-sm"
+          </GttButton>
+          <GttButton shape="square" mode="ghost" size="sm"
+            
             type="button"
             :aria-label="isFullscreen ? tr('ui.exit_fullscreen') : tr('ui.enter_fullscreen')"
             :title="isFullscreen ? tr('ui.exit_fullscreen') : tr('ui.fullscreen')"
@@ -30,7 +31,7 @@
           >
             <Minimize v-if="isFullscreen" class="size-5" aria-hidden="true" />
             <Maximize v-else class="size-5" aria-hidden="true" />
-          </button>
+          </GttButton>
         </div>
       </div>
 
@@ -45,7 +46,9 @@
         class="player-stage flex min-h-80 flex-col justify-center rounded-box bg-base-200 p-3 text-center sm:p-8"
       >
         <template v-if="isStarting">
-          <p class="text-base font-semibold uppercase tracking-wider text-primary">{{ tr('ui.get_ready') }}</p>
+          <p class="text-base font-semibold uppercase tracking-wider text-primary">
+            {{ tr('ui.get_ready') }}
+          </p>
           <p class="mt-3 text-8xl font-black text-primary sm:text-9xl" aria-live="assertive">
             {{ startLabel }}
           </p>
@@ -56,7 +59,7 @@
             class="player-step-name flex items-center justify-center text-3xl font-bold leading-tight sm:text-4xl"
             :class="currentSegment.colorClass"
           >
-            <span class="min-w-0 break-words">{{ currentSegment.name }}</span>
+            <span class="min-w-0 wrap-break-word">{{ currentSegment.name }}</span>
           </p>
           <div
             class="player-ring relative mt-3 grid aspect-square w-full max-w-84 shrink-0 self-center place-items-center sm:max-w-md"
@@ -130,18 +133,25 @@
             {{ upcomingSegment ? tr('ui.next_step') : tr('ui.last_step') }}
           </p>
           <div class="grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-3 text-center">
-            <button
-              class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
+            <GttButton shape="circle" mode="ghost" size="sm"
+              class="shrink-0 text-primary hover:bg-base-200"
               type="button"
               :disabled="isStarting || !previousSegment"
-              :aria-label="previousSegment ? tr('messages.previousNamed', { name: previousSegment.name }) : tr('ui.no_previous_step')"
+              :aria-label="
+                previousSegment
+                  ? tr('messages.previousNamed', { name: previousSegment.name })
+                  : tr('ui.no_previous_step')
+              "
               :title="tr('ui.go_to_the_previous_step')"
               @click="skipToPreviousSegment"
             >
               <SkipBack :size="24" aria-hidden="true" />
-            </button>
+            </GttButton>
             <div v-if="upcomingSegment" class="min-w-0 flex-1">
-              <p class="text-lg font-bold leading-tight sm:text-xl" :class="upcomingSegment.colorClass">
+              <p
+                class="text-lg font-bold leading-tight sm:text-xl"
+                :class="upcomingSegment.colorClass"
+              >
                 {{ upcomingSegment.name
                 }}<span v-if="upcomingSegment.setLabel"> · {{ upcomingSegment.setLabel }}</span>
               </p>
@@ -149,45 +159,49 @@
             <div v-else class="min-w-0 flex-1 text-success">
               <p class="font-bold">{{ tr('ui.the_workout_will_be_completed_after_this_step') }}</p>
             </div>
-            <button
+            <GttButton shape="circle" mode="ghost" size="sm"
               :disabled="isStarting || !upcomingSegment"
-              class="btn btn-circle btn-ghost btn-sm shrink-0 text-primary hover:bg-base-200"
+              class="shrink-0 text-primary hover:bg-base-200"
               type="button"
-              :aria-label="upcomingSegment ? tr('messages.startNamed', { name: upcomingSegment.name }) : tr('ui.no_next_step')"
+              :aria-label="
+                upcomingSegment
+                  ? tr('messages.startNamed', { name: upcomingSegment.name })
+                  : tr('ui.no_next_step')
+              "
               :title="tr('ui.start_the_next_step')"
               @click="skipToNextSegment"
             >
               <SkipForward :size="24" aria-hidden="true" />
-            </button>
+            </GttButton>
           </div>
         </div>
         <div class="player-actions grid grid-cols-3 gap-2">
-          <button
-            class="btn btn-primary btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          <GttButton color="primary" size="sm"
+            class="px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
             :aria-label="tr('ui.restart_the_current_segment')"
             @click="resetCurrentSegment"
           >
             <RotateCcw class="size-4 sm:size-5" aria-hidden="true" />
             {{ tr('ui.reset') }}
-          </button>
-          <button
-            class="btn btn-info btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          </GttButton>
+          <GttButton color="info" size="sm"
+            class="px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
             @click="togglePause"
           >
             <Play v-if="isPaused" class="size-4 sm:size-5" aria-hidden="true" />
             <Pause v-else class="size-4 sm:size-5" aria-hidden="true" />
             {{ isPaused ? tr('ui.resume') : tr('ui.pause') }}
-          </button>
-          <button
-            class="btn btn-error btn-sm px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          </GttButton>
+          <GttButton color="error" size="sm"
+            class="px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
             @click="abandonWorkoutSession"
           >
             <Square class="size-4 sm:size-5" aria-hidden="true" />
             {{ tr('ui.abandon') }}
-          </button>
+          </GttButton>
         </div>
       </div>
     </div>
@@ -197,7 +211,17 @@
 <script setup lang="ts">
 import { tr, localizedExerciseName } from '@/localization';
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
-import { Maximize, Minimize, Minimize2, Pause, Play, RotateCcw, SkipBack, SkipForward, Square } from '@lucide/vue';
+import {
+  Maximize,
+  Minimize,
+  Minimize2,
+  Pause,
+  Play,
+  RotateCcw,
+  SkipBack,
+  SkipForward,
+  Square,
+} from '@lucide/vue';
 import {
   DEFAULT_REPETITION_INTERVAL_SECONDS,
   WORKOUT_CREATOR_STEP_ACTION,
@@ -323,7 +347,8 @@ const segments = computed<PlayerSegment[]>(() =>
       const exercise = {
         ...style,
         name: exerciseName(step.exerciseId),
-        setLabel: sets > 1 ? tr('messages.setNumber', { number: setIndex + 1, total: sets }) : undefined,
+        setLabel:
+          sets > 1 ? tr('messages.setNumber', { number: setIndex + 1, total: sets }) : undefined,
         sourceStepIndex,
         mode: step.exerciseModeType ?? 'repetitions',
         target: Math.max(
@@ -409,9 +434,11 @@ const workoutProgress = computed(() =>
 );
 // Draw from the same clock as playback, without rerendering the player every frame.
 function drawRing() {
-  const elapsed = isStarting.value ? 0 : isPaused.value
-    ? elapsedMilliseconds.value
-    : Math.max(0, Date.now() - segmentStartedAt);
+  const elapsed = isStarting.value
+    ? 0
+    : isPaused.value
+      ? elapsedMilliseconds.value
+      : Math.max(0, Date.now() - segmentStartedAt);
   const progress = Math.min(1, elapsed / segmentDurationMilliseconds.value);
   progressCircle.value?.setAttribute('stroke-dashoffset', String(100 * (1 - progress)));
   ringFrame = window.requestAnimationFrame(drawRing);
@@ -801,8 +828,14 @@ watch(
 <style scoped>
 /* Hallmark · component: workout player · theme: existing app
  * pre-emit critique: P4 H5 E4 S5 R5 V4 */
-.player-header > div:first-child { min-width: 0; }
-.player-header h2, .player-step-name, .player-next p { overflow-wrap: anywhere; }
+.player-header > div:first-child {
+  min-width: 0;
+}
+.player-header h2,
+.player-step-name,
+.player-next p {
+  overflow-wrap: anywhere;
+}
 .player-next {
   position: relative;
   display: grid;
@@ -812,12 +845,18 @@ watch(
 }
 .player-next-label {
   position: absolute;
-  top: .75rem;
+  top: 0.75rem;
   inset-inline: 1rem;
 }
-.player-ring { container-type: inline-size; }
-.player-ring > p:first-of-type { font-size: clamp(3rem, 23cqw, 9rem); }
-.player-ring:has(.player-cadence) > p:first-of-type { font-size: clamp(2.5rem, 20cqw, 7rem); }
+.player-ring {
+  container-type: inline-size;
+}
+.player-ring > p:first-of-type {
+  font-size: clamp(3rem, 23cqw, 9rem);
+}
+.player-ring:has(.player-cadence) > p:first-of-type {
+  font-size: clamp(2.5rem, 20cqw, 7rem);
+}
 .workout-player:fullscreen {
   width: 100%;
   height: 100%;
@@ -841,17 +880,32 @@ watch(
     gap: 1rem 1.5rem;
     padding: 1.5rem;
   }
-  .player-header, .player-progress { grid-column: 1 / -1; }
+  .player-header,
+  .player-progress {
+    grid-column: 1 / -1;
+  }
   .player-stage {
     min-height: 0;
     padding: 1.25rem;
-    gap: .5rem;
+    gap: 0.5rem;
   }
-  .player-step-name { font-size: clamp(1.5rem, 2.5vw, 2.25rem); }
-  .player-ring { width: min(100%, clamp(15rem, calc(100dvh - 17rem), 34rem)); margin-top: .5rem; }
-  .player-sidebar { justify-content: center; min-width: 0; }
-  .player-actions { grid-template-columns: 1fr; }
-  .player-actions .btn { min-height: 3rem; }
+  .player-step-name {
+    font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  }
+  .player-ring {
+    width: min(100%, clamp(15rem, calc(100dvh - 17rem), 34rem));
+    margin-top: 0.5rem;
+  }
+  .player-sidebar {
+    justify-content: center;
+    min-width: 0;
+  }
+  .player-actions {
+    grid-template-columns: 1fr;
+  }
+  .player-actions .btn {
+    min-height: 3rem;
+  }
   .workout-player:fullscreen .player-body {
     max-width: none;
     margin: 0;

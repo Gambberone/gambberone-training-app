@@ -1,9 +1,9 @@
-import type { Exercise } from '@/domain/exercises';
 import type { ExerciseModeType, WorkoutCreatorStep } from '@/constants';
 import { DEFAULT_REPETITION_INTERVAL_SECONDS } from '@/constants/workout';
+import type { Exercise } from '@/domain/exercises';
+import { validateExerciseStep } from '@/domain/workoutValidation';
 import { ListNode, MultiNode, SingleNode } from 'wave-binder';
 import { wb } from './index';
-import { validateExerciseStep } from '@/domain/workoutValidation';
 
 type ExerciseStepNodeName =
   | 'selectedMuscleGroupId'
@@ -47,15 +47,16 @@ export const resetExerciseStep = () => {
 
 export const exerciseStepIsValid = () => Boolean(getExerciseStepNode('isStepValid').getNodeValue());
 
-export const exerciseStepValidationErrors = () => validateExerciseStep(
-  selectedExerciseNode().getNodeValue() as Exercise | null,
-  getExerciseStepNode('exerciseMode').getNodeValue() as ExerciseModeType,
-  Number(getExerciseStepNode('exerciseValue').getNodeValue()),
-  Number(getExerciseStepNode('repetitionIntervalSeconds').getNodeValue()),
-  Number(getExerciseStepNode('sets').getNodeValue()),
-  Boolean(getExerciseStepNode('hasSetPause').getNodeValue()),
-  Number(getExerciseStepNode('pauseBetweenSetsDuration').getNodeValue()),
-);
+export const exerciseStepValidationErrors = () =>
+  validateExerciseStep(
+    selectedExerciseNode().getNodeValue() as Exercise | null,
+    getExerciseStepNode('exerciseMode').getNodeValue() as ExerciseModeType,
+    Number(getExerciseStepNode('exerciseValue').getNodeValue()),
+    Number(getExerciseStepNode('repetitionIntervalSeconds').getNodeValue()),
+    Number(getExerciseStepNode('sets').getNodeValue()),
+    Boolean(getExerciseStepNode('hasSetPause').getNodeValue()),
+    Number(getExerciseStepNode('pauseBetweenSetsDuration').getNodeValue()),
+  );
 
 export const exerciseStepToDraftChanges = (): Partial<WorkoutCreatorStep> => {
   const exercise = selectedExerciseNode().getNodeValue() as Exercise | null;
@@ -66,12 +67,15 @@ export const exerciseStepToDraftChanges = (): Partial<WorkoutCreatorStep> => {
     exerciseId: exercise?.id,
     exerciseModeType: mode,
     exerciseRepetitions: mode === 'repetitions' ? value : undefined,
-    repetitionIntervalSeconds: mode === 'repetitions'
-      ? Number(getExerciseStepNode('repetitionIntervalSeconds').getNodeValue())
-      : undefined,
+    repetitionIntervalSeconds:
+      mode === 'repetitions'
+        ? Number(getExerciseStepNode('repetitionIntervalSeconds').getNodeValue())
+        : undefined,
     exerciseDuration: mode === 'duration' ? value : undefined,
     sets: Math.max(1, Number(getExerciseStepNode('sets').getNodeValue() ?? 1)),
     hasSetPause: Boolean(getExerciseStepNode('hasSetPause').getNodeValue()),
-    pauseBetweenSetsDuration: Number(getExerciseStepNode('effectivePauseDuration').getNodeValue() ?? 0),
+    pauseBetweenSetsDuration: Number(
+      getExerciseStepNode('effectivePauseDuration').getNodeValue() ?? 0,
+    ),
   };
 };

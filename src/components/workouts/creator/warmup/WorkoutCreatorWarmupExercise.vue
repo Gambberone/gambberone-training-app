@@ -14,7 +14,14 @@
       v-model="warmupValue"
       :label="isRepetitions ? tr('ui.repetitions') : tr('ui.duration_seconds')"
     />
-    <GttToggleField :id="`warmup_mode_${warmupExercise.id}`" v-model="isRepetitions" :off-label="tr('ui.timed')" :label="tr('ui.repetitions')" small inline />
+    <GttToggleField
+      :id="`warmup_mode_${warmupExercise.id}`"
+      v-model="isRepetitions"
+      :off-label="tr('ui.timed')"
+      :label="tr('ui.repetitions')"
+      small
+      inline
+    />
   </div>
   <WorkoutCreatorDurationRepetitionField
     v-if="isRepetitions"
@@ -24,15 +31,18 @@
   />
 </template>
 <script setup lang="ts">
-import { tr, localizedExercises } from '@/localization';
-import { computed } from 'vue';
-import { DEFAULT_REPETITION_INTERVAL_SECONDS, WORKOUT_CREATOR_STEP_ACTION } from '@/constants/workout.ts';
-import type { WarmupExercise } from '@/constants/workout.ts';
-import type { Exercise } from '@/domain/exercises.ts';
-import { exercisesRef } from '@/stores/exercises.ts';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
 import GttToggleField from '@/components/generic/form/GttToggleField.vue';
 import WorkoutCreatorDurationRepetitionField from '@/components/workouts/creator/WorkoutCreatorDurationRepetitionField.vue';
+import type { WarmupExercise } from '@/constants/workout.ts';
+import {
+  DEFAULT_REPETITION_INTERVAL_SECONDS,
+  WORKOUT_CREATOR_STEP_ACTION,
+} from '@/constants/workout.ts';
+import type { Exercise } from '@/domain/exercises.ts';
+import { localizedExercises, tr } from '@/localization';
+import { exercisesRef } from '@/stores/exercises.ts';
+import { computed } from 'vue';
 
 const warmupExercise = defineModel<WarmupExercise>({ required: true });
 
@@ -75,7 +85,8 @@ const warmupValue = computed({
   },
 });
 const repetitionInterval = computed({
-  get: () => String(warmupExercise.value.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS),
+  get: () =>
+    String(warmupExercise.value.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS),
   set: (value: string) => {
     warmupExercise.value = { ...warmupExercise.value, repetitionIntervalSeconds: Number(value) };
   },

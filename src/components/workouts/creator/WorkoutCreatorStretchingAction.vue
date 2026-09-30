@@ -10,20 +10,22 @@
         @remove="removeStretchingExercise(stretchingExerciseIndex)"
       />
     </div>
-    <button class="btn" type="button" @click="addStretchingExercise">{{ tr('ui.add_exercise') }}</button>
+    <GttButton  type="button" @click="addStretchingExercise">
+      {{ tr('ui.add_exercise') }}
+    </GttButton>
   </div>
 </template>
 
 <script setup lang="ts">
 import { tr } from '@/localization';
+import { currentWorkoutCreatorStep } from '@/stores/workoutCreator';
+import { createStretchingExercise } from '@/stores/workoutCreator.ts';
 import { computed } from 'vue';
 import WorkoutCreatorStretchingExercise from './stretching/WorkoutCreatorStretchingExercise.vue';
-import {
-  currentWorkoutCreatorStep,
-} from '@/stores/workoutCreator';
-import { createStretchingExercise } from '@/stores/workoutCreator.ts';
 
-const stretchingExercises = computed(() => currentWorkoutCreatorStep.value?.stretchingExercises ?? []);
+const stretchingExercises = computed(
+  () => currentWorkoutCreatorStep.value?.stretchingExercises ?? [],
+);
 
 const addStretchingExercise = () => {
   currentWorkoutCreatorStep.value?.stretchingExercises?.push(createStretchingExercise());

@@ -10,18 +10,21 @@
         >
           <Dumbbell :size="17" class="text-primary" />
           <span class="flex-1 font-medium">{{ workoutName(scheduledWorkout.workoutId) }}</span>
-          <span v-if="scheduledWorkout.time" class="flex items-center gap-1 text-sm text-base-content/60">
+          <span
+            v-if="scheduledWorkout.time"
+            class="flex items-center gap-1 text-sm text-base-content/60"
+          >
             <Clock3 :size="15" />
             {{ scheduledWorkout.time }}
           </span>
-          <button
-            class="btn btn-ghost btn-xs btn-circle"
+          <GttButton mode="ghost" size="xs" shape="circle"
+            
             type="button"
             :aria-label="tr('ui.remove_scheduled_workout')"
             @click="removeScheduledWorkout(scheduledWorkout.id)"
           >
             <Trash2 :size="16" />
-          </button>
+          </GttButton>
         </div>
       </div>
 
@@ -48,18 +51,17 @@
       <p v-else class="text-sm text-base-content/60">
         {{ tr('ui.create_a_workout_in_the_workouts_section_first') }}
       </p>
-      <p v-if="scheduleError" class="text-sm text-error" role="alert">{{ localizedValidationMessage(scheduleError) }}</p>
+      <p v-if="scheduleError" class="text-sm text-error" role="alert">
+        {{ localizedValidationMessage(scheduleError) }}
+      </p>
     </div>
   </GttModal>
 </template>
 
 <script setup lang="ts">
-import { tr, appLocale, localizedValidationMessage } from '@/localization';
-import { computed, ref, watch } from 'vue';
-import { Clock3, Dumbbell, Plus, Trash2 } from '@lucide/vue';
-import GttTimeField from '@/components/generic/form/GttTimeField.vue';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
-import GttModal from '@/components/generic/GttModal.vue';
+import GttTimeField from '@/components/generic/form/GttTimeField.vue';
+import { appLocale, localizedValidationMessage, tr } from '@/localization';
 import {
   removeScheduledWorkout,
   scheduleWorkout,
@@ -67,6 +69,8 @@ import {
   workoutsRef,
 } from '@/stores/workoutCreator';
 import { scheduleValidationErrors } from '@/wavebinder/schedule';
+import { Clock3, Dumbbell, Plus, Trash2 } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{ date?: string; preselectedWorkoutId?: string }>();
 const isOpen = defineModel<boolean>({ default: false });
@@ -76,9 +80,11 @@ const scheduleError = ref('');
 
 const dayLabel = computed(() =>
   props.date
-    ? new Intl.DateTimeFormat(appLocale(), { weekday: 'long', day: 'numeric', month: 'long' }).format(
-        new Date(`${props.date}T12:00:00`),
-      )
+    ? new Intl.DateTimeFormat(appLocale(), {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      }).format(new Date(`${props.date}T12:00:00`))
     : tr('ui.schedule_workout'),
 );
 const scheduledWorkouts = computed(() =>
@@ -97,7 +103,9 @@ watch(isOpen, (open) => {
 });
 
 function workoutName(workoutId: string) {
-  return workoutsRef.value.find((workout) => workout.id === workoutId)?.name ?? tr('ui.deleted_workout');
+  return (
+    workoutsRef.value.find((workout) => workout.id === workoutId)?.name ?? tr('ui.deleted_workout')
+  );
 }
 function addWorkoutToDay() {
   if (!props.date || !workoutToSchedule.value) return;

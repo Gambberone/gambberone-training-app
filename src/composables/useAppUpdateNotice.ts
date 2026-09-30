@@ -1,6 +1,6 @@
+import { activeToast, showToast } from '@/composables/toast';
 import { tr } from '@/localization';
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { activeToast, showToast } from '@/composables/toast';
 
 export function useAppUpdateNotice() {
   const availableBuildId = ref<string | null>(null);
@@ -13,7 +13,8 @@ export function useAppUpdateNotice() {
       !availableBuildId.value ||
       availableBuildId.value === dismissedBuildId.value ||
       activeToast.value
-    ) return;
+    )
+      return;
 
     showToast({
       title: tr('ui.new_version_available'),
@@ -21,11 +22,20 @@ export function useAppUpdateNotice() {
       kind: 'update',
       duration: null,
       actions: [
-        { label: tr('ui.later'), onClick: () => { dismissedBuildId.value = availableBuildId.value; } },
-        { label: tr('ui.reload'), color: 'primary', onClick: () => {
-          dismissedBuildId.value = availableBuildId.value;
-          window.location.reload();
-        } },
+        {
+          label: tr('ui.later'),
+          onClick: () => {
+            dismissedBuildId.value = availableBuildId.value;
+          },
+        },
+        {
+          label: tr('ui.reload'),
+          color: 'primary',
+          onClick: () => {
+            dismissedBuildId.value = availableBuildId.value;
+            window.location.reload();
+          },
+        },
       ],
     });
   }

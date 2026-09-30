@@ -1,8 +1,8 @@
+import { auth, db } from '@/firebase';
+import { i18n } from '@/i18n';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { readonly, ref } from 'vue';
-import { auth, db } from '@/firebase';
-import { i18n } from '@/i18n';
 
 const isLanguageReady = ref(false);
 const isSavingLanguage = ref(false);
@@ -18,20 +18,30 @@ onAuthStateChanged(auth, (user) => {
     i18n.global.locale.value = 'it';
     return;
   }
-  unsubscribe = onSnapshot(languageDocument(user.uid), (snapshot) => {
-    if (auth.currentUser?.uid !== user.uid) return;
-    i18n.global.locale.value = snapshot.data()?.language === 'en' ? 'en' : 'it';
-    isLanguageReady.value = true;
-    languageError.value = false;
-  }, () => {
-    if (auth.currentUser?.uid !== user.uid) return;
-    languageError.value = true;
-  });
+  unsubscribe = onSnapshot(
+    languageDocument(user.uid),
+    (snapshot) => {
+      if (auth.currentUser?.uid !== user.uid) return;
+      i18n.global.locale.value = snapshot.data()?.language === 'en' ? 'en' : 'it';
+      isLanguageReady.value = true;
+      languageError.value = false;
+    },
+    () => {
+      if (auth.currentUser?.uid !== user.uid) return;
+      languageError.value = true;
+    },
+  );
 });
 
 async function changeLanguage(language: string) {
   const user = auth.currentUser;
-  if (!user || !isLanguageReady.value || isSavingLanguage.value || (language !== 'it' && language !== 'en')) return;
+  if (
+    !user ||
+    !isLanguageReady.value ||
+    isSavingLanguage.value ||
+    (language !== 'it' && language !== 'en')
+  )
+    return;
   const previous = i18n.global.locale.value;
   isSavingLanguage.value = true;
   languageError.value = false;

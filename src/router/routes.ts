@@ -1,15 +1,6 @@
-import type { RouteRecordRaw } from 'vue-router';
 import AppLayout from '@/layouts/AppLayout.vue';
-import HomeView from '@/views/HomeView.vue';
-import HistoryView from '@/views/HistoryView.vue';
-import CalendarView from '@/views/CalendarView.vue';
-import WorkoutsView from '@/views/WorkoutsView.vue';
-import AccountView from '@/views/AccountView.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import LoginView from '@/views/LoginView.vue';
-import RegisterView from '@/views/RegisterView.vue';
-import VerifyEmailView from '@/views/VerifyEmailView.vue';
-import ForgotPasswordView from '@/views/ForgotPasswordView.vue';
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -19,22 +10,22 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'login',
         name: 'login',
-        component: LoginView,
+        component: () => import('@/views/LoginView.vue'),
       },
       {
         path: 'register',
         name: 'register',
-        component: RegisterView,
+        component: () => import('@/views/RegisterView.vue'),
       },
       {
         path: 'verify-email',
         name: 'verify-email',
-        component: VerifyEmailView,
+        component: () => import('@/views/VerifyEmailView.vue'),
       },
       {
         path: 'forgot-password',
         name: 'forgot-password',
-        component: ForgotPasswordView,
+        component: () => import('@/views/ForgotPasswordView.vue'),
       },
     ],
   },
@@ -49,7 +40,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'Dashboard',
         },
-        component: HomeView,
+        component: () => import('@/views/HomeView.vue'),
       },
       {
         path: 'calendar',
@@ -57,7 +48,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'Calendario',
         },
-        component: CalendarView,
+        component: () => import('@/views/CalendarView.vue'),
       },
       {
         path: 'workouts',
@@ -65,7 +56,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'I tuoi workout',
         },
-        component: WorkoutsView,
+        component: () => import('@/views/WorkoutsView.vue'),
       },
       {
         path: 'history',
@@ -73,7 +64,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'Storico',
         },
-        component: HistoryView,
+        component: () => import('@/views/HistoryView.vue'),
       },
       {
         path: 'account',
@@ -81,7 +72,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'Account',
         },
-        component: AccountView,
+        component: () => import('@/views/AccountView.vue'),
       },
     ],
   },

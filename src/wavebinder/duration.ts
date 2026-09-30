@@ -1,5 +1,5 @@
-import type { SingleNode } from 'wave-binder';
 import type { WorkoutCreatorStep } from '@/constants';
+import type { SingleNode } from 'wave-binder';
 import { wb } from './index';
 
 export const estimateWorkoutDuration = (steps: WorkoutCreatorStep[]) => {

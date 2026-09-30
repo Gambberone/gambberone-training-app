@@ -50,7 +50,12 @@ export type WorkoutSession = {
   workoutId: string;
   startedAt: string;
   isPaused?: boolean;
-  segmentReset?: { id: string; segmentIndex: number; isStarting: boolean; action?: 'reset' | 'skip' };
+  segmentReset?: {
+    id: string;
+    segmentIndex: number;
+    isStarting: boolean;
+    action?: 'reset' | 'skip';
+  };
   completedAt?: string;
   currentStepIndex: number;
   completedStepIndexes: number[];

@@ -1,17 +1,35 @@
 <template>
-  <button v-bind="$attrs" type="button" :aria-label="text" :aria-describedby="visible ? tooltipId : undefined"
-    @mouseenter="show" @mouseleave="hideUnlessPinned" @focus="show" @blur="hide"
-    @click="toggle" @keydown.esc.stop="hide">
+  <GttButton unstyled
+    v-bind="$attrs"
+    type="button"
+    :aria-label="text"
+    :aria-describedby="visible ? tooltipId : undefined"
+    @mouseenter="show"
+    @mouseleave="hideUnlessPinned"
+    @focus="show"
+    @blur="hide"
+    @click="toggle"
+    @keydown.esc.stop="hide"
+  >
     <slot />
-  </button>
+  </GttButton>
   <Teleport to="body">
-    <div ref="popover" :id="tooltipId" popover="manual" role="tooltip"
-      class="gtt-floating-tooltip" :style="{ left: `${left}px`, top: `${top}px`, color: textColor }">{{ text }}</div>
+    <div
+      ref="popover"
+      :id="tooltipId"
+      popover="manual"
+      role="tooltip"
+      class="gtt-floating-tooltip"
+      :style="{ left: `${left}px`, top: `${top}px`, color: textColor }"
+    >
+      {{ text }}
+    </div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, onBeforeUnmount, ref, useId } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue';
+
 defineOptions({ inheritAttrs: false });
 defineProps<{ text: string; textColor?: string }>();
 const tooltipId = useId();
@@ -30,22 +48,39 @@ async function show(event: Event) {
   const rect = anchor.getBoundingClientRect();
   const tip = popover.value.getBoundingClientRect();
   const padding = 8;
-  left.value = Math.max(padding, Math.min(rect.left + rect.width / 2 - tip.width / 2, window.innerWidth - tip.width - padding));
+  left.value = Math.max(
+    padding,
+    Math.min(rect.left + rect.width / 2 - tip.width / 2, window.innerWidth - tip.width - padding),
+  );
   const above = rect.top - tip.height - padding;
-  top.value = above >= padding ? above : Math.min(rect.bottom + padding, window.innerHeight - tip.height - padding);
+  top.value =
+    above >= padding
+      ? above
+      : Math.min(rect.bottom + padding, window.innerHeight - tip.height - padding);
 }
 function hide() {
   pinned = false;
   visible.value = false;
   popover.value?.hidePopover();
 }
-function hideUnlessPinned() { if (!pinned) hide(); }
+function hideUnlessPinned() {
+  if (!pinned) hide();
+}
 function toggle(event: Event) {
   if (pinned) hide();
-  else { pinned = true; void show(event); }
+  else {
+    pinned = true;
+    void show(event);
+  }
 }
 function outside(event: PointerEvent) {
-  if (visible.value && event.target instanceof Node && !anchor?.contains(event.target) && !popover.value?.contains(event.target)) hide();
+  if (
+    visible.value &&
+    event.target instanceof Node &&
+    !anchor?.contains(event.target) &&
+    !popover.value?.contains(event.target)
+  )
+    hide();
 }
 onMounted(() => {
   document.addEventListener('pointerdown', outside);

@@ -6,29 +6,44 @@
         <p class="mt-1 text-sm text-base-content/65">{{ tr('ui.start_tracking_your_progress') }}</p>
       </div>
 
-      <GttInputField id="register-email" :label="tr('ui.email')" compact v-model="email"
-            type="email"
-            autocomplete="email"
-            :placeholder="tr('ui.name_email_com')"
-            required>
+      <GttInputField
+        id="register-email"
+        :label="tr('ui.email')"
+        compact
+        v-model="email"
+        type="email"
+        autocomplete="email"
+        :placeholder="tr('ui.name_email_com')"
+        required
+      >
         <template #prefix><Mail :size="18" class="text-base-content/55" /></template>
       </GttInputField>
 
-      <GttInputField id="register-password" :label="tr('ui.password')" compact v-model="password"
-            type="password"
-            autocomplete="new-password"
-            :placeholder="tr('ui.at_least_6_characters')"
-            minlength="6"
-            required>
+      <GttInputField
+        id="register-password"
+        :label="tr('ui.password')"
+        compact
+        v-model="password"
+        type="password"
+        autocomplete="new-password"
+        :placeholder="tr('ui.at_least_6_characters')"
+        minlength="6"
+        required
+      >
         <template #prefix><LockKeyhole :size="18" class="text-base-content/55" /></template>
       </GttInputField>
 
-      <GttInputField id="register-passwordConfirmation" :label="tr('ui.confirm_password')" compact v-model="passwordConfirmation"
-            type="password"
-            autocomplete="new-password"
-            :placeholder="tr('ui.repeat_your_password')"
-            minlength="6"
-            required>
+      <GttInputField
+        id="register-passwordConfirmation"
+        :label="tr('ui.confirm_password')"
+        compact
+        v-model="passwordConfirmation"
+        type="password"
+        autocomplete="new-password"
+        :placeholder="tr('ui.repeat_your_password')"
+        minlength="6"
+        required
+      >
         <template #prefix><LockKeyhole :size="18" class="text-base-content/55" /></template>
       </GttInputField>
 
@@ -36,10 +51,10 @@
         {{ errorMessage }}
       </p>
 
-      <button class="btn btn-primary mt-1 w-full" type="submit" :disabled="isSubmitting">
+      <GttButton color="primary" class="mt-1 w-full" type="submit" :disabled="isSubmitting">
         <span v-if="isSubmitting" class="loading loading-spinner loading-sm" />
         {{ tr('ui.create_account') }}
-      </button>
+      </GttButton>
 
       <p class="text-center text-sm text-base-content/65">
         {{ tr('ui.already_have_an_account') }}
@@ -53,11 +68,11 @@
 
 <script setup lang="ts">
 import GttInputField from '@/components/generic/form/GttInputField.vue';
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
 import { tr } from '@/localization';
 import { LockKeyhole, Mail } from '@lucide/vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { authErrorMessage, useAuth } from '@/composables/useAuth';
 
 const email = ref('');
 const password = ref('');

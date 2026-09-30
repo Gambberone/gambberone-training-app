@@ -1,71 +1,84 @@
 <template>
   <div class="grid items-start gap-3 md:grid-cols-2">
-    <div v-for="(column, index) in exerciseColumns" :key="index" class="flex min-w-0 flex-col gap-3" :class="index === 1 ? 'hidden md:flex' : ''">
-    <article
-      v-for="{ muscleGroup, cardClass, textClass, badgeClass } in column"
-      :key="muscleGroup.id"
-      class="card card-border overflow-hidden bg-base-100 shadow-sm"
-      :class="cardClass"
+    <div
+      v-for="(column, index) in exerciseColumns"
+      :key="index"
+      class="flex min-w-0 flex-col gap-3"
+      :class="index === 1 ? 'hidden md:flex' : ''"
     >
-      <div
-        class="collapse collapse-arrow"
-        :class="{ 'collapse-open': expandedMuscleGroupId === muscleGroup.id }"
+      <article
+        v-for="{ muscleGroup, cardClass, textClass, badgeClass } in column"
+        :key="muscleGroup.id"
+        class="card card-border overflow-hidden bg-base-100 shadow-sm"
+        :class="cardClass"
       >
-        <button
-          type="button"
-          class="collapse-title flex w-full items-center justify-between gap-3 text-left font-semibold"
-          :class="textClass"
-          :aria-expanded="expandedMuscleGroupId === muscleGroup.id"
-          @click="toggleMuscleGroup(muscleGroup.id)"
+        <div
+          class="collapse collapse-arrow"
+          :class="{ 'collapse-open': expandedMuscleGroupId === muscleGroup.id }"
         >
-          <span>{{ t(`muscleGroups.${muscleGroup.id}`) }}</span>
-          <span class="badge mr-5" :class="badgeClass">{{
-            exercisesForMuscleGroup(muscleGroup.id).length
-          }}</span>
-        </button>
-        <div class="collapse-content px-0 pb-0">
-          <ul class="list bg-base-100">
-            <li
-              v-for="exercise in exercisesForMuscleGroup(muscleGroup.id)"
-              :key="exercise.id"
-              class="list-row flex items-center"
-            >
-              <div class="flex flex-1 gap-3">
-                <Dumbbell class="size-5 text-primary" aria-hidden="true" />
-                <div>{{ localizedExerciseName(exercise) }}</div>
-              </div>
-              <div class="flex-0 flex">
-                <button
-                  class="btn btn-square btn-ghost btn-sm text-primary"
-                  type="button"
-                  :aria-label="tr('messages.editNamed', { name: localizedExerciseName(exercise) })"
-                  @click.stop="editExercise(exercise)"
-                >
-                  <Pencil class="size-5" aria-hidden="true" />
-                </button>
-                <button
-                  class="btn btn-square btn-ghost btn-sm text-error"
-                  type="button"
-                  :aria-label="tr('messages.deleteNamed', { name: localizedExerciseName(exercise) })"
-                  @click.stop="removeExercise(exercise)"
-                >
-                  <Trash class="size-5" aria-hidden="true" />
-                </button>
-              </div>
-            </li>
-            <li
-              v-if="exercisesForMuscleGroup(muscleGroup.id).length === 0"
-              class="px-4 py-3 text-sm text-base-content/60"
-            >
-              {{ tr('ui.no_exercises_in_this_muscle_group') }}
-            </li>
-          </ul>
+          <GttButton unstyled
+            type="button"
+            class="collapse-title flex w-full items-center justify-between gap-3 text-left font-semibold"
+            :class="textClass"
+            :aria-expanded="expandedMuscleGroupId === muscleGroup.id"
+            @click="toggleMuscleGroup(muscleGroup.id)"
+          >
+            <span>{{ t(`muscleGroups.${muscleGroup.id}`) }}</span>
+            <span class="badge mr-5" :class="badgeClass">{{
+              exercisesForMuscleGroup(muscleGroup.id).length
+            }}</span>
+          </GttButton>
+          <div class="collapse-content px-0 pb-0">
+            <ul class="list bg-base-100">
+              <li
+                v-for="exercise in exercisesForMuscleGroup(muscleGroup.id)"
+                :key="exercise.id"
+                class="list-row flex items-center"
+              >
+                <div class="flex flex-1 gap-3">
+                  <Dumbbell class="size-5 text-primary" aria-hidden="true" />
+                  <div>{{ localizedExerciseName(exercise) }}</div>
+                </div>
+                <div class="flex-0 flex">
+                  <GttButton shape="square" mode="ghost" size="sm"
+                    class="text-primary"
+                    type="button"
+                    :aria-label="
+                      tr('messages.editNamed', { name: localizedExerciseName(exercise) })
+                    "
+                    @click.stop="editExercise(exercise)"
+                  >
+                    <Pencil class="size-5" aria-hidden="true" />
+                  </GttButton>
+                  <GttButton shape="square" mode="ghost" size="sm"
+                    class="text-error"
+                    type="button"
+                    :aria-label="
+                      tr('messages.deleteNamed', { name: localizedExerciseName(exercise) })
+                    "
+                    @click.stop="removeExercise(exercise)"
+                  >
+                    <Trash class="size-5" aria-hidden="true" />
+                  </GttButton>
+                </div>
+              </li>
+              <li
+                v-if="exercisesForMuscleGroup(muscleGroup.id).length === 0"
+                class="px-4 py-3 text-sm text-base-content/60"
+              >
+                {{ tr('ui.no_exercises_in_this_muscle_group') }}
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
     </div>
   </div>
-  <GttBottomAction desktop-target="#workouts-desktop-action" :label="tr('ui.add_exercise')" @click="isExercisesCreatorEditorModalOpen = true" />
+  <GttBottomAction
+    desktop-target="#workouts-desktop-action"
+    :label="tr('ui.add_exercise')"
+    @click="isExercisesCreatorEditorModalOpen = true"
+  />
   <ExerciseCreatorModal
     v-model="isExercisesCreatorEditorModalOpen"
     :exercise="selectedExerciseForEdit"
@@ -81,25 +94,30 @@
     @action="eliminationModalActionHandler"
   >
     <p class="text-md">
-      {{ tr('messages.deleteExercise', { name: selectedExerciseForElimination ? localizedExerciseName(selectedExerciseForElimination) : '' }) }}
+      {{
+        tr('messages.deleteExercise', {
+          name: selectedExerciseForElimination
+            ? localizedExerciseName(selectedExerciseForElimination)
+            : '',
+        })
+      }}
     </p>
   </GttModal>
 </template>
 
 <script setup lang="ts">
-import { tr, localizedExerciseName } from '@/localization';
-import { useI18n } from 'vue-i18n';
-import { Dumbbell, Pencil, Trash } from '@lucide/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import GttBottomAction from '@/components/generic/GttBottomAction.vue';
 import {
   MUSCLE_GROUPS,
   muscleGroups,
   type Exercise,
   type MuscleGroup,
 } from '@/domain/exercises.ts';
+import { localizedExerciseName, tr } from '@/localization';
 import { exercisesRef } from '@/stores/exercises.ts';
-import GttBottomAction from '@/components/generic/GttBottomAction.vue';
-import GttModal from '@/components/generic/GttModal.vue';
+import { Dumbbell, Pencil, Trash } from '@lucide/vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import ExerciseCreatorModal from './ExerciseCreatorModal.vue';
 
 const { t } = useI18n();
@@ -141,7 +159,6 @@ const exerciseCards = exerciseSections.flatMap(({ groups, cardClass, textClass, 
   groups.map((muscleGroup) => ({ muscleGroup, cardClass, textClass, badgeClass })),
 );
 
-// Preserve the mobile order while giving each desktop column its own flow.
 const isTwoColumnLayout = ref(false);
 let columnMediaQuery: MediaQueryList | undefined;
 const updateColumnLayout = () => {
@@ -153,15 +170,19 @@ onMounted(() => {
   columnMediaQuery.addEventListener('change', updateColumnLayout);
 });
 onUnmounted(() => columnMediaQuery?.removeEventListener('change', updateColumnLayout));
-const exerciseColumns = computed(() => isTwoColumnLayout.value
-  ? [exerciseCards.filter((_, index) => index % 2 === 0), exerciseCards.filter((_, index) => index % 2 === 1)]
-  : [exerciseCards]);
+const exerciseColumns = computed(() =>
+  isTwoColumnLayout.value
+    ? [
+        exerciseCards.filter((_, index) => index % 2 === 0),
+        exerciseCards.filter((_, index) => index % 2 === 1),
+      ]
+    : [exerciseCards],
+);
 
 function exercisesForMuscleGroup(muscleGroupId: MuscleGroup['id']) {
   return exercisesRef.value.filter((exercise) => exercise.muscleGroupId === muscleGroupId);
 }
 
-// Exercise edit handler
 const selectedExerciseForEdit = ref<Exercise | null>(null);
 const editExercise = (exercise: Exercise) => {
   selectedExerciseForEdit.value = exercise;
@@ -176,7 +197,6 @@ const onExerciseCreatorEditorModalUpdate = (isOpen: boolean) => {
   }
 };
 
-// Exercise elimination handler
 const selectedExerciseForElimination = ref<Exercise | null>(null);
 const showExerciseEliminationModal = ref(false);
 const removeExercise = (exercise: Exercise) => {

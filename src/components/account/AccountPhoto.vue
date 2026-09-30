@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center gap-4">
-    <button
+    <GttButton unstyled
       v-if="profilePhoto"
       type="button"
       class="size-16 shrink-0 overflow-hidden rounded-full ring-offset-base-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
@@ -8,22 +8,22 @@
       @click="viewerOpen = true"
     >
       <img :src="profilePhoto" :alt="t('account.photo')" class="h-full w-full object-cover" />
-    </button>
+    </GttButton>
     <div
       v-else
       class="grid size-16 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"
     >
       <UserRound class="size-8" aria-hidden="true" />
     </div>
-    <button
+    <GttButton mode="outline" size="sm"
       v-if="!profilePhoto"
-      class="btn btn-outline btn-sm"
+      
       type="button"
       :disabled="busy"
       @click="fileInput?.open()"
     >
       {{ t('account.uploadPhoto') }}
-    </button>
+    </GttButton>
     <p v-else class="text-sm text-base-content/60">{{ t('account.viewPhotoHint') }}</p>
     <GttFileField
       ref="fileInput"
@@ -55,11 +55,11 @@
       />
       <p v-if="error" class="text-sm text-error" role="alert">{{ error }}</p>
       <div class="flex flex-wrap justify-center gap-3">
-        <button class="btn btn-primary" type="button" :disabled="busy" @click="fileInput?.open()">
+        <GttButton color="primary"  type="button" :disabled="busy" @click="fileInput?.open()">
           {{ t('account.changePhoto') }}
-        </button>
-        <button
-          class="btn btn-outline btn-error"
+        </GttButton>
+        <GttButton mode="outline" color="error"
+          
           type="button"
           :disabled="busy"
           @click="removePhoto"
@@ -67,7 +67,7 @@
           <span v-if="busy" class="loading loading-spinner loading-sm" />{{
             t('account.removePhoto')
           }}
-        </button>
+        </GttButton>
       </div>
     </div>
   </GttModal>
@@ -115,11 +115,11 @@
       />
       <p v-if="error" class="text-sm text-error" role="alert">{{ error }}</p>
       <div class="flex justify-end gap-2">
-        <button class="btn btn-ghost" type="button" :disabled="busy" @click="cropOpen = false">
+        <GttButton mode="ghost"  type="button" :disabled="busy" @click="cropOpen = false">
           {{ t('account.cancel') }}
-        </button>
-        <button
-          class="btn btn-primary"
+        </GttButton>
+        <GttButton color="primary"
+          
           type="button"
           :disabled="busy || !sourceImage"
           @click="saveCrop"
@@ -127,21 +127,20 @@
           <span v-if="busy" class="loading loading-spinner loading-sm" />{{
             t('account.savePhoto')
           }}
-        </button>
+        </GttButton>
       </div>
     </div>
   </GttModal>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { UserRound } from '@lucide/vue';
-import GttModal from '@/components/generic/GttModal.vue';
 import GttFileField from '@/components/generic/form/GttFileField.vue';
 import GttRangeField from '@/components/generic/form/GttRangeField.vue';
-import { useAuth } from '@/composables/useAuth';
 import { showToast } from '@/composables/toast';
+import { useAuth } from '@/composables/useAuth';
+import { UserRound } from '@lucide/vue';
+import { nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const { profilePhoto, updateProfilePhoto, removeProfilePhoto } = useAuth();

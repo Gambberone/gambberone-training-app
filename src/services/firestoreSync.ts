@@ -1,3 +1,13 @@
+import type { WorkoutSession } from '@/constants';
+import { MUSCLE_GROUPS, exercises as seedExercises } from '@/domain/exercises';
+import { auth, db } from '@/firebase';
+import { exercisesRef } from '@/stores/exercises';
+import {
+  activeWorkoutSessionRef,
+  scheduledWorkoutsRef,
+  workoutSessionsRef,
+  workoutsRef,
+} from '@/stores/workoutCreator';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
@@ -6,20 +16,10 @@ import {
   getDocs,
   onSnapshot,
   setDoc,
-  writeBatch,
   waitForPendingWrites,
+  writeBatch,
 } from 'firebase/firestore';
 import { watch, type Ref } from 'vue';
-import { auth, db } from '@/firebase';
-import { exercises as seedExercises, MUSCLE_GROUPS } from '@/domain/exercises';
-import { exercisesRef } from '@/stores/exercises';
-import {
-  activeWorkoutSessionRef,
-  scheduledWorkoutsRef,
-  workoutSessionsRef,
-  workoutsRef,
-} from '@/stores/workoutCreator';
-import type { WorkoutSession } from '@/constants';
 
 type Entity = { id: string };
 
@@ -101,7 +101,8 @@ async function migrateLocalData(userId: string) {
     const batch = writeBatch(db);
     const existingExercises = await getDocs(collection(userDocument(userId), 'exercises'));
     const existingIds = new Set(existingExercises.docs.map((exercise) => exercise.id));
-    seedExercises.filter((exercise) => exercise.muscleGroupId === MUSCLE_GROUPS.GLUTES)
+    seedExercises
+      .filter((exercise) => exercise.muscleGroupId === MUSCLE_GROUPS.GLUTES)
       .forEach((exercise) => {
         if (!existingIds.has(exercise.id)) {
           batch.set(collectionDocument(userId, 'exercises', exercise.id), exercise);
@@ -127,7 +128,8 @@ function subscribeToUserData(userId: string) {
   unsubscribeCallbacks.push(
     onSnapshot(doc(userDocument(userId), 'state', 'activeWorkoutSession'), (snapshot) => {
       applyingRemoteChange = true;
-      activeWorkoutSessionRef.value = (snapshot.data()?.value as WorkoutSession | null | undefined) ?? null;
+      activeWorkoutSessionRef.value =
+        (snapshot.data()?.value as WorkoutSession | null | undefined) ?? null;
       applyingRemoteChange = false;
     }),
   );
@@ -201,7 +203,9 @@ export async function deleteAccountData(userId: string) {
 }
 
 export function resetDeletedAccountData() {
-  collections.forEach(({ state }) => { state.value = []; });
+  collections.forEach(({ state }) => {
+    state.value = [];
+  });
   activeWorkoutSessionRef.value = null;
   localStorage.removeItem('gtt:workout-playback');
 }

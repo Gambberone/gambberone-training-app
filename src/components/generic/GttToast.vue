@@ -1,10 +1,21 @@
 <template>
-  <div v-if="activeToast" class="toast toast-bottom toast-center z-[1000] w-full px-4" role="status" aria-live="polite">
-    <article class="w-full max-w-sm overflow-hidden rounded-box bg-base-100 shadow-xl ring-1 ring-base-content/10">
+  <div
+    v-if="activeToast"
+    class="toast toast-bottom toast-center z-1000 w-full px-4"
+    role="status"
+    aria-live="polite"
+  >
+    <article
+      class="w-full max-w-sm overflow-hidden rounded-box bg-base-100 shadow-xl ring-1 ring-base-content/10"
+    >
       <div class="flex items-start gap-3 p-4">
         <div
           class="grid size-10 shrink-0 place-items-center rounded-full"
-          :class="activeToast.kind === 'update' ? 'bg-primary/15 text-primary' : 'bg-success/15 text-success'"
+          :class="
+            activeToast.kind === 'update'
+              ? 'bg-primary/15 text-primary'
+              : 'bg-success/15 text-success'
+          "
         >
           <RefreshCw v-if="activeToast.kind === 'update'" :size="22" aria-hidden="true" />
           <CircleCheck v-else :size="22" aria-hidden="true" />
@@ -17,25 +28,28 @@
         </div>
       </div>
 
-      <div v-if="activeToast.actions?.length" class="flex justify-end gap-2 border-t border-base-content/10 bg-base-100 p-3">
-        <button
+      <div
+        v-if="activeToast.actions?.length"
+        class="flex justify-end gap-2 border-t border-base-content/10 bg-base-100 p-3"
+      >
+        <GttButton size="sm"
           v-for="action in activeToast.actions"
           :key="action.label"
-          class="btn btn-sm"
+          
           :class="action.color && `btn-${action.color}`"
           type="button"
           @click="runAction(action)"
         >
           {{ action.label }}
-        </button>
+        </GttButton>
       </div>
     </article>
   </div>
 </template>
 
 <script setup lang="ts">
-import { CircleCheck, RefreshCw } from '@lucide/vue';
 import { activeToast, hideToast, type ToastAction } from '@/composables/toast';
+import { CircleCheck, RefreshCw } from '@lucide/vue';
 
 function runAction(action: ToastAction) {
   action.onClick?.();

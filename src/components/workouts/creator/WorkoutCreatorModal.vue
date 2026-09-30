@@ -4,7 +4,9 @@
     full
     :title="modalTitle"
     :actions="[]"
-    :content-class="isDesktop ? 'max-w-6xl!' : 'w-screen! h-dvh! max-w-none! max-h-none! rounded-none! p-4!'"
+    :content-class="
+      isDesktop ? 'max-w-6xl!' : 'w-screen! h-dvh! max-w-none! max-h-none! rounded-none! p-4!'
+    "
     :close-on-action="false"
     :before-close="requestClose"
     :go-back="!isDesktop && Boolean(currentWorkoutCreatorStep)"
@@ -12,7 +14,11 @@
     @go-back="requestGoBack"
     :enable-full-screen="isDesktop"
   >
-    <WorkoutCreatorDesktop :exercise-errors="exerciseValidationErrors ?? []" @save="handleAction('save-workout')" @cancel-step="requestGoBack" />
+    <WorkoutCreatorDesktop
+      :exercise-errors="exerciseValidationErrors ?? []"
+      @save="handleAction('save-workout')"
+      @cancel-step="requestGoBack"
+    />
   </GttModal>
   <GttModal
     v-model="isDiscardStepConfirmationOpen"
@@ -39,28 +45,29 @@
 </template>
 
 <script setup lang="ts">
+import { showToast } from '@/composables/toast';
+import { useExerciseStepValidation } from '@/composables/useExerciseStepValidation';
 import { tr } from '@/localization';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import GttModal from '@/components/generic/GttModal.vue';
-import WorkoutCreatorDesktop from './WorkoutCreatorDesktop.vue';
 import {
   createWorkout,
   currentWorkoutCreatorStep,
   loadWorkoutCreator,
   resetWorkoutCreator,
   returnToWorkoutCreatorOverview,
-  type Workout,
   updateWorkout,
   workoutCreatorDraft,
+  type Workout,
 } from '@/stores/workoutCreator';
 import { getExerciseStepNode, selectedExerciseNode } from '@/wavebinder/exerciseStep';
-import { useExerciseStepValidation } from '@/composables/useExerciseStepValidation';
-import { showToast } from '@/composables/toast';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import WorkoutCreatorDesktop from './WorkoutCreatorDesktop.vue';
 
 const desktopMedia = window.matchMedia('(min-width: 1024px)');
 const isDesktop = ref(desktopMedia.matches);
-const updateDesktop = () => { isDesktop.value = desktopMedia.matches; };
+const updateDesktop = () => {
+  isDesktop.value = desktopMedia.matches;
+};
 desktopMedia.addEventListener('change', updateDesktop);
 onBeforeUnmount(() => desktopMedia.removeEventListener('change', updateDesktop));
 
@@ -78,10 +85,9 @@ let initialDraftState: string | undefined;
 let initialStepState: string | undefined;
 
 const hasUnsavedChanges = () =>
-  initialDraftState !== undefined && (
-    JSON.stringify(workoutCreatorDraft.value) !== initialDraftState ||
-    Boolean(currentWorkoutCreatorStep.value && currentStepState() !== initialStepState)
-  );
+  initialDraftState !== undefined &&
+  (JSON.stringify(workoutCreatorDraft.value) !== initialDraftState ||
+    Boolean(currentWorkoutCreatorStep.value && currentStepState() !== initialStepState));
 
 const currentStepState = () => {
   const step = currentWorkoutCreatorStep.value;
@@ -166,8 +172,9 @@ onBeforeUnmount(() => {
 
 const modalTitle = computed(
   () =>
-    (!isDesktop.value && currentWorkoutCreatorStep.value ? tr(`stepTypes.${currentWorkoutCreatorStep.value.type}`) : undefined) ??
-    (props.workout ? tr('ui.edit_workout') : tr('ui.workout_editor')),
+    (!isDesktop.value && currentWorkoutCreatorStep.value
+      ? tr(`stepTypes.${currentWorkoutCreatorStep.value.type}`)
+      : undefined) ?? (props.workout ? tr('ui.edit_workout') : tr('ui.workout_editor')),
 );
 const handleAction = (actionId: string) => {
   if (actionId === 'save-workout') {

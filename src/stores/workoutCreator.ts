@@ -1,14 +1,15 @@
-import { ref } from 'vue';
 import { localRef } from '@/composables/localRef';
 import {
-  WORKOUT_CREATOR_STEP_ACTION,
   DEFAULT_REPETITION_INTERVAL_SECONDS,
+  WORKOUT_CREATOR_STEP_ACTION,
+  type StretchingExercise,
+  type WarmupExercise,
   type WorkoutCreatorStep,
   type WorkoutCreatorStepAction,
   type WorkoutSession,
-  type StretchingExercise,
-  type WarmupExercise,
 } from '@/constants';
+import { wb } from '@/wavebinder';
+import { estimateWorkoutDuration } from '@/wavebinder/duration';
 import {
   collectionValidationErrors,
   exerciseStepToDraftChanges,
@@ -18,9 +19,8 @@ import {
   selectedExerciseNode,
   setCollectionValue,
 } from '@/wavebinder/exerciseStep';
+import { ref } from 'vue';
 import { exercisesRef } from './exercises';
-import { wb } from '@/wavebinder';
-import { estimateWorkoutDuration } from '@/wavebinder/duration';
 
 export interface WorkoutCreatorDraft {
   name: string;
@@ -65,7 +65,11 @@ const createStep = (type: WorkoutCreatorStepAction, step: number): WorkoutCreato
     ? { stretchingExercises: [createStretchingExercise()] }
     : {}),
   ...(type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE
-    ? { exerciseModeType: 'repetitions', exerciseRepetitions: 0, repetitionIntervalSeconds: DEFAULT_REPETITION_INTERVAL_SECONDS }
+    ? {
+        exerciseModeType: 'repetitions',
+        exerciseRepetitions: 0,
+        repetitionIntervalSeconds: DEFAULT_REPETITION_INTERVAL_SECONDS,
+      }
     : {}),
   ...(type === WORKOUT_CREATOR_STEP_ACTION.PAUSE ? { pauseDuration: 0 } : {}),
 });
@@ -82,7 +86,12 @@ export const activeWorkoutSessionRef = localRef<WorkoutSession | null>(
 );
 // This is intentionally not persisted: it only controls whether the global player is expanded.
 export const isWorkoutPlayerOpenRef = ref(false);
-export const workoutPlayerStatusRef = ref<{ step: string; stepColorClass: string; counter: string; paused: boolean } | null>(null);
+export const workoutPlayerStatusRef = ref<{
+  step: string;
+  stepColorClass: string;
+  counter: string;
+  paused: boolean;
+} | null>(null);
 export const workoutPlayerPauseRequestRef = ref(0);
 
 export type WorkoutPlaybackCheckpoint = {
@@ -98,7 +107,9 @@ export type WorkoutPlaybackCheckpoint = {
 
 const workoutPlaybackKey = 'gtt:workout-playback';
 
-export const getWorkoutPlaybackCheckpoint = (sessionId: string): WorkoutPlaybackCheckpoint | null => {
+export const getWorkoutPlaybackCheckpoint = (
+  sessionId: string,
+): WorkoutPlaybackCheckpoint | null => {
   try {
     const saved = localStorage.getItem(workoutPlaybackKey);
     if (!saved) return null;

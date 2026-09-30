@@ -1,12 +1,12 @@
-import { nextTick, readonly, ref, watch } from 'vue';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { driver, type Driver } from 'driver.js';
-import 'driver.js/dist/driver.css';
 import { auth, db } from '@/firebase';
 import { i18n } from '@/i18n';
 import router from '@/router';
 import { activeWorkoutSessionRef } from '@/stores/workoutCreator';
+import { driver, type Driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { nextTick, readonly, ref, watch } from 'vue';
 import { useLanguage } from './useLanguage';
 
 const running = ref(false);
@@ -28,8 +28,14 @@ const destinations = [
 
 async function persistSeen(uid: string) {
   try {
-    await setDoc(preferenceDoc(uid), { version: 1, seenAt: new Date().toISOString() }, { merge: true });
-  } catch { if (auth.currentUser?.uid === uid) error.value = true; }
+    await setDoc(
+      preferenceDoc(uid),
+      { version: 1, seenAt: new Date().toISOString() },
+      { merge: true },
+    );
+  } catch {
+    if (auth.currentUser?.uid === uid) error.value = true;
+  }
 }
 
 async function startTour() {
@@ -40,7 +46,10 @@ async function startTour() {
   const t = i18n.global.t;
   async function goTo(index: number) {
     if (navigating || !running.value) return;
-    if (index >= destinations.length) { tour?.destroy(); return; }
+    if (index >= destinations.length) {
+      tour?.destroy();
+      return;
+    }
     const destination = destinations[index];
     if (!destination) return;
     navigating = true;
@@ -55,7 +64,9 @@ async function startTour() {
     } catch {
       error.value = true;
       tour?.destroy();
-    } finally { navigating = false; }
+    } finally {
+      navigating = false;
+    }
   }
   tour = driver({
     animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -71,8 +82,12 @@ async function startTour() {
     nextBtnText: t('tour.next'),
     prevBtnText: t('tour.previous'),
     doneBtnText: t('tour.done'),
-    onNextClick: () => { void goTo((tour?.getActiveIndex() ?? 0) + 1); },
-    onPrevClick: () => { void goTo((tour?.getActiveIndex() ?? 0) - 1); },
+    onNextClick: () => {
+      void goTo((tour?.getActiveIndex() ?? 0) + 1);
+    },
+    onPrevClick: () => {
+      void goTo((tour?.getActiveIndex() ?? 0) - 1);
+    },
     onCloseClick: () => tour?.destroy(),
     onPopoverRender: (popover) => {
       popover.closeButton.setAttribute('aria-label', t('tour.skip'));
@@ -106,20 +121,45 @@ export function initializeAppTour() {
     tour?.destroy();
     ready.value = false;
     seen.value = true;
-    if (!user) { tour?.destroy(); offeredUser = undefined; return; }
-    stopListener = onSnapshot(preferenceDoc(user.uid), (snapshot) => {
-      if (auth.currentUser?.uid !== user.uid) return;
-      seen.value = snapshot.data()?.version >= 1;
-      ready.value = true;
-    }, () => { error.value = true; });
+    if (!user) {
+      tour?.destroy();
+      offeredUser = undefined;
+      return;
+    }
+    stopListener = onSnapshot(
+      preferenceDoc(user.uid),
+      (snapshot) => {
+        if (auth.currentUser?.uid !== user.uid) return;
+        seen.value = snapshot.data()?.version >= 1;
+        ready.value = true;
+      },
+      () => {
+        error.value = true;
+      },
+    );
   });
-  watch([ready, seen, isLanguageReady, () => router.currentRoute.value.name, activeWorkoutSessionRef], () => {
-    const user = auth.currentUser;
-    if (!user?.emailVerified || !ready.value || seen.value || !isLanguageReady.value || running.value || activeWorkoutSessionRef.value) return;
-    if (!router.currentRoute.value.matched.some((record) => record.meta.requiresAuth) || offeredUser === user.uid) return;
-    offeredUser = user.uid;
-    void startTour();
-  });
+  watch(
+    [ready, seen, isLanguageReady, () => router.currentRoute.value.name, activeWorkoutSessionRef],
+    () => {
+      const user = auth.currentUser;
+      if (
+        !user?.emailVerified ||
+        !ready.value ||
+        seen.value ||
+        !isLanguageReady.value ||
+        running.value ||
+        activeWorkoutSessionRef.value
+      )
+        return;
+      if (
+        !router.currentRoute.value.matched.some((record) => record.meta.requiresAuth) ||
+        offeredUser === user.uid
+      )
+        return;
+      offeredUser = user.uid;
+      void startTour();
+    },
+  );
 }
 
 export function useAppTour() {

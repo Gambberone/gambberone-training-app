@@ -12,34 +12,54 @@
         </p>
       </div>
 
-      <p v-if="message" class="w-full rounded-box bg-success/10 p-3 text-sm text-success" role="status">
+      <p
+        v-if="message"
+        class="w-full rounded-box bg-success/10 p-3 text-sm text-success"
+        role="status"
+      >
         {{ message }}
       </p>
-      <p v-if="errorMessage" class="w-full rounded-box bg-error/10 p-3 text-sm text-error" role="alert">
+      <p
+        v-if="errorMessage"
+        class="w-full rounded-box bg-error/10 p-3 text-sm text-error"
+        role="alert"
+      >
         {{ errorMessage }}
       </p>
 
-      <button class="btn btn-primary w-full" type="button" :disabled="isChecking" @click="checkVerification">
+      <GttButton color="primary"
+        class="w-full"
+        type="button"
+        :disabled="isChecking"
+        @click="checkVerification"
+      >
         <span v-if="isChecking" class="loading loading-spinner loading-sm" />
         {{ tr('ui.i_have_verified_my_email') }}
-      </button>
-      <button class="btn btn-ghost btn-sm" type="button" :disabled="isResending" @click="resendVerification">
+      </GttButton>
+      <GttButton mode="ghost" size="sm"
+        
+        type="button"
+        :disabled="isResending"
+        @click="resendVerification"
+      >
         <span v-if="isResending" class="loading loading-spinner loading-xs" />
         {{ tr('ui.resend_verification_email') }}
-      </button>
-      <button class="btn btn-ghost btn-sm" type="button" @click="logout">{{ tr('ui.sign_out') }}</button>
+      </GttButton>
+      <GttButton mode="ghost" size="sm"  type="button" @click="logout">
+        {{ tr('ui.sign_out') }}
+      </GttButton>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { authErrorMessage, useAuth } from '@/composables/useAuth';
+import { auth } from '@/firebase';
 import { tr } from '@/localization';
-import { applyActionCode } from 'firebase/auth';
 import { MailCheck } from '@lucide/vue';
+import { applyActionCode } from 'firebase/auth';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { auth } from '@/firebase';
-import { authErrorMessage, useAuth } from '@/composables/useAuth';
 
 const { currentUser, sendVerificationEmail, signOut } = useAuth();
 const router = useRouter();

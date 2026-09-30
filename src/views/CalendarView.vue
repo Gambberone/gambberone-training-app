@@ -4,44 +4,50 @@
       <div class="flex items-center justify-between gap-3">
         <h1 class="text-2xl font-bold text-primary capitalize">{{ calendarLabel }}</h1>
         <div class="flex items-center gap-1">
-          <button
-            class="btn btn-ghost btn-sm btn-circle"
+          <GttButton mode="ghost" size="sm" shape="circle"
+            
             type="button"
-            :aria-label="calendarView === 'month' ? tr('ui.previous_month') : tr('ui.previous_week')"
+            :aria-label="
+              calendarView === 'month' ? tr('ui.previous_month') : tr('ui.previous_week')
+            "
             @click="movePeriod(-1)"
           >
             <ChevronLeft :size="20" />
-          </button>
-          <button class="btn btn-primary btn-sm" type="button" @click="goToToday">{{ tr('ui.today') }}</button>
-          <button
-            class="btn btn-ghost btn-sm btn-circle"
+          </GttButton>
+          <GttButton color="primary" size="sm"  type="button" @click="goToToday">
+            {{ tr('ui.today') }}
+          </GttButton>
+          <GttButton mode="ghost" size="sm" shape="circle"
+            
             type="button"
             :aria-label="calendarView === 'month' ? tr('ui.next_month') : tr('ui.next_week')"
             @click="movePeriod(1)"
           >
             <ChevronRight :size="20" />
-          </button>
+          </GttButton>
         </div>
       </div>
       <div class="mt-3 flex items-center justify-between gap-3">
-        <p class="text-sm text-base-content/60">{{ tr('ui.select_a_day_to_schedule_a_workout') }}</p>
+        <p class="text-sm text-base-content/60">
+          {{ tr('ui.select_a_day_to_schedule_a_workout') }}
+        </p>
         <div class="join shrink-0" :aria-label="tr('ui.calendar_view')">
-          <button
-            class="btn btn-sm join-item"
+          <GttButton size="sm"
+            class="join-item"
             :class="{ 'btn-primary': calendarView === 'month' }"
             type="button"
             @click="calendarView = 'month'"
           >
             {{ tr('ui.month') }}
-          </button>
-          <button
-            class="btn btn-sm join-item"
+          </GttButton>
+          <GttButton size="sm"
+            class="join-item"
             :class="{ 'btn-primary': calendarView === 'week' }"
             type="button"
             @click="calendarView = 'week'"
           >
             {{ tr('ui.week') }}
-          </button>
+          </GttButton>
         </div>
       </div>
     </header>
@@ -51,7 +57,7 @@
         <span v-for="weekday in weekdays" :key="weekday">{{ weekday }}</span>
       </div>
       <div class="calendar-grid">
-        <button
+        <GttButton unstyled
           v-for="day in calendarDays"
           :key="day.key"
           class="calendar-day"
@@ -79,12 +85,12 @@
               {{ tr('messages.calendarMore', { count: workoutsForDate(day.key).length - 2 }) }}
             </span>
           </div>
-        </button>
+        </GttButton>
       </div>
     </div>
 
     <div v-else class="week-calendar card bg-base-200 shadow-sm">
-      <button
+      <GttButton unstyled
         v-for="day in weekDays"
         :key="day.key"
         class="week-day-row"
@@ -113,7 +119,7 @@
             {{ tr('messages.calendarMore', { count: workoutsForDate(day.key).length - 2 }) }}
           </span>
         </div>
-      </button>
+      </GttButton>
     </div>
 
     <CalendarDayModal
@@ -126,16 +132,20 @@
 </template>
 
 <script setup lang="ts">
-import { tr, appLocale } from '@/localization';
-import { computed, ref, watch } from 'vue';
-import { ChevronLeft, ChevronRight } from '@lucide/vue';
-import { useRoute, useRouter } from 'vue-router';
 import CalendarDayModal from '@/components/calendar/CalendarDayModal.vue';
+import { appLocale, tr } from '@/localization';
 import { scheduledWorkoutsRef, workoutsRef } from '@/stores/workoutCreator';
+import { ChevronLeft, ChevronRight } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 type CalendarDay = { date: Date; key: string; isCurrentMonth: boolean; isToday: boolean };
 
-const weekdays = computed(() => Array.from({ length: 7 }, (_, index) => new Intl.DateTimeFormat(appLocale(), { weekday: 'short' }).format(new Date(2024, 0, 1 + index))));
+const weekdays = computed(() =>
+  Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(appLocale(), { weekday: 'short' }).format(new Date(2024, 0, 1 + index)),
+  ),
+);
 type CalendarView = 'month' | 'week';
 const route = useRoute();
 const router = useRouter();
@@ -210,7 +220,9 @@ function workoutsForDate(date: string) {
     });
 }
 function workoutName(workoutId: string) {
-  return workoutsRef.value.find((workout) => workout.id === workoutId)?.name ?? tr('ui.deleted_workout');
+  return (
+    workoutsRef.value.find((workout) => workout.id === workoutId)?.name ?? tr('ui.deleted_workout')
+  );
 }
 function weekdayLabel(date: Date) {
   return new Intl.DateTimeFormat(appLocale(), { weekday: 'short' }).format(date);

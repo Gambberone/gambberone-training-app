@@ -75,7 +75,6 @@
     "cropHorizontal": "Horizontal position",
     "cropVertical": "Vertical position",
     "savePhoto": "Save photo",
-
     "changePassword": "Change password",
     "currentPassword": "Current password",
     "newPassword": "New password",
@@ -85,7 +84,6 @@
     "deleteConfirmation": "I confirm that I want to permanently delete my account and all its data.",
     "cancel": "Cancel",
     "deletePermanently": "Delete permanently",
-
     "vibrationDescription": "Vibrate during countdowns and step changes, when supported.",
     "screenDescription": "Keep the screen on during workouts, when supported.",
     "soundsDescription": "Sound alerts with 3, 2 and 1 seconds or repetitions remaining.",

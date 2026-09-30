@@ -245,8 +245,12 @@ body,
   font-size: 1.125rem;
   color: var(--color-primary);
 }
-.app-tour-popover .driver-popover-description { line-height: 1.6; }
-.app-tour-popover .driver-popover-progress-text { color: var(--color-base-content); }
+.app-tour-popover .driver-popover-description {
+  line-height: 1.6;
+}
+.app-tour-popover .driver-popover-progress-text {
+  color: var(--color-base-content);
+}
 .app-tour-popover .driver-popover-footer button {
   border: 1px solid var(--color-base-300);
   border-radius: var(--radius-field);
@@ -256,7 +260,11 @@ body,
   font-family: inherit;
   padding: 0.5rem 0.75rem;
 }
-.app-tour-popover .driver-popover-footer .driver-popover-next-btn { background: var(--color-primary); color: var(--color-primary-content); border-color: var(--color-primary); }
+.app-tour-popover .driver-popover-footer .driver-popover-next-btn {
+  background: var(--color-primary);
+  color: var(--color-primary-content);
+  border-color: var(--color-primary);
+}
 .app-tour-popover .driver-popover-close-btn {
   top: 1.25rem;
   right: 1.25rem;
@@ -269,11 +277,22 @@ body,
   font-weight: 600;
   color: var(--color-primary);
 }
-.app-tour-popover button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-.app-tour-popover .driver-popover-arrow-side-left { border-left-color: var(--color-base-100); }
-.app-tour-popover .driver-popover-arrow-side-right { border-right-color: var(--color-base-100); }
-.app-tour-popover .driver-popover-arrow-side-top { border-top-color: var(--color-base-100); }
-.app-tour-popover .driver-popover-arrow-side-bottom { border-bottom-color: var(--color-base-100); }
+.app-tour-popover button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.app-tour-popover .driver-popover-arrow-side-left {
+  border-left-color: var(--color-base-100);
+}
+.app-tour-popover .driver-popover-arrow-side-right {
+  border-right-color: var(--color-base-100);
+}
+.app-tour-popover .driver-popover-arrow-side-top {
+  border-top-color: var(--color-base-100);
+}
+.app-tour-popover .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--color-base-100);
+}
 
 .app-tour-popover .driver-popover-close-btn:hover,
 .app-tour-popover .driver-popover-close-btn:focus {

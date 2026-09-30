@@ -1,22 +1,22 @@
 <template>
   <div class="flex w-full flex-col gap-2" :class="{ 'h-full min-h-0': props.scrollContent }">
     <div class="flex shrink-0 items-center gap-4">
-    <div class="min-w-0 flex-1 overflow-x-auto">
-      <div role="tablist" class="tabs tabs-box min-w-full w-max flex-nowrap">
-        <a
-          v-for="tab in props.tabs"
-          :key="tab.key"
-          :data-tour-tab="tab.key"
-          class="tab"
-          role="tab"
-          :class="tabClass(tab)"
-          @click="handleTabChange(tab)"
-        >
-          {{ tab.label }}
-        </a>
+      <div class="min-w-0 flex-1 overflow-x-auto">
+        <div role="tablist" class="tabs tabs-box min-w-full w-max flex-nowrap">
+          <a
+            v-for="tab in props.tabs"
+            :key="tab.key"
+            :data-tour-tab="tab.key"
+            class="tab"
+            role="tab"
+            :class="tabClass(tab)"
+            @click="handleTabChange(tab)"
+          >
+            {{ tab.label }}
+          </a>
+        </div>
       </div>
-    </div>
-    <slot name="actions" />
+      <slot name="actions" />
     </div>
     <div
       v-if="activeTab"
@@ -110,7 +110,19 @@ const handleTabChange = (tab: Tab) => {
 }
 
 .gtt-tabs-scroll.fade-top.fade-bottom {
-  mask-image: linear-gradient(to bottom, transparent, black 1rem, black calc(100% - 1rem), transparent);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 1rem, black calc(100% - 1rem), transparent);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 1rem,
+    black calc(100% - 1rem),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 1rem,
+    black calc(100% - 1rem),
+    transparent
+  );
 }
 </style>

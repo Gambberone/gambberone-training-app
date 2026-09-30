@@ -1,22 +1,22 @@
+import { auth, db } from '@/firebase';
 import { tr } from '@/localization';
+import { deleteAccountData, resetDeletedAccountData } from '@/services/firestoreSync';
 import {
   createUserWithEmailAndPassword,
   deleteUser,
   EmailAuthProvider,
-  reauthenticateWithCredential,
-  updatePassword,
-  sendEmailVerification,
   onAuthStateChanged,
+  reauthenticateWithCredential,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updatePassword,
   updateProfile,
   type User,
 } from 'firebase/auth';
-import { computed, readonly, ref, triggerRef } from 'vue';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/firebase';
-import { deleteAccountData, resetDeletedAccountData } from '@/services/firestoreSync';
+import { computed, readonly, ref, triggerRef } from 'vue';
 
 const allowedPhotoTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const maxPhotoSize = 5 * 1024 * 1024;
@@ -78,7 +78,8 @@ export function useAuth() {
     isAuthenticated,
     isAuthReady: readonly(isAuthReady),
     signIn: (email: string, password: string) => signInWithEmailAndPassword(auth, email, password),
-    register: (email: string, password: string) => createUserWithEmailAndPassword(auth, email, password),
+    register: (email: string, password: string) =>
+      createUserWithEmailAndPassword(auth, email, password),
     sendVerificationEmail: (user: User = auth.currentUser!) =>
       sendEmailVerification(user, {
         url: `${window.location.origin}/auth/verify-email`,
@@ -115,7 +116,10 @@ export function useAuth() {
     changePassword: async (currentPassword: string, newPassword: string) => {
       const user = auth.currentUser;
       if (!user?.email) throw new Error('No authenticated user');
-      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword));
+      await reauthenticateWithCredential(
+        user,
+        EmailAuthProvider.credential(user.email, currentPassword),
+      );
       await updatePassword(user, newPassword);
     },
     deleteAccount: async (password: string) => {

@@ -1,11 +1,13 @@
 import { createApp } from 'vue';
-import './style.css';
-import './wavebinder';
 import App from './App.vue';
-import { i18n } from './i18n';
+import GttButton from './components/generic/GttButton.vue';
+import GttModal from './components/generic/GttModal.vue';
 import './composables/useLanguage';
+import { i18n } from './i18n';
 import router from './router/index.ts';
 import { startFirestoreSync } from './services/firestoreSync';
+import './style.css';
+import './wavebinder';
 
 startFirestoreSync();
-createApp(App).use(router).use(i18n).mount('#app');
+createApp(App).component('GttButton', GttButton).component('GttModal', GttModal).use(router).use(i18n).mount('#app');

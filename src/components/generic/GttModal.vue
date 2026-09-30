@@ -8,43 +8,48 @@
   >
     <div
       class="modal-box flex max-h-[calc(100dvh-2rem)] flex-col"
-      :class="[props.contentClass, {
-        'w-[95dvw] h-[95dvh]': props.full,
-        'w-screen! h-screen! max-w-none! max-h-none! rounded-none': isFullScreen,
-      }]"
+      :class="[
+        props.contentClass,
+        {
+          'w-[95dvw] h-[95dvh]': props.full,
+          'w-screen! h-screen! max-w-none! max-h-none! rounded-none': isFullScreen,
+        },
+      ]"
     >
       <div class="modal-top relative z-10 flex items-center bg-base-100/85 backdrop-blur-sm">
         <div class="flex flex-1 items-center">
-          <button
+          <GttButton mode="ghost" size="sm" shape="circle"
             v-if="props.goBack"
-            class="btn btn-ghost btn-sm btn-circle mr-2 text-primary"
+            class="mr-2 text-primary"
             type="button"
             :aria-label="tr('ui.go_back')"
             @click="emit('goBack')"
           >
             <ChevronLeft :size="25" />
-          </button>
+          </GttButton>
           <span class="text-xl" v-if="props.title">{{ props.title }}</span>
         </div>
         <div class="flex-0 flex">
-          <button
-            class="btn btn-ghost btn-sm btn-circle top-4 right-4"
+          <GttButton mode="ghost" size="sm" shape="circle"
+            class="top-4 right-4"
             type="button"
             v-if="enableFullScreen"
-            :aria-label="isFullScreen ? tr('ui.minimize_dialog') : tr('ui.expand_dialog_to_fullscreen')"
+            :aria-label="
+              isFullScreen ? tr('ui.minimize_dialog') : tr('ui.expand_dialog_to_fullscreen')
+            "
             @click="toggleFullScreen"
           >
             <Minimize v-if="isFullScreen" :size="20" />
             <Maximize v-else :size="20" />
-          </button>
-          <button
-            class="btn btn-ghost btn-sm btn-circle top-4 right-4 text-error"
+          </GttButton>
+          <GttButton mode="ghost" size="sm" shape="circle"
+            class="top-4 right-4 text-error"
             type="button"
             :aria-label="tr('ui.close_dialog')"
             @click="closeModal"
           >
             <Close :size="25" />
-          </button>
+          </GttButton>
         </div>
       </div>
       <div
@@ -60,17 +65,17 @@
         class="modal-action relative z-10 shrink-0 bg-base-100/85 backdrop-blur-sm"
         v-if="props.actions && props.actions.length > 0"
       >
-        <button
+        <GttButton
           v-for="action in props.actions"
           :class="[action.color && `btn-${action.color}`]"
           :key="action.id"
-          class="btn"
+          
           type="button"
           :disabled="action.disabled"
           @click="actionHandler(action.id)"
         >
           {{ action.label }}
-        </button>
+        </GttButton>
       </div>
     </div>
   </dialog>

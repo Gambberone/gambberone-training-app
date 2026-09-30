@@ -1,28 +1,36 @@
 <template>
   <Teleport defer :to="isDesktop && desktopTarget ? desktopTarget : '#app-bottom-action'">
     <div v-if="!isWorkoutPlayerOpenRef">
-      <button
-        class="btn gap-2 font-semibold"
-        :class="isDesktop && desktopTarget ? 'btn-outline btn-primary whitespace-nowrap' : 'btn-outline btn-primary mx-auto flex h-12 w-full max-w-2xl rounded-xl'"
+      <GttButton
+        mode="outline"
+        color="primary"
+        class="gap-2 font-semibold"
+        :class="
+          isDesktop && desktopTarget
+            ? 'whitespace-nowrap'
+            : 'mx-auto flex h-12 w-full max-w-2xl rounded-xl'
+        "
         type="button"
         @click="emit('click')"
       >
-        <Plus class="size-5" aria-hidden="true" />
-        {{ label }}
-      </button>
+        <template #icon><Plus class="size-5" aria-hidden="true" /></template>
+        <template #label>{{ label }}</template>
+      </GttButton>
     </div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
-import { Plus } from '@lucide/vue';
 import { isWorkoutPlayerOpenRef } from '@/stores/workoutCreator';
+import { Plus } from '@lucide/vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 defineProps<{ label: string; desktopTarget?: string }>();
 const isDesktop = ref(false);
 let mediaQuery: MediaQueryList | undefined;
-const updateDesktop = () => { isDesktop.value = mediaQuery?.matches ?? false; };
+const updateDesktop = () => {
+  isDesktop.value = mediaQuery?.matches ?? false;
+};
 onMounted(() => {
   mediaQuery = window.matchMedia('(min-width: 1024px)');
   updateDesktop();
