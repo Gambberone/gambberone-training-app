@@ -1,13 +1,10 @@
 <template>
-  <section
-    ref="friendsPage"
-    class="mx-auto w-full max-w-5xl friends-page space-y-6 pb-8"
-  >
+  <section ref="friendsPage" class="mx-auto w-full max-w-5xl friends-page space-y-6 pb-8">
     <header class="flex flex-wrap items-start justify-between gap-4">
       <div class="min-w-0">
-        <h1 class="text-3xl font-bold">{{ t("friends.title") }}</h1>
+        <h1 class="text-3xl font-bold">{{ t('friends.title') }}</h1>
         <p class="mt-2 text-sm text-base-content/65">
-          {{ t("friends.intro") }}
+          {{ t('friends.intro') }}
         </p>
       </div>
       <GttButton
@@ -15,7 +12,7 @@
         color="primary"
         class="whitespace-nowrap"
         @click="openAdd"
-        ><UserPlus :size="18" />{{ t("friends.add") }}</GttButton
+        ><UserPlus :size="18" />{{ t('friends.add') }}</GttButton
       >
     </header>
 
@@ -33,23 +30,13 @@
     >
       <UserPlus :size="20" class="shrink-0 text-primary" aria-hidden="true" />
       <span class="min-w-0 flex-1 text-sm font-semibold">{{
-        t("friends.pendingRequests", { count: requests.length })
+        t('friends.pendingRequests', { count: requests.length })
       }}</span>
       <ChevronRight :size="18" class="shrink-0" aria-hidden="true" />
     </button>
-    <GttTabs
-      v-model="activeTab"
-      :tabs="tabs"
-      initial-active-tab="friends"
-      class="gap-5!"
-    >
+    <GttTabs v-model="activeTab" :tabs="tabs" initial-active-tab="friends" class="gap-5!">
       <template v-for="tab in tabs" :key="tab.key" #[tab.key]>
-        <div
-          v-if="loading"
-          class="space-y-3"
-          role="status"
-          :aria-label="t('friends.loading')"
-        >
+        <div v-if="loading" class="space-y-3" role="status" :aria-label="t('friends.loading')">
           <div v-for="i in 3" :key="i" class="skeleton h-20 rounded-xl" />
         </div>
         <template v-else-if="activeTab === 'friends'">
@@ -57,16 +44,13 @@
             v-if="!accepted.length"
             class="rounded-box border border-base-300/50 bg-base-100 px-5 py-12 text-center"
           >
-            <Users
-              class="mx-auto mb-4 size-10 text-primary"
-              aria-hidden="true"
-            />
-            <h2 class="text-lg font-bold">{{ t("friends.emptyTitle") }}</h2>
+            <Users class="mx-auto mb-4 size-10 text-primary" aria-hidden="true" />
+            <h2 class="text-lg font-bold">{{ t('friends.emptyTitle') }}</h2>
             <p class="mx-auto mt-2 max-w-sm text-sm text-base-content/60">
-              {{ t("friends.noFriends") }}
+              {{ t('friends.noFriends') }}
             </p>
             <GttButton color="primary" class="mt-5" @click="openAdd">{{
-              t("friends.add")
+              t('friends.add')
             }}</GttButton>
           </div>
           <ul
@@ -104,9 +88,7 @@
                   {{ emails[otherId(friend)] }}
                 </p>
               </div>
-              <div
-                class="friend-inline-actions flex items-center gap-1 sm:gap-2"
-              >
+              <div class="friend-inline-actions flex items-center gap-1 sm:gap-2">
                 <GttButton
                   mode="outline"
                   size="sm"
@@ -115,17 +97,14 @@
                   :title="t('friends.shareWorkout')"
                   :disabled="pending.has(friend.id)"
                   @click="openShare(friend)"
-                  ><Send :size="16" aria-hidden="true" /><span
-                    class="hidden sm:inline"
-                    >{{ t("friends.shareWorkout") }}</span
-                  ></GttButton
+                  ><Send :size="16" aria-hidden="true" /><span class="hidden sm:inline">{{
+                    t('friends.shareWorkout')
+                  }}</span></GttButton
                 >
                 <details class="dropdown dropdown-end">
                   <summary
                     class="btn btn-ghost btn-sm btn-square"
-                    :aria-label="
-                      t('friends.optionsFor', { name: name(otherId(friend)) })
-                    "
+                    :aria-label="t('friends.optionsFor', { name: name(otherId(friend)) })"
                   >
                     <Ellipsis :size="20" />
                   </summary>
@@ -138,7 +117,7 @@
                         :disabled="pending.has(friend.id)"
                         @click="confirmRemove(friend, $event)"
                       >
-                        {{ t("friends.remove") }}
+                        {{ t('friends.remove') }}
                       </button>
                     </li>
                   </ul>
@@ -176,12 +155,8 @@
                 >
                   {{ initials(otherId(friend)) }}
                 </div>
-                <span class="friend-name min-w-0 font-semibold">{{
-                  name(otherId(friend))
-                }}</span>
-                <div
-                  class="friend-actions col-start-2 flex items-center gap-2 sm:col-start-auto"
-                >
+                <span class="friend-name min-w-0 font-semibold">{{ name(otherId(friend)) }}</span>
+                <div class="friend-actions col-start-2 flex items-center gap-2 sm:col-start-auto">
                   <GttButton
                     v-if="group.key === 'incoming'"
                     color="primary"
@@ -191,7 +166,7 @@
                     ><span
                       v-if="pending.has(friend.id)"
                       class="loading loading-spinner loading-xs"
-                    />{{ t("friends.accept") }}</GttButton
+                    />{{ t('friends.accept') }}</GttButton
                   >
                   <GttButton
                     mode="ghost"
@@ -199,11 +174,7 @@
                     :disabled="pending.has(friend.id)"
                     @click="act(friend.id, () => removeFriend(friend))"
                     >{{
-                      t(
-                        group.key === "incoming"
-                          ? "friends.decline"
-                          : "friends.cancel",
-                      )
+                      t(group.key === 'incoming' ? 'friends.decline' : 'friends.cancel')
                     }}</GttButton
                   >
                 </div>
@@ -216,13 +187,10 @@
             v-if="!shared.length"
             class="rounded-box border border-base-300/50 bg-base-100 px-5 py-12 text-center"
           >
-            <Inbox
-              class="mx-auto mb-4 size-10 text-primary"
-              aria-hidden="true"
-            />
-            <h2 class="text-lg font-bold">{{ t("friends.noReceived") }}</h2>
+            <Inbox class="mx-auto mb-4 size-10 text-primary" aria-hidden="true" />
+            <h2 class="text-lg font-bold">{{ t('friends.noReceived') }}</h2>
             <p class="mt-2 text-sm text-base-content/60">
-              {{ t("friends.receivedHint") }}
+              {{ t('friends.receivedHint') }}
             </p>
           </div>
           <ul v-else class="space-y-3">
@@ -233,7 +201,7 @@
             >
               <h2 class="wrap-break-word font-bold">{{ item.workout.name }}</h2>
               <p class="mt-1 wrap-break-word text-sm text-base-content/60">
-                {{ t("friends.from", { name: name(item.from) }) }} ·
+                {{ t('friends.from', { name: name(item.from) }) }} ·
                 {{ sharedDate(item.sharedAt) }}
               </p>
               <p
@@ -241,18 +209,14 @@
               >
                 <span class="inline-flex items-center gap-1.5 tabular-nums"
                   ><Clock :size="15" aria-hidden="true" />{{
-                    t("friends.estimatedMinutes", {
-                      count: Math.ceil(
-                        workoutEstimatedDuration(item.workout) / 60,
-                      ),
+                    t('friends.estimatedMinutes', {
+                      count: Math.ceil(workoutEstimatedDuration(item.workout) / 60),
                     })
                   }}</span
                 >
                 <span>{{
-                  t("friends.steps", {
-                    count: item.workout.steps.filter(
-                      (step) => step.type !== "SETPAUSE",
-                    ).length,
+                  t('friends.steps', {
+                    count: item.workout.steps.filter((step) => step.type !== 'SETPAUSE').length,
                   })
                 }}</span>
               </p>
@@ -264,17 +228,16 @@
                   size="sm"
                   :disabled="pending.has(item.id)"
                   @click="act(item.id, () => dismissSharedWorkout(item.id))"
-                  >{{ t("friends.dismiss") }}</GttButton
+                  >{{ t('friends.dismiss') }}</GttButton
                 >
                 <GttButton
                   color="primary"
                   size="sm"
                   :disabled="pending.has(item.id)"
                   @click="previewTarget = item"
-                  ><span
-                    v-if="pending.has(item.id)"
-                    class="loading loading-spinner loading-xs"
-                  />{{ t("friends.preview") }}</GttButton
+                  ><span v-if="pending.has(item.id)" class="loading loading-spinner loading-xs" />{{
+                    t('friends.preview')
+                  }}</GttButton
                 >
               </div>
             </li>
@@ -290,7 +253,7 @@
     >
       <template v-if="previewTarget">
         <p class="mb-4 text-sm text-base-content/65">
-          {{ t("friends.from", { name: name(previewTarget.from) }) }}
+          {{ t('friends.from', { name: name(previewTarget.from) }) }}
         </p>
         <ReceivedWorkoutPreview :workout="previewTarget.workout" />
         <p v-if="pageError" class="mt-4 text-sm text-error" role="alert">
@@ -301,25 +264,21 @@
             mode="ghost"
             :disabled="pending.has(previewTarget.id)"
             @click="dismissPreview"
-            >{{ t("friends.decline") }}</GttButton
+            >{{ t('friends.decline') }}</GttButton
           >
           <GttButton
             color="primary"
             :disabled="pending.has(previewTarget.id)"
             @click="importWorkout(previewTarget)"
-            >{{ t("friends.import") }}</GttButton
+            >{{ t('friends.import') }}</GttButton
           >
         </div>
       </template>
     </GttModal>
-    <GttModal
-      v-model="addOpen"
-      :title="t('friends.add')"
-      :before-close="() => !pending.has('add')"
-    >
+    <GttModal v-model="addOpen" :title="t('friends.add')" :before-close="() => !pending.has('add')">
       <form class="space-y-4" @submit.prevent="addFriend">
         <label for="friend-uid" class="block text-sm font-semibold">{{
-          t("friends.friendId")
+          t('friends.friendId')
         }}</label>
         <input
           id="friend-uid"
@@ -339,26 +298,20 @@
           type="submit"
           class="w-full"
           :disabled="pending.has('add') || !friendId.trim()"
-          ><span
-            v-if="pending.has('add')"
-            class="loading loading-spinner loading-sm"
-          />{{ t("friends.sendRequest") }}</GttButton
+          ><span v-if="pending.has('add')" class="loading loading-spinner loading-sm" />{{
+            t('friends.sendRequest')
+          }}</GttButton
         >
       </form>
       <div class="mt-6 space-y-3 border-t border-base-300 pt-5">
-        <h3 class="text-sm font-semibold">{{ t("friends.yourId") }}</h3>
-        <p class="text-sm text-base-content/60">{{ t("friends.idHint") }}</p>
+        <h3 class="text-sm font-semibold">{{ t('friends.yourId') }}</h3>
+        <p class="text-sm text-base-content/60">{{ t('friends.idHint') }}</p>
         <div class="flex items-center gap-2">
-          <code
-            class="min-w-0 flex-1 break-all rounded-lg bg-base-200 p-3 text-xs"
-            >{{ currentUser?.uid }}</code
-          >
-          <GttButton
-            mode="outline"
-            size="sm"
-            :disabled="!currentUser?.uid"
-            @click="copyId"
-            ><Copy :size="16" />{{ t("friends.copy") }}</GttButton
+          <code class="min-w-0 flex-1 break-all rounded-lg bg-base-200 p-3 text-xs">{{
+            currentUser?.uid
+          }}</code>
+          <GttButton mode="outline" size="sm" :disabled="!currentUser?.uid" @click="copyId"
+            ><Copy :size="16" />{{ t('friends.copy') }}</GttButton
           >
         </div>
         <p v-if="copyError" class="text-sm text-error" role="alert">
@@ -372,21 +325,15 @@
       :before-close="() => !shareTarget || !pending.has(shareTarget.id)"
     >
       <form class="space-y-4" @submit.prevent="sendWorkout">
-        <p
-          v-if="shareTarget"
-          class="wrap-break-word text-sm text-base-content/65"
-        >
-          {{ t("friends.shareWith", { name: name(otherId(shareTarget)) }) }}
+        <p v-if="shareTarget" class="wrap-break-word text-sm text-base-content/65">
+          {{ t('friends.shareWith', { name: name(otherId(shareTarget)) }) }}
         </p>
-        <p
-          v-if="!workoutsRef.length"
-          class="rounded-xl bg-base-200 p-4 text-sm"
-        >
-          {{ t("friends.noOwnWorkouts") }}
+        <p v-if="!workoutsRef.length" class="rounded-xl bg-base-200 p-4 text-sm">
+          {{ t('friends.noOwnWorkouts') }}
         </p>
         <template v-else>
           <label for="shared-workout" class="block text-sm font-semibold">{{
-            t("friends.chooseWorkout")
+            t('friends.chooseWorkout')
           }}</label>
           <select
             id="shared-workout"
@@ -395,12 +342,8 @@
             required
             :disabled="!!shareTarget && pending.has(shareTarget.id)"
           >
-            <option value="" disabled>{{ t("friends.chooseWorkout") }}</option>
-            <option
-              v-for="workout in workoutsRef"
-              :key="workout.id"
-              :value="workout.id"
-            >
+            <option value="" disabled>{{ t('friends.chooseWorkout') }}</option>
+            <option v-for="workout in workoutsRef" :key="workout.id" :value="workout.id">
               {{ workout.name }}
             </option>
           </select>
@@ -409,20 +352,18 @@
               {{ selectedWorkout.name }}
             </p>
             <p class="mt-1 text-sm text-base-content/60">
-              {{ t("friends.steps", { count: selectedWorkout.steps.length }) }}
+              {{ t('friends.steps', { count: selectedWorkout.steps.length }) }}
             </p>
           </div>
           <GttButton
             color="primary"
             type="submit"
             class="w-full"
-            :disabled="
-              !selectedWorkout || !shareTarget || pending.has(shareTarget.id)
-            "
+            :disabled="!selectedWorkout || !shareTarget || pending.has(shareTarget.id)"
             ><span
               v-if="shareTarget && pending.has(shareTarget.id)"
               class="loading loading-spinner loading-sm"
-            />{{ t("friends.share") }}</GttButton
+            />{{ t('friends.share') }}</GttButton
           >
         </template>
         <p v-if="shareError" class="text-sm text-error" role="alert">
@@ -436,7 +377,7 @@
       :before-close="() => !removeTarget || !pending.has(removeTarget.id)"
     >
       <p v-if="removeTarget" class="wrap-break-word">
-        {{ t("friends.removeConfirm", { name: name(otherId(removeTarget)) }) }}
+        {{ t('friends.removeConfirm', { name: name(otherId(removeTarget)) }) }}
       </p>
       <p v-if="removeError" class="mt-3 text-sm text-error" role="alert">
         {{ removeError }}
@@ -446,13 +387,13 @@
           mode="ghost"
           :disabled="!!removeTarget && pending.has(removeTarget.id)"
           @click="removeOpen = false"
-          >{{ t("friends.cancel") }}</GttButton
+          >{{ t('friends.cancel') }}</GttButton
         >
         <GttButton
           color="error"
           :disabled="!removeTarget || pending.has(removeTarget.id)"
           @click="deleteFriend"
-          >{{ t("friends.remove") }}</GttButton
+          >{{ t('friends.remove') }}</GttButton
         >
       </div>
     </GttModal>
@@ -460,15 +401,15 @@
 </template>
 
 <script setup lang="ts">
-import ReceivedWorkoutPreview from "@/components/workouts/ReceivedWorkoutPreview.vue";
-import { listenFriendPresence } from "@/services/presence";
-import { isPresenceOnline } from "@/services/presenceStatus";
-import GttButton from "@/components/generic/GttButton.vue";
-import GttModal from "@/components/generic/GttModal.vue";
-import GttTabs from "@/components/generic/GttTabs.vue";
-import { showToast } from "@/composables/toast";
-import { useAuth } from "@/composables/useAuth";
-import { appLocale, tr as t } from "@/localization";
+import ReceivedWorkoutPreview from '@/components/workouts/ReceivedWorkoutPreview.vue';
+import { listenFriendPresence } from '@/services/presence';
+import { isPresenceOnline } from '@/services/presenceStatus';
+import GttButton from '@/components/generic/GttButton.vue';
+import GttModal from '@/components/generic/GttModal.vue';
+import GttTabs from '@/components/generic/GttTabs.vue';
+import { showToast } from '@/composables/toast';
+import { useAuth } from '@/composables/useAuth';
+import { appLocale, tr as t } from '@/localization';
 import {
   acceptFriend,
   dismissSharedWorkout,
@@ -481,39 +422,28 @@ import {
   shareWorkout,
   type Friendship,
   type SharedWorkout,
-} from "@/services/friends";
-import { workoutsRef, workoutEstimatedDuration } from "@/stores/workoutCreator";
-import {
-  ChevronRight,
-  Clock,
-  Copy,
-  Ellipsis,
-  Inbox,
-  Send,
-  UserPlus,
-  Users,
-} from "@lucide/vue";
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
+} from '@/services/friends';
+import { workoutsRef, workoutEstimatedDuration } from '@/stores/workoutCreator';
+import { ChevronRight, Clock, Copy, Ellipsis, Inbox, Send, UserPlus, Users } from '@lucide/vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 const { currentUser } = useAuth();
 const friendsPage = ref<HTMLElement>();
 function closeFriendMenus(event: Event) {
   const target = event.target;
-  friendsPage.value
-    ?.querySelectorAll<HTMLDetailsElement>("details[open]")
-    .forEach((menu) => {
-      if (event instanceof KeyboardEvent) {
-        if (event.key !== "Escape") return;
-        menu.removeAttribute("open");
-        menu.querySelector("summary")?.focus();
-      } else if (target instanceof Node && !menu.contains(target)) {
-        menu.removeAttribute("open");
-      }
-    });
+  friendsPage.value?.querySelectorAll<HTMLDetailsElement>('details[open]').forEach((menu) => {
+    if (event instanceof KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      menu.removeAttribute('open');
+      menu.querySelector('summary')?.focus();
+    } else if (target instanceof Node && !menu.contains(target)) {
+      menu.removeAttribute('open');
+    }
+  });
 }
 onMounted(() => {
-  document.addEventListener("pointerdown", closeFriendMenus);
-  document.addEventListener("keydown", closeFriendMenus);
+  document.addEventListener('pointerdown', closeFriendMenus);
+  document.addEventListener('keydown', closeFriendMenus);
 });
 
 const friends = ref<Friendship[]>([]);
@@ -537,59 +467,53 @@ const isFriendOnline = (id: string) =>
 const names = reactive<Record<string, string>>({});
 const emails = reactive<Record<string, string>>({});
 const pending = reactive(new Set<string>());
-const loadError = ref("");
-const pageError = ref("");
-const addError = ref("");
-const copyError = ref("");
-const shareError = ref("");
-const removeError = ref("");
+const loadError = ref('');
+const pageError = ref('');
+const addError = ref('');
+const copyError = ref('');
+const shareError = ref('');
+const removeError = ref('');
 const friendsLoading = ref(true);
 const sharedLoading = ref(true);
-const activeTab = ref("friends");
+const activeTab = ref('friends');
 const addOpen = ref(false);
 const shareOpen = ref(false);
 const removeOpen = ref(false);
-const friendId = ref("");
+const friendId = ref('');
 const shareTarget = ref<Friendship>();
 const removeTarget = ref<Friendship>();
-const selectedWorkoutId = ref("");
+const selectedWorkoutId = ref('');
 const selectedWorkout = computed(() =>
   workoutsRef.value.find((w) => w.id === selectedWorkoutId.value),
 );
 const requests = computed(() =>
-  friends.value.filter(
-    (f) => f.status === "pending" && f.recipient === currentUser.value?.uid,
-  ),
+  friends.value.filter((f) => f.status === 'pending' && f.recipient === currentUser.value?.uid),
 );
 const sent = computed(() =>
-  friends.value.filter(
-    (f) => f.status === "pending" && f.requester === currentUser.value?.uid,
-  ),
+  friends.value.filter((f) => f.status === 'pending' && f.requester === currentUser.value?.uid),
 );
 const accepted = computed(() =>
   friends.value
-    .filter((f) => f.status === "accepted")
-    .sort((a, b) =>
-      name(otherId(a)).localeCompare(name(otherId(b)), appLocale()),
-    ),
+    .filter((f) => f.status === 'accepted')
+    .sort((a, b) => name(otherId(a)).localeCompare(name(otherId(b)), appLocale())),
 );
 const sortedShared = computed(() =>
   [...shared.value].sort((a, b) => b.sharedAt.localeCompare(a.sharedAt)),
 );
 const loading = computed(() =>
-  activeTab.value === "received" ? sharedLoading.value : friendsLoading.value,
+  activeTab.value === 'received' ? sharedLoading.value : friendsLoading.value,
 );
 const tabs = computed(() =>
   [
-    { key: "friends", label: t("friends.title"), count: accepted.value.length },
+    { key: 'friends', label: t('friends.title'), count: accepted.value.length },
     {
-      key: "requests",
-      label: t("friends.requestsTab"),
+      key: 'requests',
+      label: t('friends.requestsTab'),
       count: requests.value.length,
     },
     {
-      key: "received",
-      label: t("friends.receivedTab"),
+      key: 'received',
+      label: t('friends.receivedTab'),
       count: shared.value.length,
     },
   ].map((tab) => ({
@@ -599,44 +523,40 @@ const tabs = computed(() =>
 );
 const requestGroups = computed(() => [
   {
-    key: "incoming",
-    title: t("friends.requests"),
+    key: 'incoming',
+    title: t('friends.requests'),
     items: requests.value,
-    empty: t("friends.noRequests"),
+    empty: t('friends.noRequests'),
   },
   {
-    key: "outgoing",
-    title: t("friends.sent"),
+    key: 'outgoing',
+    title: t('friends.sent'),
     items: sent.value,
-    empty: t("friends.noSent"),
+    empty: t('friends.noSent'),
   },
 ]);
 const otherId = (friend: Friendship) =>
-  friend.participants.find((id) => id !== currentUser.value?.uid) || "";
+  friend.participants.find((id) => id !== currentUser.value?.uid) || '';
 const name = (id: string) =>
   names[id] ||
-  (friends.value.some(
-    (friend) => friend.status === "accepted" && otherId(friend) === id,
-  )
+  (friends.value.some((friend) => friend.status === 'accepted' && otherId(friend) === id)
     ? emails[id]
-    : "") ||
-  t("friends.unnamed");
+    : '') ||
+  t('friends.unnamed');
 const initials = (id: string) =>
   names[id]
     ? names[id]!.trim()
         .split(/\s+/)
         .slice(0, 2)
         .map((part) => part[0])
-        .join("")
+        .join('')
         .toLocaleUpperCase(appLocale())
-    : "?";
+    : '?';
 function sharedDate(value: string) {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
-    ? ""
-    : new Intl.DateTimeFormat(appLocale(), { dateStyle: "medium" }).format(
-        date,
-      );
+    ? ''
+    : new Intl.DateTimeFormat(appLocale(), { dateStyle: 'medium' }).format(date);
 }
 let unsubscribe: (() => void)[] = [];
 let generation = 0;
@@ -657,7 +577,7 @@ watch([friends, shared], () => {
     ...friends.value.flatMap((f) => f.participants),
     ...shared.value.map((s) => s.from),
   ]);
-  ids.delete(currentUser.value?.uid || "");
+  ids.delete(currentUser.value?.uid || '');
   profileListeners.forEach((stop, id) => {
     if (!ids.has(id)) {
       stop();
@@ -667,7 +587,7 @@ watch([friends, shared], () => {
   });
   const version = generation;
   const acceptedIds = new Set(
-    friends.value.filter((friend) => friend.status === "accepted").map(otherId),
+    friends.value.filter((friend) => friend.status === 'accepted').map(otherId),
   );
   emailListeners.forEach((stop, id) => {
     if (!acceptedIds.has(id)) {
@@ -702,8 +622,7 @@ watch([friends, shared], () => {
           else delete emails[id];
         },
         () => {
-          if (version === generation && emailListeners.has(id))
-            delete emails[id];
+          if (version === generation && emailListeners.has(id)) delete emails[id];
         },
       ),
     );
@@ -720,8 +639,7 @@ watch([friends, shared], () => {
           else delete names[id];
         },
         (error) => {
-          if (version === generation)
-            console.error("Unable to load friend profile", error);
+          if (version === generation) console.error('Unable to load friend profile', error);
         },
       ),
     );
@@ -737,8 +655,8 @@ watch(
     friends.value = [];
     shared.value = [];
     Object.keys(names).forEach((id) => delete names[id]);
-    loadError.value = "";
-    pageError.value = "";
+    loadError.value = '';
+    pageError.value = '';
     addOpen.value = shareOpen.value = removeOpen.value = false;
     previewTarget.value = undefined;
     friendsLoading.value = sharedLoading.value = !!uid;
@@ -753,7 +671,7 @@ watch(
         () => {
           if (version !== generation) return;
           friendsLoading.value = false;
-          loadError.value = t("friends.loadError");
+          loadError.value = t('friends.loadError');
         },
       ),
       listenSharedWorkouts(
@@ -765,7 +683,7 @@ watch(
         () => {
           if (version !== generation) return;
           sharedLoading.value = false;
-          loadError.value = t("friends.loadError");
+          loadError.value = t('friends.loadError');
         },
       ),
     ];
@@ -774,8 +692,8 @@ watch(
 );
 onUnmounted(() => {
   clearInterval(presenceClock);
-  document.removeEventListener("pointerdown", closeFriendMenus);
-  document.removeEventListener("keydown", closeFriendMenus);
+  document.removeEventListener('pointerdown', closeFriendMenus);
+  document.removeEventListener('keydown', closeFriendMenus);
   generation++;
   unsubscribe.forEach((stop) => stop());
   stopProfileListeners();
@@ -783,62 +701,62 @@ onUnmounted(() => {
 async function act(
   key: string,
   action: () => Promise<void>,
-  success = t("friends.done"),
+  success = t('friends.done'),
   errorTarget = pageError,
 ) {
   if (pending.has(key)) return false;
   pending.add(key);
-  errorTarget.value = "";
+  errorTarget.value = '';
   try {
     await action();
     showToast({ title: success });
     return true;
   } catch {
-    errorTarget.value = t("friends.actionError");
+    errorTarget.value = t('friends.actionError');
     return false;
   } finally {
     pending.delete(key);
   }
 }
 function openAdd() {
-  addError.value = "";
-  copyError.value = "";
+  addError.value = '';
+  copyError.value = '';
   addOpen.value = true;
 }
 async function addFriend() {
-  if (pending.has("add")) return;
+  if (pending.has('add')) return;
   const id = friendId.value.trim();
-  addError.value = "";
+  addError.value = '';
   if (!id) return;
   if (id === currentUser.value?.uid) {
-    addError.value = t("friends.self");
+    addError.value = t('friends.self');
     return;
   }
   if (friends.value.some((friend) => friend.participants.includes(id))) {
-    addError.value = t("friends.exists");
+    addError.value = t('friends.exists');
     return;
   }
-  pending.add("add");
+  pending.add('add');
   try {
     await requestFriend(id);
-    friendId.value = "";
+    friendId.value = '';
     addOpen.value = false;
-    showToast({ title: t("friends.requestSent") });
+    showToast({ title: t('friends.requestSent') });
   } catch (cause) {
     addError.value =
-      cause instanceof Error && cause.message === "unknown"
-        ? t("friends.unknown")
-        : cause instanceof Error && cause.message === "exists"
-          ? t("friends.exists")
-          : t("friends.actionError");
+      cause instanceof Error && cause.message === 'unknown'
+        ? t('friends.unknown')
+        : cause instanceof Error && cause.message === 'exists'
+          ? t('friends.exists')
+          : t('friends.actionError');
   } finally {
-    pending.delete("add");
+    pending.delete('add');
   }
 }
 function openShare(friend: Friendship) {
   shareTarget.value = friend;
-  selectedWorkoutId.value = "";
-  shareError.value = "";
+  selectedWorkoutId.value = '';
+  shareError.value = '';
   shareOpen.value = true;
 }
 async function sendWorkout() {
@@ -850,53 +768,39 @@ async function sendWorkout() {
     (await act(
       friend.id,
       () => shareWorkout(friend, workout),
-      t("friends.workoutSent"),
+      t('friends.workoutSent'),
       shareError,
     ))
   )
     shareOpen.value = false;
 }
 function confirmRemove(friend: Friendship, event: Event) {
-  (event.currentTarget as HTMLElement)
-    .closest("details")
-    ?.removeAttribute("open");
+  (event.currentTarget as HTMLElement).closest('details')?.removeAttribute('open');
   removeTarget.value = friend;
-  removeError.value = "";
+  removeError.value = '';
   removeOpen.value = true;
 }
 async function deleteFriend() {
   const friend = removeTarget.value;
-  if (
-    friend &&
-    (await act(
-      friend.id,
-      () => removeFriend(friend),
-      t("friends.done"),
-      removeError,
-    ))
-  )
+  if (friend && (await act(friend.id, () => removeFriend(friend), t('friends.done'), removeError)))
     removeOpen.value = false;
 }
 async function importWorkout(item: SharedWorkout) {
   const success = await act(
     item.id,
     async () => {
-      const copy = JSON.parse(
-        JSON.stringify(item.workout),
-      ) as SharedWorkout["workout"];
+      const copy = JSON.parse(JSON.stringify(item.workout)) as SharedWorkout['workout'];
       delete copy.exerciseNames;
       copy.id = crypto.randomUUID();
       workoutsRef.value = [...workoutsRef.value, copy];
       try {
         await dismissSharedWorkout(item.id);
       } catch (cause) {
-        workoutsRef.value = workoutsRef.value.filter(
-          (workout) => workout.id !== copy.id,
-        );
+        workoutsRef.value = workoutsRef.value.filter((workout) => workout.id !== copy.id);
         throw cause;
       }
     },
-    t("friends.workoutImported"),
+    t('friends.workoutImported'),
   );
   if (success) previewTarget.value = undefined;
 }
@@ -906,13 +810,13 @@ async function dismissPreview() {
     previewTarget.value = undefined;
 }
 async function copyId() {
-  copyError.value = "";
+  copyError.value = '';
   if (!currentUser.value?.uid) return;
   try {
     await navigator.clipboard.writeText(currentUser.value.uid);
-    showToast({ title: t("friends.copied") });
+    showToast({ title: t('friends.copied') });
   } catch {
-    copyError.value = t("friends.actionError");
+    copyError.value = t('friends.actionError');
   }
 }
 </script>
