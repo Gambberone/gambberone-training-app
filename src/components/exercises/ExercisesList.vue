@@ -133,25 +133,25 @@ const exerciseSections = [
   {
     title: 'Stretching',
     groups: muscleGroups.filter(({ id }) => id === MUSCLE_GROUPS.STRETCHING),
-    cardClass: 'border-warning bg-warning/10',
-    textClass: 'text-warning',
-    badgeClass: 'badge-warning',
+    cardClass: 'border-base-300/60 bg-base-100',
+    textClass: 'text-base-content',
+    badgeClass: 'badge-neutral badge-outline',
   },
   {
     title: 'Warm-up',
     groups: muscleGroups.filter(({ id }) => id === MUSCLE_GROUPS.WARMUP),
-    cardClass: 'border-error bg-error/10',
-    textClass: 'text-error',
-    badgeClass: 'badge-error',
+    cardClass: 'border-base-300/60 bg-base-100',
+    textClass: 'text-base-content',
+    badgeClass: 'badge-neutral badge-outline',
   },
   {
     title: tr('ui.exercises'),
     groups: muscleGroups.filter(
       ({ id }) => id !== MUSCLE_GROUPS.STRETCHING && id !== MUSCLE_GROUPS.WARMUP,
     ),
-    cardClass: 'border-info bg-info/10',
-    textClass: 'text-info',
-    badgeClass: 'badge-info',
+    cardClass: 'border-base-300/60 bg-base-100',
+    textClass: 'text-base-content',
+    badgeClass: 'badge-neutral badge-outline',
   },
 ];
 

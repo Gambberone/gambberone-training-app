@@ -12,7 +12,8 @@
       />
     </div>
     <p v-if="!hasActivity" class="mt-2 text-xs text-base-content/60">{{ t('home.trend.empty') }}</p>
-    <p v-else class="mt-2 text-xs text-base-content/60">{{ t('home.trend.currentWeek') }}</p>
+    <p v-if="comparison" class="mt-3 text-sm font-medium">{{ comparison }}</p>
+    <p v-if="hasActivity" class="mt-2 text-xs text-base-content/60">{{ t('home.trend.currentWeek') }}</p>
   </section>
 </template>
 
@@ -95,6 +96,14 @@ const weeks = computed(() => {
       count,
     };
   });
+});
+// Compare the two most recent complete weeks, avoiding a partial-week comparison.
+const comparison = computed(() => {
+  const previous = weeks.value[5]?.count ?? 0;
+  const latest = weeks.value[6]?.count ?? 0;
+  if (!previous && !latest) return '';
+  return latest === previous ? t('home.trend.same', { count: latest })
+    : t(latest > previous ? 'home.trend.more' : 'home.trend.less', { count: Math.abs(latest - previous) });
 });
 const hasActivity = computed(() => weeks.value.some((week) => week.count > 0));
 const chartDescription = computed(

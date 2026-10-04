@@ -23,12 +23,28 @@
     "noExercises": "Nessun esercizio trovato. Prova un altro nome o gruppo muscolare.",
     "execution": "Esecuzione",
     "advanced": "Opzioni avanzate",
-    "allGroups": "Tutti i gruppi"
+    "allGroups": "Tutti i gruppi",
+    "newPosition": "Nuovo passaggio · posizione {number}",
+    "stepPosition": "Passaggio {number} di {total}",
+    "addStep": "Aggiungi passaggio",
+    "stepSaveHint": "Salva il passaggio nella sequenza. Per confermare tutto, salva l’allenamento.",
+    "recoveryLabel": "Recupero",
+    "sequenceDuration": "Sequenza: {duration}"
   },
   "friends": {
+    "preview": "Anteprima",
+    "online": "Online",
+    "previewSets": "{count} serie",
+    "previewReps": "{count} ripetizioni",
+    "previewSeconds": "{count} s",
+    "previewRest": "Pausa tra le serie: {count} s",
+    "previewUnnamed": "Nome esercizio non disponibile",
+
+    "pendingRequests": "Richieste da gestire: {count}",
+    "estimatedMinutes": "~{count} min stimati",
     "title": "Amici",
     "pendingIndicator": "Amici: {count} elementi da gestire",
-    "intro": "Aggiungi amici tramite il loro ID e scambiatevi i workout.",
+    "intro": "Condividi i tuoi allenamenti con chi si allena con te.",
     "yourId": "Il tuo ID",
     "copy": "Copia",
     "idHint": "Condividi questo ID con chi vuoi aggiungere.",
@@ -60,7 +76,21 @@
     "exists": "Richiesta o amicizia già esistente.",
     "workoutSent": "Workout condiviso.",
     "workoutImported": "Workout salvato.",
-    "copied": "ID copiato."
+    "copied": "ID copiato.",
+    "requestsTab": "Richieste",
+    "receivedTab": "Ricevuti",
+    "emptyTitle": "Allenarsi è meglio in compagnia",
+    "shareWorkout": "Condividi workout",
+    "optionsFor": "Opzioni per {name}",
+    "receivedHint": "Qui troverai gli allenamenti che i tuoi amici condividono con te.",
+    "from": "Da {name}",
+    "shareWith": "Invia un allenamento a {name}.",
+    "noOwnWorkouts": "Crea prima un workout nella sezione Allenamenti, poi torna qui per condividerlo.",
+    "steps": "Nessuno step | 1 step | {count} step",
+    "removeTitle": "Rimuovi amico",
+    "removeConfirm": "Vuoi rimuovere {name} dagli amici? Per condividere altri workout dovrete aggiungervi di nuovo.",
+    "loading": "Caricamento amici",
+    "unnamed": "Amico senza nome"
   },
   "home": {
     "expired": "Scaduto",
@@ -100,10 +130,25 @@
       "period": "Workout completati · ultime 8 settimane",
       "empty": "Completa il primo workout per iniziare a vedere il tuo andamento.",
       "currentWeek": "La settimana attuale è ancora in corso.",
-      "count": "Nessun workout | {count} workout | {count} workout"
-    }
+      "count": "Nessun workout | {count} workout | {count} workout",
+      "more": "Ultima settimana completa: +{count} workout rispetto alla precedente.",
+      "less": "Ultima settimana completa: {count} workout in meno rispetto alla precedente.",
+      "same": "Le ultime due settimane complete: {count} workout ciascuna."
+    },
+    "recoveryDescription": "Prenditi una pausa e prepara la prossima sessione.",
+    "nextWorkout": "Il prossimo allenamento"
   },
   "account": {
+    "shareOnline": "Mostra quando sono online",
+    "shareOnlineHint": "Solo gli amici accettati vedranno quando l’app è aperta e attiva. Disattivato per impostazione predefinita.",
+    "presenceError": "Impossibile aggiornare lo stato online. Riprova.",
+
+    "privacy": "Privacy",
+    "appearance": "Aspetto e lingua",
+    "playback": "Durante il workout",
+    "security": "Sicurezza",
+
+    "surprise": "Sorpresa",
     "viewPhoto": "Visualizza foto",
     "viewPhotoHint": "Tocca la foto per ingrandirla o modificarla.",
     "cropPhoto": "Ritaglia foto",
@@ -158,7 +203,10 @@
     "language": "Lingua",
     "dark": "Scuro",
     "theme": "Tema",
-    "languageError": "Impossibile sincronizzare la lingua. Controlla la connessione e riprova."
+    "languageError": "Impossibile sincronizzare la lingua. Controlla la connessione e riprova.",
+    "shareEmail": "Mostra la mia email agli amici",
+    "shareEmailHint": "Solo gli amici accettati possono vedere il tuo indirizzo. Verrà usato quando non hai impostato un nome. Disattivando questa opzione, l’indirizzo non sarà più disponibile nell’app.",
+    "shareEmailError": "Impossibile caricare o salvare la preferenza. Riprova."
   },
   "tour": {
     "next": "Avanti",
@@ -490,7 +538,14 @@
     "lastCompleted": "Ultimo completamento: {date}",
     "setCount": "{count} set",
     "exerciseCount": "{count} esercizio | {count} esercizi",
-    "stepDetails": "{name} · {duration}"
+    "stepDetails": "{name} · {duration}",
+    "collectionCount": "{count} workout nella tua raccolta",
+    "view": "Vista degli allenamenti",
+    "cards": "Schede",
+    "compact": "Compatta",
+    "estimatedDuration": "Durata stimata",
+    "emptyTitle": "Il tuo primo allenamento parte da qui",
+    "emptyDescription": "Combina esercizi, recuperi e riscaldamento in una sequenza adatta a te."
   },
   "history": {
     "title": "Storico",
@@ -498,10 +553,11 @@
     "thisMonth": "Questo mese",
     "sessions": "Sessioni",
     "minutes": "Minuti delle sessioni",
+    "monthDifference": "Finora: {count} sessioni rispetto al mese precedente",
     "previousMonth": "Mese precedente",
     "minutesValue": "{count} min",
     "allSessions": "Tutte le sessioni",
-    "results": "{count} sessioni",
+    "results": "Nessuna sessione | 1 sessione | {count} sessioni",
     "period": "Periodo",
     "allTime": "Da sempre",
     "last30Days": "Ultimi 30 giorni",
@@ -515,5 +571,55 @@
     "noResults": "Nessuna sessione trovata",
     "changeFilters": "Prova a cambiare periodo o workout.",
     "resetFilters": "Azzera filtri"
+  },
+  "authDesign": {
+    "rhythm": "Il tuo ritmo.",
+    "journey": "Il tuo percorso.",
+    "description": "Dai spazio ai tuoi allenamenti. Organizza le sessioni e ritrova i tuoi progressi, giorno dopo giorno.",
+    "train": "Allenamento",
+    "recover": "Recupero",
+    "repeat": "Riparti",
+    "footer": "Ogni allenamento trova il suo posto.",
+    "signingIn": "Accesso in corso…",
+    "creatingAccount": "Creazione in corso…",
+    "sending": "Invio in corso…",
+    "checking": "Verifica in corso…",
+    "checkVerification": "Controlla verifica",
+    "verifyDescription": "Apri il link di verifica che abbiamo inviato a questo indirizzo, poi torna qui per continuare."
+  },
+  "visual": {
+    "scheduledCount": "Allenamenti pianificati: {count}",
+    "home": "Home",
+    "calendar": "Agenda",
+    "workouts": "Workout",
+    "friends": "Amici",
+    "history": "Storico",
+    "account": "Profilo",
+    "navExpand": "Espandi navigazione",
+    "navCollapse": "Riduci navigazione",
+    "dayDetails": "Allenamenti del giorno",
+    "emptyDay": "Nessun allenamento pianificato.",
+    "planDay": "Pianifica",
+    "selectedDay": "Giorno selezionato"
+  },
+  "planner": {
+    "title": "Il tuo calendario",
+    "scheduled": "Programmato",
+    "completed": "Completato",
+    "duration": "{minutes} min di allenamento",
+    "estimate": "Circa {minutes} min",
+    "history": "Vedi nello storico",
+    "manage": "Gestisci",
+    "emptyHint": "Scegli un workout e dagli un posto nella tua giornata.",
+    "dayCount": "Allenamenti: {count}"
+  },
+  "playerDesign": {
+    "paused": "In pausa",
+    "pauseHint": "Timer fermo. Riprendi quando sei pronto.",
+    "completed": "Sessione completata",
+    "sessionDuration": "Durata sessione",
+    "sequenceSteps": "Passaggi della sequenza",
+    "saved": "La sessione è stata salvata nello storico.",
+    "done": "Chiudi riepilogo"
   }
 }

@@ -1,7 +1,9 @@
 <template>
   <dialog
     ref="dialog"
-    class="modal"
+    class="modal gtt-modal"
+    :class="{ 'gtt-modal--sheet': !props.full && !props.actions?.length, 'gtt-modal--editor': props.full }"
+    :aria-labelledby="props.title ? titleId : undefined"
     @cancel.prevent="closeModal"
     @close="isOpen = false"
     @click.self="closeModal"
@@ -27,7 +29,7 @@
           >
             <ChevronLeft :size="25" />
           </GttButton>
-          <span class="text-xl" v-if="props.title">{{ props.title }}</span>
+          <h2 :id="titleId" class="min-w-0 flex-1 text-xl font-bold wrap-break-word" v-if="props.title">{{ props.title }}</h2>
         </div>
         <div class="flex-0 flex">
           <GttButton mode="ghost" size="sm" shape="circle"
@@ -43,7 +45,7 @@
             <Maximize v-else :size="20" />
           </GttButton>
           <GttButton mode="ghost" size="sm" shape="circle"
-            class="top-4 right-4 text-error"
+            class="top-4 right-4 text-base-content"
             type="button"
             :aria-label="tr('ui.close_dialog')"
             @click="closeModal"
@@ -84,7 +86,7 @@
 <script setup lang="ts">
 import { tr } from '@/localization';
 import { ChevronLeft, X as Close, Maximize, Minimize } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import { ref, watch, useId } from 'vue';
 
 interface ModalAction {
   id: string;
@@ -115,6 +117,7 @@ const emit = defineEmits<{
   goBack: [];
 }>();
 
+const titleId = useId();
 const isOpen = defineModel<boolean>({ default: false });
 const dialog = ref<HTMLDialogElement | null>(null);
 const isFullScreen = ref(false);

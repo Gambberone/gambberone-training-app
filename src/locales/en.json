@@ -23,12 +23,28 @@
     "noExercises": "No exercises found. Try another name or muscle group.",
     "execution": "Execution",
     "advanced": "Advanced options",
-    "allGroups": "All muscle groups"
+    "allGroups": "All muscle groups",
+    "newPosition": "New step · position {number}",
+    "stepPosition": "Step {number} of {total}",
+    "addStep": "Add step",
+    "stepSaveHint": "Save this step to the sequence. Save the workout to confirm all changes.",
+    "recoveryLabel": "Rest",
+    "sequenceDuration": "Sequence: {duration}"
   },
   "friends": {
+    "preview": "Preview",
+    "online": "Online",
+    "previewSets": "{count} sets",
+    "previewReps": "{count} reps",
+    "previewSeconds": "{count} s",
+    "previewRest": "Rest between sets: {count} s",
+    "previewUnnamed": "Exercise name unavailable",
+
+    "pendingRequests": "Requests to review: {count}",
+    "estimatedMinutes": "~{count} min estimated",
     "title": "Friends",
     "pendingIndicator": "Friends: {count} items to review",
-    "intro": "Add friends using their ID and share workouts.",
+    "intro": "Share your workouts with the people you train with.",
     "yourId": "Your ID",
     "copy": "Copy",
     "idHint": "Share this ID with someone you want to add.",
@@ -60,7 +76,21 @@
     "exists": "A request or friendship already exists.",
     "workoutSent": "Workout shared.",
     "workoutImported": "Workout saved.",
-    "copied": "ID copied."
+    "copied": "ID copied.",
+    "requestsTab": "Requests",
+    "receivedTab": "Received",
+    "emptyTitle": "Training is better together",
+    "shareWorkout": "Share workout",
+    "optionsFor": "Options for {name}",
+    "receivedHint": "Workouts your friends share with you will appear here.",
+    "from": "From {name}",
+    "shareWith": "Send a workout to {name}.",
+    "noOwnWorkouts": "Create a workout in the Workouts section first, then come back to share it.",
+    "steps": "No steps | 1 step | {count} steps",
+    "removeTitle": "Remove friend",
+    "removeConfirm": "Remove {name} from your friends? You will need to add each other again to share more workouts.",
+    "loading": "Loading friends",
+    "unnamed": "Unnamed friend"
   },
   "home": {
     "expired": "Expired",
@@ -100,10 +130,25 @@
       "period": "Completed workouts · last 8 weeks",
       "empty": "Complete your first workout to start tracking your activity.",
       "currentWeek": "The current week is still in progress.",
-      "count": "No workouts | {count} workout | {count} workouts"
-    }
+      "count": "No workouts | {count} workout | {count} workouts",
+      "more": "Last complete week: {count} more workouts than the previous week.",
+      "less": "Last complete week: {count} fewer workouts than the previous week.",
+      "same": "The last two complete weeks: {count} workouts each."
+    },
+    "recoveryDescription": "Take a break and get ready for your next session.",
+    "nextWorkout": "Your next workout"
   },
   "account": {
+    "shareOnline": "Show when I am online",
+    "shareOnlineHint": "Only accepted friends will see when the app is open and active. Off by default.",
+    "presenceError": "Unable to update online visibility. Try again.",
+
+    "privacy": "Privacy",
+    "appearance": "Appearance and language",
+    "playback": "During your workout",
+    "security": "Security",
+
+    "surprise": "Surprise",
     "viewPhoto": "View photo",
     "viewPhotoHint": "Tap the photo to enlarge or edit it.",
     "cropPhoto": "Crop photo",
@@ -158,7 +203,10 @@
     "language": "Language",
     "dark": "Dark",
     "theme": "Theme",
-    "languageError": "Could not sync your language. Check your connection and try again."
+    "languageError": "Could not sync your language. Check your connection and try again.",
+    "shareEmail": "Show my email to friends",
+    "shareEmailHint": "Only accepted friends can see your address. It will be used when you have not set a name. Turning this off removes the address from the app.",
+    "shareEmailError": "Could not load or save this preference. Try again."
   },
   "tour": {
     "next": "Next",
@@ -490,7 +538,14 @@
     "lastCompleted": "Last completed: {date}",
     "setCount": "{count} set | {count} sets",
     "exerciseCount": "{count} exercise | {count} exercises",
-    "stepDetails": "{name} · {duration}"
+    "stepDetails": "{name} · {duration}",
+    "collectionCount": "{count} workout in your collection | {count} workouts in your collection",
+    "view": "Workout list view",
+    "cards": "Cards",
+    "compact": "Compact",
+    "estimatedDuration": "Estimated duration",
+    "emptyTitle": "Your first workout starts here",
+    "emptyDescription": "Combine exercises, rest and warm-up into a sequence that works for you."
   },
   "history": {
     "title": "History",
@@ -498,10 +553,11 @@
     "thisMonth": "This month",
     "sessions": "Sessions",
     "minutes": "Session minutes",
+    "monthDifference": "So far: {count} sessions compared with last month",
     "previousMonth": "Previous month",
     "minutesValue": "{count} min",
     "allSessions": "All sessions",
-    "results": "{count} sessions",
+    "results": "No sessions | 1 session | {count} sessions",
     "period": "Period",
     "allTime": "All time",
     "last30Days": "Last 30 days",
@@ -515,5 +571,55 @@
     "noResults": "No sessions found",
     "changeFilters": "Try a different period or workout.",
     "resetFilters": "Reset filters"
+  },
+  "authDesign": {
+    "rhythm": "Your rhythm.",
+    "journey": "Your journey.",
+    "description": "Make room for your training. Plan your sessions and follow your progress, day after day.",
+    "train": "Train",
+    "recover": "Recover",
+    "repeat": "Go again",
+    "footer": "A place for every workout.",
+    "signingIn": "Signing in…",
+    "creatingAccount": "Creating account…",
+    "sending": "Sending…",
+    "checking": "Checking…",
+    "checkVerification": "Check verification",
+    "verifyDescription": "Open the verification link we sent to this address, then come back here to continue."
+  },
+  "visual": {
+    "scheduledCount": "Scheduled workouts: {count}",
+    "home": "Home",
+    "calendar": "Agenda",
+    "workouts": "Workouts",
+    "friends": "Friends",
+    "history": "History",
+    "account": "Profile",
+    "navExpand": "Expand navigation",
+    "navCollapse": "Collapse navigation",
+    "dayDetails": "Day’s workouts",
+    "emptyDay": "No workouts scheduled.",
+    "planDay": "Schedule",
+    "selectedDay": "Selected day"
+  },
+  "planner": {
+    "title": "Your training calendar",
+    "scheduled": "Scheduled",
+    "completed": "Completed",
+    "duration": "{minutes} min of training",
+    "estimate": "About {minutes} min",
+    "history": "View history",
+    "manage": "Manage",
+    "emptyHint": "Choose a workout and make room for it in your day.",
+    "dayCount": "Workouts: {count}"
+  },
+  "playerDesign": {
+    "paused": "Paused",
+    "pauseHint": "Timer stopped. Resume when you are ready.",
+    "completed": "Session completed",
+    "sessionDuration": "Session duration",
+    "sequenceSteps": "Sequence steps",
+    "saved": "Your session has been saved to history.",
+    "done": "Close summary"
   }
 }

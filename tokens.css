@@ -1,0 +1,54 @@
+/* Auth tokens extend the existing training-light / training-dark system. */
+:root {
+  --font-auth-display: var(--font-sans);
+  --font-auth-body: var(--font-sans);
+  --color-auth-story: oklch(20.8% 0.042 265.755);
+  --color-auth-story-ink: oklch(96.8% 0.007 247.896);
+  --color-auth-story-muted: oklch(80% 0.025 255);
+  --color-auth-story-rule: oklch(37.2% 0.044 257.287);
+  --color-auth-story-accent: oklch(76.5% 0.177 163.223);
+  --color-auth-track-glow: color-mix(in oklch, var(--color-auth-story-accent) 30%, transparent);
+  --color-auth-track-halo: color-mix(in oklch, var(--color-auth-story-accent) 12%, transparent);
+  --color-auth-story-accent-ink: oklch(26.2% 0.051 172.552);
+  --color-auth-action: color-mix(in oklch, var(--color-primary) 85%, var(--color-base-content));
+  --color-auth-action-ink: var(--color-primary-content);
+  --color-auth-muted: color-mix(in oklch, var(--color-base-content) 75%, var(--color-base-100));
+  --color-auth-rule: color-mix(in oklch, var(--color-base-content) 28%, var(--color-base-100));
+  --color-auth-input: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-200));
+  --color-auth-transparent: transparent;
+  --space-auth-xs: 0.25rem;
+  --space-auth-sm: 0.5rem;
+  --space-auth-md: 0.75rem;
+  --space-auth-lg: 1rem;
+  --space-auth-form-gap: 1.25rem;
+  --space-auth-xl: 1.5rem;
+  --space-auth-2xl: 2rem;
+  --space-auth-3xl: 3rem;
+  --space-auth-4xl: 4rem;
+  --text-auth-small: 0.8125rem;
+  --text-auth-body: 0.9375rem;
+  --text-auth-title: clamp(1.75rem, 3vw, 2.25rem);
+  --text-auth-display: clamp(3.25rem, 5vw, 5rem);
+  --radius-auth-field: var(--radius-field);
+  --radius-auth-pill: 999px;
+  --ease-auth-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-auth-short: 150ms;
+  --rule-auth-width: 1px;
+}
+
+/* Shared app rhythm, using the training theme colors. */
+:root {
+  --space-ui-xs: 0.5rem;
+  --space-ui-sm: 0.75rem;
+  --space-ui-md: 1rem;
+  --space-ui-lg: 1.5rem;
+  --space-ui-xl: 2rem;
+  --space-ui-2xl: 3rem;
+  --text-ui-small: 0.8125rem;
+  --text-ui-title: clamp(1.75rem, 2.5vw, 2rem);
+  --size-ui-control: 2.75rem;
+  --ease-ui-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-ui-short: 150ms;
+  --color-ui-muted: color-mix(in srgb, var(--color-base-content) 75%, var(--color-base-100));
+  --color-ui-rule: color-mix(in srgb, var(--color-base-content) 28%, var(--color-base-100));
+}

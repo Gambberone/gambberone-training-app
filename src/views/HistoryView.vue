@@ -9,56 +9,51 @@
 
     <section
       aria-labelledby="history-summary"
-      class="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+      class="history-summary rounded-box border border-base-300/50 bg-base-100 p-5 sm:p-6"
     >
-      <div
-        class="rounded-box border border-base-300/50 bg-base-100 p-5 shadow-sm sm:p-6"
-      >
-        <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="history-summary" class="text-lg font-bold">
-            {{ currentMonthLabel }}
-          </h2>
-          <span class="text-sm text-base-content/60">{{
-            t("history.thisMonth")
-          }}</span>
-        </div>
-        <dl class="mt-7 grid grid-cols-2 gap-4">
-          <div>
-            <dd
-              class="text-4xl font-bold tabular-nums text-primary sm:text-5xl"
-            >
-              {{ currentMonthSessions.length }}
-            </dd>
-            <dt class="mt-2 text-sm text-base-content/65">
-              {{ t("history.sessions") }}
-            </dt>
-          </div>
-          <div>
-            <dd class="text-4xl font-bold tabular-nums sm:text-5xl">
-              {{ currentMonthMinutes }}
-            </dd>
-            <dt class="mt-2 text-sm text-base-content/65">
-              {{ t("history.minutes") }}
-            </dt>
-          </div>
-        </dl>
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="history-summary" class="text-lg font-bold capitalize">
+          {{ currentMonthLabel }}
+        </h2>
+        <span class="text-sm text-base-content/60">{{
+          t("history.thisMonth")
+        }}</span>
       </div>
+      <dl class="mt-5 grid grid-cols-2 gap-4">
+        <div>
+          <dd class="text-4xl font-bold tabular-nums">
+            {{ currentMonthSessions.length }}
+          </dd>
+          <dt class="mt-1 text-sm text-base-content/65">
+            {{ t("history.sessions") }}
+          </dt>
+        </div>
+        <div>
+          <dd class="text-4xl font-bold tabular-nums">
+            {{ currentMonthMinutes }}
+          </dd>
+          <dt class="mt-1 text-sm text-base-content/65">
+            {{ t("history.minutes") }}
+          </dt>
+        </div>
+      </dl>
       <div
-        class="rounded-box border border-base-300/50 bg-base-100 p-5 shadow-sm sm:p-6"
+        class="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-t border-base-300/50 pt-4 text-sm text-base-content/65"
       >
-        <h2 class="text-lg font-bold">{{ t("history.previousMonth") }}</h2>
-        <p class="mt-1 text-sm capitalize text-base-content/60">
-          {{ previousMonthLabel }}
-        </p>
-        <p class="mt-6 text-2xl font-bold tabular-nums">
-          {{ previousMonthSessions.length }}
-          <span class="text-sm font-normal text-base-content/60">{{
-            t("history.sessions")
-          }}</span>
-        </p>
-        <p class="mt-2 text-sm text-base-content/65">
-          {{ t("history.minutesValue", { count: previousMonthMinutes }) }}
-        </p>
+        <span class="capitalize">{{ previousMonthLabel }}</span>
+        <span>{{
+          t("history.results", { count: previousMonthSessions.length })
+        }}</span>
+        <span class="tabular-nums">{{
+          t("history.minutesValue", { count: previousMonthMinutes })
+        }}</span>
+        <span
+          v-if="previousMonthSessions.length"
+          class="font-semibold text-base-content"
+          >{{
+            t("history.monthDifference", { count: sessionDifferenceLabel })
+          }}</span
+        >
       </div>
     </section>
 
@@ -114,6 +109,15 @@
         </div>
       </div>
 
+      <div v-if="hasFilters && filteredSessions.length" class="mt-3 flex justify-end">
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          @click="resetFilters"
+        >
+          {{ t("history.resetFilters") }}
+        </button>
+      </div>
       <div
         v-if="!completedSessions.length"
         class="mt-5 rounded-box border border-base-300/50 bg-base-100 px-6 py-12 text-center shadow-sm"
@@ -152,27 +156,46 @@
           :key="group.key"
           :aria-label="group.label"
         >
-          <h3
-            class="mb-3 text-sm font-semibold capitalize text-base-content/65"
-          >
-            {{ group.label }}
-          </h3>
+          <div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h3 class="text-sm font-semibold capitalize text-base-content">
+              {{ group.label }}
+            </h3>
+            <p class="text-xs text-base-content/60">
+              {{ t("history.results", { count: group.sessions.length }) }} ·
+              {{
+                t("history.minutesValue", {
+                  count: group.sessions.reduce(
+                    (total, session) => total + sessionMinutes(session),
+                    0,
+                  ),
+                })
+              }}
+            </p>
+          </div>
           <ul
             class="overflow-hidden rounded-box border border-base-300/50 bg-base-100 shadow-sm"
           >
             <li
               v-for="(session, index) in group.sessions"
               :key="session.id"
-              class="grid gap-2 px-4 py-4 sm:grid-cols-[5.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:px-5"
+              class="history-session grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-4 sm:gap-5 sm:px-5"
               :class="{ 'border-t border-base-300/50': index > 0 }"
             >
               <time
-                class="text-sm font-semibold text-primary"
+                class="history-date flex flex-col items-center rounded-lg bg-base-200 py-2"
                 :datetime="session.completedAt"
-                >{{ dayLabel(session.completedAt!) }}</time
+                :aria-label="dayLabel(session.completedAt!)"
               >
+                <span class="text-lg font-bold leading-none tabular-nums">{{
+                  new Date(session.completedAt!).getDate()
+                }}</span>
+                <span
+                  class="mt-1 text-[0.65rem] font-semibold uppercase text-base-content/60"
+                  >{{ shortMonthLabel(session.completedAt!) }}</span
+                >
+              </time>
               <div class="min-w-0">
-                <p class="truncate font-semibold">
+                <p class="history-workout font-semibold leading-snug">
                   {{ workoutName(session.workoutId) }}
                 </p>
                 <p class="mt-0.5 text-xs text-base-content/60">
@@ -180,7 +203,7 @@
                 </p>
               </div>
               <span
-                class="text-sm tabular-nums text-base-content/65 sm:text-right"
+                class="whitespace-nowrap text-sm font-semibold tabular-nums text-base-content"
                 >{{
                   t("history.minutesValue", { count: sessionMinutes(session) })
                 }}</span
@@ -203,6 +226,9 @@ import { useI18n } from "vue-i18n";
 const { t, locale } = useI18n();
 const period = ref("all");
 const selectedWorkout = ref("all");
+const hasFilters = computed(
+  () => period.value !== "all" || selectedWorkout.value !== "all",
+);
 const now = new Date();
 const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -255,6 +281,16 @@ const previousMonthMinutes = computed(() =>
     0,
   ),
 );
+const sessionDifferenceLabel = computed(() => {
+  const difference =
+    currentMonthSessions.value.length - previousMonthSessions.value.length;
+  return difference > 0 ? `+${difference}` : String(difference);
+});
+function shortMonthLabel(value: string) {
+  return new Intl.DateTimeFormat(locale.value, { month: "short" }).format(
+    new Date(value),
+  );
+}
 const sessionWorkouts = computed(() =>
   [...new Set(completedSessions.value.map((session) => session.workoutId))]
     .map((id) => ({ id, name: workoutName(id) }))
@@ -310,3 +346,12 @@ function resetFilters() {
   selectedWorkout.value = "all";
 }
 </script>
+
+<style scoped>
+/* Hallmark · existing training system · diary rows
+ * pre-emit critique: P4 H5 E4 S4 R5 V4 */
+.history-workout {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+</style>

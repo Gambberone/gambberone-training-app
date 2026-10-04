@@ -1,53 +1,55 @@
 <template>
-  <section class="card border border-base-300 bg-base-100 shadow-sm">
-    <div class="card-body items-center gap-5 p-6 text-center">
-      <div class="grid size-16 place-items-center rounded-full bg-primary/15 text-primary">
+  <section class="auth-panel">
+    <div class="auth-form" :aria-busy="isChecking || isResending">
+      <div class="auth-verify-icon">
         <MailCheck :size="32" />
       </div>
 
-      <div>
-        <h2 class="text-xl font-bold text-base-content">{{ tr('ui.verify_your_email') }}</h2>
+      <div class="auth-form-header">
+        <h1>{{ tr('ui.verify_your_email') }}</h1>
         <p class="mt-2 text-sm leading-6 text-base-content/65">
-          {{ tr('messages.verifySent', { email: currentUser?.email ?? '' }) }}
+          {{ tr('authDesign.verifyDescription') }}
+          <span v-if="currentUser?.email" class="auth-verify-email">{{ currentUser.email }}</span>
         </p>
       </div>
 
       <p
         v-if="message"
-        class="w-full rounded-box bg-success/10 p-3 text-sm text-success"
+        class="auth-notice auth-notice--success"
         role="status"
       >
         {{ message }}
       </p>
       <p
         v-if="errorMessage"
-        class="w-full rounded-box bg-error/10 p-3 text-sm text-error"
+        class="auth-notice auth-notice--error"
         role="alert"
       >
         {{ errorMessage }}
       </p>
 
       <GttButton color="primary"
-        class="w-full"
+        class="auth-submit"
         type="button"
         :disabled="isChecking"
         @click="checkVerification"
       >
         <span v-if="isChecking" class="loading loading-spinner loading-sm" />
-        {{ tr('ui.i_have_verified_my_email') }}
+        {{ tr(isChecking ? 'authDesign.checking' : 'authDesign.checkVerification') }}
       </GttButton>
-      <GttButton mode="ghost" size="sm"
-        
-        type="button"
-        :disabled="isResending"
-        @click="resendVerification"
-      >
-        <span v-if="isResending" class="loading loading-spinner loading-xs" />
-        {{ tr('ui.resend_verification_email') }}
-      </GttButton>
-      <GttButton mode="ghost" size="sm"  type="button" @click="logout">
-        {{ tr('ui.sign_out') }}
-      </GttButton>
+      <div class="auth-secondary-actions">
+        <GttButton mode="ghost" size="sm"
+          type="button"
+          :disabled="isResending"
+          @click="resendVerification"
+        >
+          <span v-if="isResending" class="loading loading-spinner loading-xs" />
+          {{ tr(isResending ? 'authDesign.sending' : 'ui.resend_verification_email') }}
+        </GttButton>
+        <GttButton mode="ghost" size="sm" type="button" @click="logout">
+          {{ tr('ui.sign_out') }}
+        </GttButton>
+      </div>
     </div>
   </section>
 </template>

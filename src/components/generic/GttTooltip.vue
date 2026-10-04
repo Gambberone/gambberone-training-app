@@ -4,7 +4,7 @@
     type="button"
     :aria-label="text"
     :aria-describedby="visible ? tooltipId : undefined"
-    @mouseenter="show"
+    @mouseenter="scheduleShow"
     @mouseleave="hideUnlessPinned"
     @focus="show"
     @blur="hide"
@@ -38,9 +38,21 @@ const visible = ref(false);
 const left = ref(0);
 const top = ref(0);
 let pinned = false;
+let hoverTimer: ReturnType<typeof setTimeout> | undefined;
+function cancelHover() { clearTimeout(hoverTimer); hoverTimer = undefined; }
+function scheduleShow(event: MouseEvent) {
+  cancelHover();
+  if (pinned || visible.value) return;
+  const target = event.currentTarget as HTMLElement;
+  hoverTimer = setTimeout(() => { void showAt(target); }, 800);
+}
 let anchor: HTMLElement | undefined;
 async function show(event: Event) {
-  anchor = event.currentTarget as HTMLElement;
+  cancelHover();
+  return showAt(event.currentTarget as HTMLElement);
+}
+async function showAt(target: HTMLElement) {
+  anchor = target;
   visible.value = true;
   await nextTick();
   if (!visible.value || !popover.value || !anchor?.isConnected) return;
@@ -59,11 +71,13 @@ async function show(event: Event) {
       : Math.min(rect.bottom + padding, window.innerHeight - tip.height - padding);
 }
 function hide() {
+  cancelHover();
   pinned = false;
   visible.value = false;
   popover.value?.hidePopover();
 }
 function hideUnlessPinned() {
+  cancelHover();
   if (!pinned) hide();
 }
 function toggle(event: Event) {

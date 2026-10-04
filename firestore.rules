@@ -16,6 +16,29 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['displayName']);
       allow delete: if signedIn() && request.auth.uid == userId;
     }
+    match /friendContacts/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || areFriends(request.auth.uid, userId));
+      allow create, update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['email'])
+        && (request.resource.data.email == null || request.resource.data.email == request.auth.token.email);
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+    match /friendPresence/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || areFriends(request.auth.uid, userId));
+      allow create, update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['enabled'])
+        && request.resource.data.enabled is bool;
+      allow delete: if signedIn() && request.auth.uid == userId;
+      match /sessions/{sessionId} {
+        allow read: if signedIn() && (request.auth.uid == userId ||
+          (areFriends(request.auth.uid, userId) && get(/databases/$(database)/documents/friendPresence/$(userId)).data.enabled == true));
+        allow create, update: if signedIn() && request.auth.uid == userId
+          && get(/databases/$(database)/documents/friendPresence/$(userId)).data.enabled == true
+          && request.resource.data.keys().hasOnly(['updatedAt'])
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if signedIn() && request.auth.uid == userId;
+      }
+    }
     match /friendships/{friendshipId} {
       allow read: if signedIn() && request.auth.uid in resource.data.participants;
       allow create: if signedIn()

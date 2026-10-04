@@ -1,10 +1,30 @@
 <template>
-  <article ref="playerElement" class="workout-player card bg-base-100 shadow-sm">
+  <article
+    ref="playerElement"
+    class="workout-player card bg-base-100 shadow-sm"
+    :class="{
+      'workout-player--paused': isPaused,
+      'workout-player--focus': isFullscreen,
+    }"
+    @keydown="handleFocusKeys"
+  >
     <div class="player-body card-body gap-5 p-5">
+      <div v-if="isFullscreen" class="player-focus-top">
+        <GttButton
+          mode="ghost"
+          shape="square"
+          :aria-label="tr('ui.exit_fullscreen')"
+          @click="toggleFullscreen"
+          ><Minimize :size="22" aria-hidden="true"
+        /></GttButton>
+      </div>
       <div class="player-header flex items-center justify-between gap-3">
         <div>
           <p class="text-sm font-semibold text-primary">
-            {{ tr('messages.inProgress') }} ·
+            {{
+              isPaused ? tr("playerDesign.paused") : tr("messages.inProgress")
+            }}
+            ·
             <span class="font-mono tabular-nums">{{ totalElapsedLabel }}</span>
           </p>
           <h2 class="text-xl font-bold">{{ workout.name }}</h2>
@@ -13,8 +33,10 @@
           <span class="badge badge-primary"
             >{{ currentSegmentIndex + 1 }}/{{ segments.length }}</span
           >
-          <GttButton shape="square" mode="ghost" size="sm"
-            
+          <GttButton
+            shape="square"
+            mode="ghost"
+            size="sm"
             type="button"
             :aria-label="tr('ui.minimize_player')"
             :title="tr('ui.continue_in_the_background')"
@@ -22,11 +44,19 @@
           >
             <Minimize2 class="size-5" aria-hidden="true" />
           </GttButton>
-          <GttButton shape="square" mode="ghost" size="sm"
-            
+          <GttButton
+            shape="square"
+            mode="ghost"
+            size="sm"
             type="button"
-            :aria-label="isFullscreen ? tr('ui.exit_fullscreen') : tr('ui.enter_fullscreen')"
-            :title="isFullscreen ? tr('ui.exit_fullscreen') : tr('ui.fullscreen')"
+            :aria-label="
+              isFullscreen
+                ? tr('ui.exit_fullscreen')
+                : tr('ui.enter_fullscreen')
+            "
+            :title="
+              isFullscreen ? tr('ui.exit_fullscreen') : tr('ui.fullscreen')
+            "
             @click="toggleFullscreen"
           >
             <Minimize v-if="isFullscreen" class="size-5" aria-hidden="true" />
@@ -37,29 +67,43 @@
 
       <div class="player-progress h-2 overflow-hidden rounded-full bg-base-200">
         <div
-          class="h-full bg-primary transition-all duration-200"
-          :style="{ width: `${workoutProgress}%` }"
+          class="player-progress-fill h-full origin-left bg-primary"
+          :style="{ transform: `scaleX(${workoutProgress / 100})` }"
         />
       </div>
 
+      <p v-if="isPaused" class="player-pause-status" role="status">
+        <Pause :size="18" aria-hidden="true" />{{
+          tr("playerDesign.pauseHint")
+        }}
+      </p>
       <div
         class="player-stage flex min-h-80 flex-col justify-center rounded-box bg-base-200 p-3 text-center sm:p-8"
       >
         <template v-if="isStarting">
-          <p class="text-base font-semibold uppercase tracking-wider text-primary">
-            {{ tr('ui.get_ready') }}
+          <p
+            class="text-base font-semibold uppercase tracking-wider text-primary"
+          >
+            {{ tr("ui.get_ready") }}
           </p>
-          <p class="mt-3 text-8xl font-black text-primary sm:text-9xl" aria-live="assertive">
+          <p
+            class="mt-3 text-8xl font-black text-primary sm:text-9xl"
+            aria-live="assertive"
+          >
             {{ startLabel }}
           </p>
-          <p class="mt-3 text-base text-base-content/60">{{ tr('ui.starting_shortly') }}</p>
+          <p class="mt-3 text-base text-base-content/60">
+            {{ tr("ui.starting_shortly") }}
+          </p>
         </template>
         <template v-else>
           <p
             class="player-step-name flex items-center justify-center text-3xl font-bold leading-tight sm:text-4xl"
             :class="currentSegment.colorClass"
           >
-            <span class="min-w-0 wrap-break-word">{{ currentSegment.name }}</span>
+            <span class="min-w-0 wrap-break-word">{{
+              currentSegment.name
+            }}</span>
           </p>
           <div
             class="player-ring relative mt-3 grid aspect-square w-full max-w-84 shrink-0 self-center place-items-center sm:max-w-md"
@@ -110,30 +154,67 @@
             >
               <template v-if="isRepetitions">{{ counterLabel }}</template>
               <template v-else>
-                {{ counterLabel.split(':')[0] }}<span class="mx-[0.06em]">:</span
-                >{{ counterLabel.split(':')[1] }}
+                {{ counterLabel.split(":")[0]
+                }}<span class="mx-[0.06em]">:</span
+                >{{ counterLabel.split(":")[1] }}
               </template>
             </p>
             <p
               v-if="isRepetitions"
               class="player-cadence absolute inset-x-[15%] bottom-[19%] text-sm leading-tight text-base-content/60 sm:text-base"
             >
-              {{ tr('messages.repetitionInterval', { seconds: repetitionIntervalSeconds }) }}
+              {{
+                tr("messages.repetitionInterval", {
+                  seconds: repetitionIntervalSeconds,
+                })
+              }}
             </p>
           </div>
         </template>
       </div>
 
+      <div v-if="isFullscreen" class="player-focus-controls">
+        <p
+          v-if="upcomingSegment"
+          class="player-focus-next text-sm text-base-content/65"
+        >
+          {{ tr("ui.next_step") }}:
+          <span class="font-semibold" :class="upcomingSegment.colorClass">{{
+            upcomingSegment.name
+          }}</span>
+        </p>
+        <p v-else class="text-sm text-base-content/65">
+          {{ tr("ui.last_step") }}
+        </p>
+        <GttButton
+          color="primary"
+          class="player-focus-pause"
+          :aria-pressed="isPaused"
+          @click="togglePause"
+          ><Play v-if="isPaused" :size="22" aria-hidden="true" /><Pause
+            v-else
+            :size="22"
+            aria-hidden="true"
+          />{{ isPaused ? tr("ui.resume") : tr("ui.pause") }}</GttButton
+        >
+      </div>
       <div class="player-sidebar flex flex-col gap-4">
-        <div class="player-next rounded-box border border-base-300 bg-base-100 px-4 py-3">
+        <div
+          class="player-next rounded-box border border-base-300 bg-base-100 px-4 py-3"
+        >
           <p
-            class="player-next-label text-center text-xs font-semibold uppercase tracking-wider"
+            class="player-next-label text-left text-xs font-semibold"
             :class="upcomingSegment ? 'text-base-content/55' : 'text-success'"
           >
-            {{ upcomingSegment ? tr('ui.next_step') : tr('ui.last_step') }}
+            {{ upcomingSegment ? tr("ui.next_step") : tr("ui.last_step") }}
           </p>
-          <div class="grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-3 text-center">
-            <GttButton shape="circle" mode="ghost" size="sm"
+          <div
+            class="grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-3 text-center"
+          >
+            <GttButton
+              shape="circle"
+              mode="ghost"
+              size="sm"
               class="shrink-0 text-primary hover:bg-base-200"
               type="button"
               :disabled="isStarting || !previousSegment"
@@ -149,17 +230,24 @@
             </GttButton>
             <div v-if="upcomingSegment" class="min-w-0 flex-1">
               <p
-                class="text-lg font-bold leading-tight sm:text-xl"
+                class="text-sm font-semibold leading-tight"
                 :class="upcomingSegment.colorClass"
               >
                 {{ upcomingSegment.name
-                }}<span v-if="upcomingSegment.setLabel"> · {{ upcomingSegment.setLabel }}</span>
+                }}<span v-if="upcomingSegment.setLabel">
+                  · {{ upcomingSegment.setLabel }}</span
+                >
               </p>
             </div>
             <div v-else class="min-w-0 flex-1 text-success">
-              <p class="font-bold">{{ tr('ui.the_workout_will_be_completed_after_this_step') }}</p>
+              <p class="font-bold">
+                {{ tr("ui.the_workout_will_be_completed_after_this_step") }}
+              </p>
             </div>
-            <GttButton shape="circle" mode="ghost" size="sm"
+            <GttButton
+              shape="circle"
+              mode="ghost"
+              size="sm"
               :disabled="isStarting || !upcomingSegment"
               class="shrink-0 text-primary hover:bg-base-200"
               type="button"
@@ -175,32 +263,39 @@
             </GttButton>
           </div>
         </div>
-        <div class="player-actions grid grid-cols-3 gap-2">
-          <GttButton color="primary" size="sm"
-            class="px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+        <div class="player-actions grid grid-cols-2 gap-2">
+          <GttButton
+            mode="ghost"
+            size="sm"
+            class="player-reset px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
             :aria-label="tr('ui.restart_the_current_segment')"
             @click="resetCurrentSegment"
           >
             <RotateCcw class="size-4 sm:size-5" aria-hidden="true" />
-            {{ tr('ui.reset') }}
+            {{ tr("ui.reset") }}
           </GttButton>
-          <GttButton color="info" size="sm"
-            class="px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          <GttButton
+            color="primary"
+            size="sm"
+            class="player-pause px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
+            :aria-pressed="isPaused"
             @click="togglePause"
           >
             <Play v-if="isPaused" class="size-4 sm:size-5" aria-hidden="true" />
             <Pause v-else class="size-4 sm:size-5" aria-hidden="true" />
-            {{ isPaused ? tr('ui.resume') : tr('ui.pause') }}
+            {{ isPaused ? tr("ui.resume") : tr("ui.pause") }}
           </GttButton>
-          <GttButton color="error" size="sm"
-            class="px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
+          <GttButton
+            mode="ghost"
+            size="sm"
+            class="player-abandon text-error px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
             @click="abandonWorkoutSession"
           >
             <Square class="size-4 sm:size-5" aria-hidden="true" />
-            {{ tr('ui.abandon') }}
+            {{ tr("ui.abandon") }}
           </GttButton>
         </div>
       </div>
@@ -209,8 +304,16 @@
 </template>
 
 <script setup lang="ts">
-import { tr, localizedExerciseName } from '@/localization';
-import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
+import { tr, localizedExerciseName } from "@/localization";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  watchEffect,
+} from "vue";
 import {
   Maximize,
   Minimize,
@@ -221,13 +324,13 @@ import {
   SkipBack,
   SkipForward,
   Square,
-} from '@lucide/vue';
+} from "@lucide/vue";
 import {
   DEFAULT_REPETITION_INTERVAL_SECONDS,
   WORKOUT_CREATOR_STEP_ACTION,
   type WorkoutCreatorStep,
-} from '@/constants';
-import type { Workout } from '@/stores/workoutCreator';
+} from "@/constants";
+import type { Workout } from "@/stores/workoutCreator";
 import {
   abandonWorkoutSession,
   activeWorkoutSessionRef,
@@ -237,10 +340,10 @@ import {
   updateWorkoutSessionStep,
   workoutPlayerPauseRequestRef,
   workoutPlayerStatusRef,
-} from '@/stores/workoutCreator';
-import { exercisesRef } from '@/stores/exercises';
-import { useWorkoutPreferences } from '@/composables/useWorkoutPreferences';
-import { signalTimer } from '@/services/workoutFeedback';
+} from "@/stores/workoutCreator";
+import { exercisesRef } from "@/stores/exercises";
+import { useWorkoutPreferences } from "@/composables/useWorkoutPreferences";
+import { signalTimer } from "@/services/workoutFeedback";
 
 type PlayerSegment = {
   name: string;
@@ -248,7 +351,7 @@ type PlayerSegment = {
   typeLabel: string;
   colorClass: string;
   sourceStepIndex: number;
-  mode: 'duration' | 'repetitions';
+  mode: "duration" | "repetitions";
   target: number;
   repetitionIntervalSeconds?: number;
 };
@@ -281,20 +384,20 @@ let lastCheckpointAt = 0;
 
 const exerciseName = (id?: string) => {
   const exercise = exercisesRef.value.find((item) => item.id === id);
-  return exercise ? localizedExerciseName(exercise) : tr('ui.exercise');
+  return exercise ? localizedExerciseName(exercise) : tr("ui.exercise");
 };
 
-const segmentStyle = (type: WorkoutCreatorStep['type']) => {
+const segmentStyle = (type: WorkoutCreatorStep["type"]) => {
   switch (type) {
     case WORKOUT_CREATOR_STEP_ACTION.WARMUP:
-      return { typeLabel: 'Warm-up', colorClass: 'text-error' };
+      return { typeLabel: "Warm-up", colorClass: "text-error" };
     case WORKOUT_CREATOR_STEP_ACTION.STRETCHING:
-      return { typeLabel: 'Stretching', colorClass: 'text-warning' };
+      return { typeLabel: "Stretching", colorClass: "text-warning" };
     case WORKOUT_CREATOR_STEP_ACTION.PAUSE:
     case WORKOUT_CREATOR_STEP_ACTION.SETPAUSE:
-      return { typeLabel: tr('ui.rest'), colorClass: 'text-info' };
+      return { typeLabel: tr("ui.rest"), colorClass: "text-info" };
     default:
-      return { typeLabel: tr('ui.exercise'), colorClass: 'text-primary' };
+      return { typeLabel: tr("ui.exercise"), colorClass: "text-primary" };
   }
 };
 
@@ -310,7 +413,9 @@ const segments = computed<PlayerSegment[]>(() =>
         mode: exercise.modeType,
         target: Math.max(
           1,
-          exercise.modeType === 'duration' ? exercise.duration : exercise.repetitions,
+          exercise.modeType === "duration"
+            ? exercise.duration
+            : exercise.repetitions,
         ),
         repetitionIntervalSeconds: exercise.repetitionIntervalSeconds,
       }));
@@ -321,7 +426,7 @@ const segments = computed<PlayerSegment[]>(() =>
         ...style,
         name: exerciseName(exercise.exerciseId),
         sourceStepIndex,
-        mode: 'duration' as const,
+        mode: "duration" as const,
         target: Math.max(1, exercise.duration),
       }));
     }
@@ -330,9 +435,9 @@ const segments = computed<PlayerSegment[]>(() =>
       return [
         {
           ...style,
-          name: tr('messages.recovery'),
+          name: tr("messages.recovery"),
           sourceStepIndex,
-          mode: 'duration' as const,
+          mode: "duration" as const,
           target: Math.max(1, step.pauseDuration ?? 0),
         },
       ];
@@ -348,12 +453,14 @@ const segments = computed<PlayerSegment[]>(() =>
         ...style,
         name: exerciseName(step.exerciseId),
         setLabel:
-          sets > 1 ? tr('messages.setNumber', { number: setIndex + 1, total: sets }) : undefined,
+          sets > 1
+            ? tr("messages.setNumber", { number: setIndex + 1, total: sets })
+            : undefined,
         sourceStepIndex,
-        mode: step.exerciseModeType ?? 'repetitions',
+        mode: step.exerciseModeType ?? "repetitions",
         target: Math.max(
           1,
-          step.exerciseModeType === 'duration'
+          step.exerciseModeType === "duration"
             ? (step.exerciseDuration ?? 0)
             : (step.exerciseRepetitions ?? 0),
         ),
@@ -364,9 +471,9 @@ const segments = computed<PlayerSegment[]>(() =>
           ? [
               {
                 ...segmentStyle(WORKOUT_CREATOR_STEP_ACTION.SETPAUSE),
-                name: tr('messages.setRecovery'),
+                name: tr("messages.setRecovery"),
                 sourceStepIndex,
-                mode: 'duration' as const,
+                mode: "duration" as const,
                 target: Math.max(1, step.pauseBetweenSetsDuration ?? 0),
               },
             ]
@@ -379,16 +486,20 @@ const segments = computed<PlayerSegment[]>(() =>
 const currentSegment = computed<PlayerSegment>(
   () =>
     segments.value[currentSegmentIndex.value] ?? {
-      name: tr('messages.workoutDone'),
-      typeLabel: tr('ui.completed'),
-      colorClass: 'text-success',
+      name: tr("messages.workoutDone"),
+      typeLabel: tr("ui.completed"),
+      colorClass: "text-success",
       sourceStepIndex: 0,
-      mode: 'duration',
+      mode: "duration",
       target: 1,
     },
 );
-const previousSegment = computed(() => segments.value[currentSegmentIndex.value - 1]);
-const nextSegment = computed(() => segments.value[currentSegmentIndex.value + 1]);
+const previousSegment = computed(
+  () => segments.value[currentSegmentIndex.value - 1],
+);
+const nextSegment = computed(
+  () => segments.value[currentSegmentIndex.value + 1],
+);
 const upcomingSegment = computed(() =>
   isStarting.value ? currentSegment.value : nextSegment.value,
 );
@@ -399,7 +510,9 @@ const repetitionIntervalSeconds = computed(() => {
     : DEFAULT_REPETITION_INTERVAL_SECONDS;
 });
 const elapsedSeconds = computed(
-  () => Math.min(segmentDurationMilliseconds.value, elapsedMilliseconds.value) / 1000,
+  () =>
+    Math.min(segmentDurationMilliseconds.value, elapsedMilliseconds.value) /
+    1000,
 );
 const currentRepetition = computed(() =>
   Math.min(
@@ -407,9 +520,11 @@ const currentRepetition = computed(() =>
     Math.floor(elapsedSeconds.value / repetitionIntervalSeconds.value) + 1,
   ),
 );
-const isRepetitions = computed(() => currentSegment.value.mode === 'repetitions');
+const isRepetitions = computed(
+  () => currentSegment.value.mode === "repetitions",
+);
 const startLabel = computed(() =>
-  startCountdown.value > 0 ? String(startCountdown.value) : 'GO!',
+  startCountdown.value > 0 ? String(startCountdown.value) : "GO!",
 );
 const counterLabel = computed(() =>
   isRepetitions.value
@@ -427,7 +542,8 @@ const segmentDurationMilliseconds = computed(
 );
 const workoutProgress = computed(() =>
   segments.value.length
-    ? ((currentSegmentIndex.value + elapsedMilliseconds.value / segmentDurationMilliseconds.value) /
+    ? ((currentSegmentIndex.value +
+        elapsedMilliseconds.value / segmentDurationMilliseconds.value) /
         segments.value.length) *
       100
     : 0,
@@ -440,7 +556,10 @@ function drawRing() {
       ? elapsedMilliseconds.value
       : Math.max(0, Date.now() - segmentStartedAt);
   const progress = Math.min(1, elapsed / segmentDurationMilliseconds.value);
-  progressCircle.value?.setAttribute('stroke-dashoffset', String(100 * (1 - progress)));
+  progressCircle.value?.setAttribute(
+    "stroke-dashoffset",
+    String(100 * (1 - progress)),
+  );
   ringFrame = window.requestAnimationFrame(drawRing);
 }
 
@@ -448,14 +567,16 @@ watchEffect(() => {
   workoutPlayerStatusRef.value = {
     step: currentSegment.value.name,
     stepColorClass: currentSegment.value.colorClass,
-    counter: isStarting.value ? formatTime(Math.max(0, startCountdown.value)) : counterLabel.value,
+    counter: isStarting.value
+      ? formatTime(Math.max(0, startCountdown.value))
+      : counterLabel.value,
     paused: isPaused.value,
   };
 });
 
 function formatTime(seconds: number) {
   const safeSeconds = Math.max(0, seconds);
-  return `${String(Math.floor(safeSeconds / 60)).padStart(2, '0')}:${String(safeSeconds % 60).padStart(2, '0')}`;
+  return `${String(Math.floor(safeSeconds / 60)).padStart(2, "0")}:${String(safeSeconds % 60).padStart(2, "0")}`;
 }
 
 function savePlayback() {
@@ -485,7 +606,7 @@ function restorePlayback() {
       checkpoint.elapsedMilliseconds < 0 ||
       !Number.isFinite(checkpoint.totalElapsedMilliseconds) ||
       checkpoint.totalElapsedMilliseconds < 0 ||
-      typeof checkpoint.isStarting !== 'boolean' ||
+      typeof checkpoint.isStarting !== "boolean" ||
       !Number.isInteger(checkpoint.startCountdown) ||
       checkpoint.startCountdown < 0 ||
       checkpoint.startCountdown > 3
@@ -529,7 +650,7 @@ function checkpointAtExit() {
 }
 
 function checkpointWhenHidden() {
-  if (document.visibilityState === 'hidden') {
+  if (document.visibilityState === "hidden") {
     checkpointAtExit();
   } else {
     resumeAfterBackground();
@@ -537,7 +658,7 @@ function checkpointWhenHidden() {
 }
 
 function resumeAfterBackground() {
-  if (!pausedForBackground || document.visibilityState !== 'visible') return;
+  if (!pausedForBackground || document.visibilityState !== "visible") return;
   pausedForBackground = false;
   const session = activeWorkoutSessionRef.value;
   if (session && session.id === sessionId && session.isPaused !== true) {
@@ -564,12 +685,12 @@ function startSegment() {
 
 function skipToPreviousSegment() {
   if (isStarting.value || !previousSegment.value) return;
-  publishSegmentChange(currentSegmentIndex.value - 1, false, 'skip');
+  publishSegmentChange(currentSegmentIndex.value - 1, false, "skip");
 }
 
 function skipToNextSegment() {
   if (isStarting.value || !nextSegment.value) return;
-  publishSegmentChange(currentSegmentIndex.value + 1, false, 'skip');
+  publishSegmentChange(currentSegmentIndex.value + 1, false, "skip");
 }
 
 function tick() {
@@ -579,7 +700,10 @@ function tick() {
     ? currentSegment.value.target - currentRepetition.value + 1
     : Math.max(
         0,
-        Math.ceil((segmentDurationMilliseconds.value - elapsedMilliseconds.value) / 1000),
+        Math.ceil(
+          (segmentDurationMilliseconds.value - elapsedMilliseconds.value) /
+            1000,
+        ),
       );
   if (remainingCount !== lastRemainingCount) {
     lastRemainingCount = remainingCount;
@@ -616,7 +740,7 @@ function runCountdown() {
   countdownTimer = window.setInterval(() => {
     startCountdown.value -= 1;
     if (startCountdown.value > 0) signalTimer();
-    else if (startCountdown.value === 0) signalTimer(true, true, 'go');
+    else if (startCountdown.value === 0) signalTimer(true, true, "go");
     savePlayback();
     if (startCountdown.value >= 0) return;
     stopCountdown();
@@ -627,15 +751,23 @@ function runCountdown() {
 }
 
 async function syncWakeLock() {
-  if (!keepScreenAwake.value || document.visibilityState !== 'visible' || isUnmounted) {
+  if (
+    !keepScreenAwake.value ||
+    document.visibilityState !== "visible" ||
+    isUnmounted
+  ) {
     await wakeLock?.release().catch(() => {});
     wakeLock = undefined;
     return;
   }
-  if (wakeLock || !('wakeLock' in navigator)) return;
+  if (wakeLock || !("wakeLock" in navigator)) return;
   try {
-    const lock = await navigator.wakeLock.request('screen');
-    if (isUnmounted || !keepScreenAwake.value || document.visibilityState !== 'visible') {
+    const lock = await navigator.wakeLock.request("screen");
+    if (
+      isUnmounted ||
+      !keepScreenAwake.value ||
+      document.visibilityState !== "visible"
+    ) {
       await lock.release();
     } else wakeLock = lock;
   } catch {
@@ -660,7 +792,8 @@ function setPaused(paused: boolean, syncSession = true) {
     }
     savePlayback();
     const session = activeWorkoutSessionRef.value;
-    if (syncSession && session && session.id === sessionId) session.isPaused = true;
+    if (syncSession && session && session.id === sessionId)
+      session.isPaused = true;
     return;
   }
 
@@ -671,7 +804,8 @@ function setPaused(paused: boolean, syncSession = true) {
   }
   savePlayback();
   const session = activeWorkoutSessionRef.value;
-  if (syncSession && session && session.id === sessionId) session.isPaused = false;
+  if (syncSession && session && session.id === sessionId)
+    session.isPaused = false;
 }
 
 function togglePause() {
@@ -681,7 +815,13 @@ function togglePause() {
 function applySegmentReset() {
   const session = activeWorkoutSessionRef.value;
   const reset = session?.segmentReset;
-  if (!session || session.id !== sessionId || !reset || reset.id === appliedResetId) return;
+  if (
+    !session ||
+    session.id !== sessionId ||
+    !reset ||
+    reset.id === appliedResetId
+  )
+    return;
   if (
     !Number.isInteger(reset.segmentIndex) ||
     reset.segmentIndex < 0 ||
@@ -699,18 +839,25 @@ function applySegmentReset() {
   segmentStartedAt = Date.now();
   elapsedMilliseconds.value = 0;
   lastRemainingCount = 0;
-  isPaused.value = session.isPaused === true || document.visibilityState === 'hidden';
-  pausedForBackground = document.visibilityState === 'hidden' && session.isPaused !== true;
+  isPaused.value =
+    session.isPaused === true || document.visibilityState === "hidden";
+  pausedForBackground =
+    document.visibilityState === "hidden" && session.isPaused !== true;
   lastTotalTickAt = isPaused.value || isStarting.value ? 0 : Date.now();
   if (!isPaused.value) {
     if (isStarting.value) runCountdown();
     else runSegmentTimer();
   }
   savePlayback();
-  if (reset.action === 'skip' && document.visibilityState === 'visible') signalTimer(true, false);
+  if (reset.action === "skip" && document.visibilityState === "visible")
+    signalTimer(true, false);
 }
 
-function publishSegmentChange(segmentIndex: number, starting: boolean, action: 'reset' | 'skip') {
+function publishSegmentChange(
+  segmentIndex: number,
+  starting: boolean,
+  action: "reset" | "skip",
+) {
   const session = activeWorkoutSessionRef.value;
   const segment = segments.value[segmentIndex];
   if (!session || session.id !== sessionId || !segment) return;
@@ -728,29 +875,73 @@ function publishSegmentChange(segmentIndex: number, starting: boolean, action: '
 }
 
 function resetCurrentSegment() {
-  publishSegmentChange(currentSegmentIndex.value, isStarting.value, 'reset');
+  publishSegmentChange(currentSegmentIndex.value, isStarting.value, "reset");
 }
 
-watch(() => activeWorkoutSessionRef.value?.segmentReset?.id, applySegmentReset, { flush: 'sync' });
+watch(
+  () => activeWorkoutSessionRef.value?.segmentReset?.id,
+  applySegmentReset,
+  { flush: "sync" },
+);
 
 watch(workoutPlayerPauseRequestRef, togglePause);
 watch(
   () => activeWorkoutSessionRef.value?.isPaused,
   (paused) => {
-    if (activeWorkoutSessionRef.value?.id === sessionId && typeof paused === 'boolean') {
-      if (!paused && document.visibilityState === 'hidden') return;
+    if (
+      activeWorkoutSessionRef.value?.id === sessionId &&
+      typeof paused === "boolean"
+    ) {
+      if (!paused && document.visibilityState === "hidden") return;
       setPaused(paused, false);
     }
   },
-  { flush: 'sync' },
+  { flush: "sync" },
 );
 
 async function toggleFullscreen() {
-  if (document.fullscreenElement) {
-    await document.exitFullscreen();
+  if (isFullscreen.value) {
+    if (document.fullscreenElement === playerElement.value)
+      await document.exitFullscreen();
+    isFullscreen.value = false;
+    await nextTick();
+    playerElement.value
+      ?.querySelector<HTMLButtonElement>(".player-header button:last-child")
+      ?.focus();
     return;
   }
-  await playerElement.value?.requestFullscreen();
+  isFullscreen.value = true;
+  try {
+    await playerElement.value?.requestFullscreen?.();
+  } catch {
+    /* Keep the focused viewport layout when native fullscreen is unavailable. */
+  }
+  await nextTick();
+  playerElement.value
+    ?.querySelector<HTMLButtonElement>(".player-focus-top button")
+    ?.focus();
+}
+function handleFocusKeys(event: KeyboardEvent) {
+  if (!isFullscreen.value) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    void toggleFullscreen();
+  }
+  if (event.key !== "Tab") return;
+  const buttons = [
+    ...(playerElement.value?.querySelectorAll<HTMLButtonElement>(
+      "button:not(:disabled)",
+    ) ?? []),
+  ].filter((button) => button.getClientRects().length);
+  const first = buttons[0],
+    last = buttons[buttons.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last?.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first?.focus();
+  }
 }
 
 async function minimizePlayer() {
@@ -761,7 +952,7 @@ async function minimizePlayer() {
       return;
     }
   }
-  emit('minimize');
+  emit("minimize");
 }
 
 function syncFullscreenState() {
@@ -782,17 +973,18 @@ onMounted(() => {
   isUnmounted = false;
   ringFrame = window.requestAnimationFrame(drawRing);
   void syncWakeLock();
-  document.addEventListener('fullscreenchange', syncFullscreenState);
-  document.addEventListener('visibilitychange', checkpointWhenHidden);
-  document.addEventListener('visibilitychange', syncWakeLock);
-  window.addEventListener('pagehide', checkpointAtExit);
-  window.addEventListener('pageshow', resumeAfterBackground);
-  window.addEventListener('focus', resumeAfterBackground);
+  document.addEventListener("fullscreenchange", syncFullscreenState);
+  document.addEventListener("visibilitychange", checkpointWhenHidden);
+  document.addEventListener("visibilitychange", syncWakeLock);
+  window.addEventListener("pagehide", checkpointAtExit);
+  window.addEventListener("pageshow", resumeAfterBackground);
+  window.addEventListener("focus", resumeAfterBackground);
   if (!segments.value.length) return completeWorkoutSession();
   if (restorePlayback()) {
     applySegmentReset();
     if (pausedForBackground) resumeAfterBackground();
-    else if (activeWorkoutSessionRef.value?.isPaused === false) setPaused(false, false);
+    else if (activeWorkoutSessionRef.value?.isPaused === false)
+      setPaused(false, false);
     return;
   }
   beginWorkout(activeWorkoutSessionRef.value?.isPaused === true);
@@ -807,12 +999,12 @@ onBeforeUnmount(() => {
   stopTimer();
   stopCountdown();
   workoutPlayerStatusRef.value = null;
-  document.removeEventListener('fullscreenchange', syncFullscreenState);
-  document.removeEventListener('visibilitychange', checkpointWhenHidden);
-  document.removeEventListener('visibilitychange', syncWakeLock);
-  window.removeEventListener('pagehide', checkpointAtExit);
-  window.removeEventListener('pageshow', resumeAfterBackground);
-  window.removeEventListener('focus', resumeAfterBackground);
+  document.removeEventListener("fullscreenchange", syncFullscreenState);
+  document.removeEventListener("visibilitychange", checkpointWhenHidden);
+  document.removeEventListener("visibilitychange", syncWakeLock);
+  window.removeEventListener("pagehide", checkpointAtExit);
+  window.removeEventListener("pageshow", resumeAfterBackground);
+  window.removeEventListener("focus", resumeAfterBackground);
 });
 watch(
   () => props.workout.id,
@@ -840,8 +1032,8 @@ watch(
   position: relative;
   display: grid;
   align-items: center;
-  min-height: 9rem;
-  padding: 2.5rem 1rem;
+  min-height: 5.5rem;
+  padding: 2rem 1rem 0.75rem;
 }
 .player-next-label {
   position: absolute;
@@ -914,6 +1106,154 @@ watch(
   .workout-player:fullscreen .player-ring {
     width: min(100%, clamp(15rem, calc(100dvh - 15rem), 42rem));
     max-width: none;
+  }
+}
+.player-pause-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-ui-xs);
+  padding: var(--space-ui-sm);
+  border: 1px solid var(--color-ui-rule);
+  border-radius: var(--radius-box);
+  background: var(--color-base-200);
+  font-weight: 600;
+}
+.player-pause {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-height: 3.5rem;
+  font-size: 1rem;
+}
+.player-sidebar {
+  flex-direction: column-reverse;
+}
+.workout-player--paused .player-stage {
+  outline: 2px solid var(--color-ui-rule);
+  outline-offset: -2px;
+}
+@media (min-width: 64rem) {
+  .workout-player--paused .player-body {
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+  }
+  .player-pause-status {
+    grid-column: 1 / -1;
+  }
+  .player-sidebar {
+    flex-direction: column-reverse;
+    justify-content: center;
+  }
+  .player-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .player-actions .player-pause {
+    min-height: 3.5rem;
+  }
+}
+/* Focused counter: one screen, essential information and controls. */
+.workout-player--focus {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--color-base-100);
+}
+.workout-player--focus .player-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-ui-md);
+  gap: var(--space-ui-sm);
+}
+.workout-player--focus .player-header,
+.workout-player--focus .player-progress,
+.workout-player--focus .player-pause-status,
+.workout-player--focus .player-sidebar {
+  display: none;
+}
+.player-focus-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.workout-player--focus .player-stage {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  background: var(--color-base-100);
+  outline: 0;
+  border-radius: 0;
+}
+.workout-player--focus .player-step-name {
+  font-size: clamp(1.25rem, 3vw, 2.5rem);
+}
+.workout-player--focus .player-ring {
+  width: min(85vw, calc(100dvh - 15rem));
+  max-width: none;
+  margin-top: var(--space-ui-xs);
+}
+.player-focus-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: var(--space-ui-sm);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.player-focus-next {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workout-player--focus .player-focus-pause {
+  min-height: 3.5rem;
+  width: min(100%, 20rem);
+  font-size: 1rem;
+}
+@media (orientation: landscape) and (max-height: 32rem) {
+  .workout-player--focus .player-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 18rem);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--space-ui-xs) var(--space-ui-lg);
+  }
+  .player-focus-top {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .workout-player--focus .player-stage {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .workout-player--focus .player-ring {
+    width: min(100%, calc(100dvh - 6rem));
+  }
+  .player-focus-controls {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    min-width: 0;
+  }
+  .player-focus-next {
+    width: 100%;
+  }
+}
+@media (max-width: 63.9375rem) and (orientation: portrait) {
+  .workout-player--focus .player-stage { gap: var(--space-ui-md); }
+  .workout-player--focus .player-stage > p { flex: 0 0 auto; }
+  .workout-player--focus .player-step-name { margin: 0; font-size: 1.25rem; }
+  .workout-player--focus .player-ring {
+    width: min(calc(100vw - 2 * var(--space-ui-md)), calc(100dvh - 16rem));
+    margin-top: 0;
   }
 }
 </style>

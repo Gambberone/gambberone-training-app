@@ -1,8 +1,8 @@
 <template>
-  <section class="card border border-base-300 bg-base-100 shadow-sm">
-    <form class="card-body gap-5 p-6" @submit.prevent="submit">
-      <div>
-        <h2 class="text-xl font-bold text-base-content">{{ tr('ui.reset_password') }}</h2>
+  <section class="auth-panel">
+    <form class="auth-form" :aria-busy="isSubmitting" @submit.prevent="submit">
+      <div class="auth-form-header">
+        <h1>{{ tr('ui.reset_password') }}</h1>
         <p class="mt-1 text-sm leading-6 text-base-content/65">
           {{ tr('ui.enter_your_email_to_receive_a_secure_link_to_choose_a_new_password') }}
         </p>
@@ -21,19 +21,19 @@
         <template #prefix><Mail :size="18" class="text-base-content/55" /></template>
       </GttInputField>
 
-      <p v-if="message" class="rounded-box bg-success/10 p-3 text-sm text-success" role="status">
+      <p v-if="message" class="auth-notice auth-notice--success" role="status">
         {{ message }}
       </p>
-      <p v-if="errorMessage" class="rounded-box bg-error/10 p-3 text-sm text-error" role="alert">
+      <p v-if="errorMessage" class="auth-notice auth-notice--error" role="alert">
         {{ errorMessage }}
       </p>
 
-      <GttButton color="primary" class="w-full" type="submit" :disabled="isSubmitting">
+      <GttButton color="primary" class="auth-submit" type="submit" :disabled="isSubmitting">
         <span v-if="isSubmitting" class="loading loading-spinner loading-sm" />
-        {{ tr('ui.send_recovery_link') }}
+        {{ tr(isSubmitting ? 'authDesign.sending' : 'ui.send_recovery_link') }}
       </GttButton>
 
-      <RouterLink class="btn btn-ghost btn-sm" to="/auth/login">{{
+      <RouterLink class="auth-link" to="/auth/login">{{
         tr('ui.back_to_sign_in')
       }}</RouterLink>
     </form>

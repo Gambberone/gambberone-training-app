@@ -1,26 +1,56 @@
 <template>
-  <section class="mx-auto w-full max-w-6xl">
+  <section class="account-page mx-auto w-full max-w-6xl space-y-6 pb-8">
     <header class="mb-7">
-      <p class="mb-1 text-sm font-semibold text-primary">{{ t('account.preferences') }}</p>
-      <h1 class="text-3xl font-bold tracking-tight text-base-content">{{ t('account.title') }}</h1>
-      <p class="mt-2 text-base-content/65">{{ t('account.intro') }}</p>
+      <h1 class="text-3xl font-bold tracking-tight text-base-content">
+        {{ t("account.title") }}
+      </h1>
+      <p class="mt-2 text-sm text-base-content/65">{{ t("account.intro") }}</p>
     </header>
 
-    <div class="grid items-start gap-4 lg:grid-cols-2">
+    <GttModal
+      v-model="showSurprise"
+      :title="t('account.surprise')"
+      content-class="max-w-4xl"
+    >
+      <iframe
+        v-if="showSurprise"
+        class="aspect-video w-full rounded-xl border-0"
+        src="https://www.youtube.com/embed/9J62hGda9BQ?autoplay=1&playsinline=1"
+        :title="t('account.surprise')"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      />
+    </GttModal>
+
+    <div
+      class="grid items-start gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+    >
       <div class="min-w-0 space-y-4">
-        <details class="card border border-base-300 bg-base-100 shadow-sm" open>
+        <details class="card border border-base-300/50 bg-base-100" open>
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
-            <span>{{ t('account.profile') }}</span>
+            <span class="flex min-w-0 items-center gap-3"
+              ><UserRound
+                :size="19"
+                class="shrink-0 text-base-content/55"
+                aria-hidden="true"
+              />{{ t("account.profile") }}</span
+            >
             <ChevronDown
               class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
               aria-hidden="true"
             />
           </summary>
-          <form class="card-body gap-4 px-5 pb-5 pt-0" @submit.prevent="saveName">
+          <form
+            class="card-body gap-4 px-5 pb-5 pt-0"
+            @submit.prevent="saveName"
+          >
             <div>
-              <p class="mt-1 text-sm text-base-content/65">{{ t('account.profileDescription') }}</p>
+              <p class="mt-1 text-sm text-base-content/65">
+                {{ t("account.profileDescription") }}
+              </p>
             </div>
             <AccountPhoto />
             <GttInputField
@@ -35,10 +65,13 @@
               compact
             />
             <div>
-              <p class="text-sm font-semibold">{{ t('ui.email') }}</p>
-              <p class="mt-1 break-all text-sm text-base-content/65">{{ currentUser?.email }}</p>
+              <p class="text-sm font-semibold">{{ t("ui.email") }}</p>
+              <p class="mt-1 break-all text-sm text-base-content/65">
+                {{ currentUser?.email }}
+              </p>
             </div>
-            <GttButton color="primary"
+            <GttButton
+              color="primary"
               class="self-end"
               type="submit"
               :disabled="
@@ -47,27 +80,66 @@
                 displayName.trim() === (currentUser?.displayName ?? '')
               "
             >
-              <span v-if="isSavingName" class="loading loading-spinner loading-sm" />
-              {{ t('account.saveName') }}
+              <span
+                v-if="isSavingName"
+                class="loading loading-spinner loading-sm"
+              />
+              {{ t("account.saveName") }}
             </GttButton>
-            <div class="divider my-0" />
-            <GttButton mode="outline" color="error"
-              class="w-full"
-              type="button"
-              :disabled="isDeletingAccount || isChangingPassword"
-              @click="logout"
-            >
-              {{ t('account.logout') }}
-            </GttButton>
+            <div class="border-t border-base-300/50 pt-5">
+              <h3 class="mb-4 text-sm font-bold">{{ t("account.privacy") }}</h3>
+              <div class="mb-5">
+                <GttToggleField
+                  id="account-online"
+                  :model-value="presenceEnabled"
+                  :label="t('account.shareOnline')"
+                  :hint="t('account.shareOnlineHint')"
+                  :disabled="!presenceReady || presenceSaving"
+                  @update:model-value="setPresenceEnabled"
+                />
+                <p
+                  v-if="presenceError"
+                  class="mt-2 text-sm text-error"
+                  role="alert"
+                >
+                  {{ t("account.presenceError") }}
+                </p>
+              </div>
+              <GttToggleField
+                id="account-share-email"
+                :model-value="friendEmail.enabled.value"
+                :label="t('account.shareEmail')"
+                :hint="t('account.shareEmailHint')"
+                :disabled="
+                  !friendEmail.ready.value ||
+                  friendEmail.saving.value ||
+                  !currentUser?.email
+                "
+                @update:model-value="friendEmail.setEnabled"
+              />
+              <p
+                v-if="friendEmail.error.value"
+                class="text-sm text-error"
+                role="alert"
+              >
+                {{ t("account.shareEmailError") }}
+              </p>
+            </div>
           </form>
         </details>
       </div>
       <div class="min-w-0 space-y-4">
-        <details class="card border border-base-300 bg-base-100 shadow-sm">
+        <details class="card border border-base-300/50 bg-base-100" open>
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
-            <span>{{ t('account.personalization') }}</span>
+            <span class="flex min-w-0 items-center gap-3"
+              ><SlidersHorizontal
+                :size="19"
+                class="shrink-0 text-base-content/55"
+                aria-hidden="true"
+              />{{ t("account.personalization") }}</span
+            >
             <ChevronDown
               class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
               aria-hidden="true"
@@ -76,9 +148,10 @@
           <div class="card-body gap-4 px-5 pb-5 pt-0">
             <div>
               <p class="mt-1 text-sm text-base-content/65">
-                {{ t('account.personalizationDescription') }}
+                {{ t("account.personalizationDescription") }}
               </p>
             </div>
+            <h3 class="text-sm font-bold">{{ t("account.appearance") }}</h3>
             <GttSelectField
               id="account-theme"
               :model-value="themePreference"
@@ -97,21 +170,23 @@
               compact
               @update:model-value="(value) => value && changeLanguage(value)"
             />
-            <div class="divider my-0" />
+            <div class="border-t border-base-300/50 pt-4">
+              <h3 class="text-sm font-bold">{{ t("account.playback") }}</h3>
+            </div>
             <GttToggleField
               id="account-sounds"
               v-model="timerSounds"
               :label="t('account.sounds')"
               :hint="t('account.soundsDescription')"
             />
-            <div class="divider my-0" />
+            <div class="border-t border-base-300/50" />
             <GttToggleField
               id="account-vibration"
               v-model="timerVibration"
               :label="t('account.vibration')"
               :hint="t('account.vibrationDescription')"
             />
-            <div class="divider my-0" />
+            <div class="border-t border-base-300/50" />
             <GttToggleField
               id="account-screen"
               v-model="keepScreenAwake"
@@ -120,43 +195,29 @@
             />
           </div>
         </details>
-        <details class="card border border-base-300 bg-base-100 shadow-sm">
+        <h2 class="px-1 pt-3 text-sm font-bold text-base-content/65">
+          {{ t("account.security") }}
+        </h2>
+        <details class="card border border-base-300/50 bg-base-100">
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
-            <span>{{ t('tour.help') }}</span>
-            <ChevronDown
-              class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
-              aria-hidden="true"
-            />
-          </summary>
-          <div class="card-body gap-3 px-5 pb-5 pt-0">
-            <p class="text-sm text-base-content/65">{{ t('tour.replayDescription') }}</p>
-            <GttButton mode="outline"
-              class="self-start"
-              type="button"
-              :disabled="isTourRunning || !!activeWorkoutSessionRef"
-              @click="startTour"
+            <span class="flex min-w-0 items-center gap-3"
+              ><LockKeyhole
+                :size="19"
+                class="shrink-0 text-base-content/55"
+                aria-hidden="true"
+              />{{ t("account.changePassword") }}</span
             >
-              {{ t('tour.replay') }}
-            </GttButton>
-            <p v-if="activeWorkoutSessionRef" class="text-sm text-base-content/60">
-              {{ t('tour.workoutActive') }}
-            </p>
-            <p v-if="tourError" class="text-sm text-error" role="alert">{{ t('tour.error') }}</p>
-          </div>
-        </details>
-        <details class="card border border-base-300 bg-base-100 shadow-sm">
-          <summary
-            class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
-          >
-            <span>{{ t('account.changePassword') }}</span>
             <ChevronDown
               class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
               aria-hidden="true"
             />
           </summary>
-          <form class="card-body gap-4 px-5 pb-5 pt-0" @submit.prevent="savePassword">
+          <form
+            class="card-body gap-4 px-5 pb-5 pt-0"
+            @submit.prevent="savePassword"
+          >
             <GttInputField
               id="account-current-password"
               v-model="currentPassword"
@@ -189,39 +250,53 @@
               required
               compact
             />
-            <p v-if="passwordError" class="text-sm text-error" role="alert">{{ passwordError }}</p>
-            <GttButton color="primary"
+            <p v-if="passwordError" class="text-sm text-error" role="alert">
+              {{ passwordError }}
+            </p>
+            <GttButton
+              color="primary"
               class="self-end"
               type="submit"
               :disabled="isChangingPassword || isDeletingAccount"
             >
-              <span v-if="isChangingPassword" class="loading loading-spinner loading-sm" />
-              {{ t('account.changePassword') }}
+              <span
+                v-if="isChangingPassword"
+                class="loading loading-spinner loading-sm"
+              />
+              {{ t("account.changePassword") }}
             </GttButton>
           </form>
         </details>
-        <details class="card border border-error/30 bg-base-100 shadow-sm">
+        <details class="card border border-base-300/50 bg-base-100">
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
-            <span class="text-error">{{ t('account.deleteAccount') }}</span>
+            <span class="text-error">{{ t("account.deleteAccount") }}</span>
             <ChevronDown
               class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
               aria-hidden="true"
             />
           </summary>
           <div class="card-body gap-4 px-5 pb-5 pt-0">
-            <p class="text-sm text-base-content/65">{{ t('account.deleteDescription') }}</p>
-            <GttButton mode="outline" color="error"
+            <p class="text-sm text-base-content/65">
+              {{ t("account.deleteDescription") }}
+            </p>
+            <GttButton
+              mode="outline"
+              color="error"
               v-if="!showDeleteConfirmation"
               class="self-start"
               type="button"
               :disabled="isChangingPassword"
               @click="showDeleteConfirmation = true"
             >
-              {{ t('account.deleteAccount') }}
+              {{ t("account.deleteAccount") }}
             </GttButton>
-            <form v-else class="flex flex-col gap-4" @submit.prevent="confirmDeleteAccount">
+            <form
+              v-else
+              class="flex flex-col gap-4"
+              @submit.prevent="confirmDeleteAccount"
+            >
               <GttInputField
                 id="account-delete-password"
                 v-model="deletePassword"
@@ -239,78 +314,176 @@
                 :disabled="isDeletingAccount"
                 required
               />
-              <p v-if="deleteError" class="text-sm text-error" role="alert">{{ deleteError }}</p>
+              <p v-if="deleteError" class="text-sm text-error" role="alert">
+                {{ deleteError }}
+              </p>
               <div class="flex flex-wrap justify-end gap-2">
-                <GttButton mode="ghost"
-                  
+                <GttButton
+                  mode="ghost"
                   type="button"
                   :disabled="isDeletingAccount"
                   @click="cancelDelete"
                 >
-                  {{ t('account.cancel') }}
+                  {{ t("account.cancel") }}
                 </GttButton>
-                <GttButton color="error"
-                  
+                <GttButton
+                  color="error"
                   type="submit"
                   :disabled="
-                    isDeletingAccount || !deleteConfirmed || !deletePassword || isChangingPassword
+                    isDeletingAccount ||
+                    !deleteConfirmed ||
+                    !deletePassword ||
+                    isChangingPassword
                   "
                 >
-                  <span v-if="isDeletingAccount" class="loading loading-spinner loading-sm" />
-                  {{ t('account.deletePermanently') }}
+                  <span
+                    v-if="isDeletingAccount"
+                    class="loading loading-spinner loading-sm"
+                  />
+                  {{ t("account.deletePermanently") }}
                 </GttButton>
               </div>
             </form>
           </div>
         </details>
+        <details class="card border border-base-300/50 bg-base-100">
+          <summary
+            class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          >
+            <span class="flex min-w-0 items-center gap-3"
+              ><CircleHelp
+                :size="19"
+                class="shrink-0 text-base-content/55"
+                aria-hidden="true"
+              />{{ t("tour.help") }}</span
+            >
+            <ChevronDown
+              class="account-card-chevron size-5 shrink-0 text-base-content/50 transition-transform"
+              aria-hidden="true"
+            />
+          </summary>
+          <div class="card-body gap-3 px-5 pb-5 pt-0">
+            <p class="text-sm text-base-content/65">
+              {{ t("tour.replayDescription") }}
+            </p>
+            <GttButton
+              mode="outline"
+              class="self-start"
+              type="button"
+              :disabled="isTourRunning || !!activeWorkoutSessionRef"
+              @click="startTour"
+            >
+              {{ t("tour.replay") }}
+            </GttButton>
+            <p
+              v-if="activeWorkoutSessionRef"
+              class="text-sm text-base-content/60"
+            >
+              {{ t("tour.workoutActive") }}
+            </p>
+            <p v-if="tourError" class="text-sm text-error" role="alert">
+              {{ t("tour.error") }}
+            </p>
+            <GttButton
+              mode="ghost"
+              class="self-start"
+              type="button"
+              @click="showSurprise = true"
+              ><Gift :size="18" aria-hidden="true" />{{
+                t("account.surprise")
+              }}</GttButton
+            >
+          </div>
+        </details>
       </div>
     </div>
+    <footer
+      class="flex items-center justify-end border-t border-base-300/50 pt-4"
+    >
+      <GttButton
+        mode="ghost"
+        type="button"
+        :disabled="isDeletingAccount || isChangingPassword"
+        @click="logout"
+        ><LogOut :size="18" aria-hidden="true" />{{
+          t("account.logout")
+        }}</GttButton
+      >
+    </footer>
   </section>
 </template>
 
 <script setup lang="ts">
-import AccountPhoto from '@/components/account/AccountPhoto.vue';
-import GttCheckboxField from '@/components/generic/form/GttCheckboxField.vue';
-import GttInputField from '@/components/generic/form/GttInputField.vue';
-import GttSelectField from '@/components/generic/form/GttSelectField.vue';
-import GttToggleField from '@/components/generic/form/GttToggleField.vue';
-import { showToast } from '@/composables/toast';
-import { useAppTour } from '@/composables/useAppTour';
-import { authErrorMessage, useAuth } from '@/composables/useAuth';
-import { useLanguage } from '@/composables/useLanguage';
-import { useTheme } from '@/composables/useTheme';
-import { useWorkoutPreferences } from '@/composables/useWorkoutPreferences';
-import { activeWorkoutSessionRef } from '@/stores/workoutCreator';
-import { ChevronDown } from '@lucide/vue';
-import { computed, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import {
+  presenceEnabled,
+  presenceReady,
+  presenceSaving,
+  presenceError,
+  setPresenceEnabled,
+} from "@/services/presence";
+import AccountPhoto from "@/components/account/AccountPhoto.vue";
+import GttModal from "@/components/generic/GttModal.vue";
+import GttCheckboxField from "@/components/generic/form/GttCheckboxField.vue";
+import GttInputField from "@/components/generic/form/GttInputField.vue";
+import GttSelectField from "@/components/generic/form/GttSelectField.vue";
+import GttToggleField from "@/components/generic/form/GttToggleField.vue";
+import { showToast } from "@/composables/toast";
+import { useAppTour } from "@/composables/useAppTour";
+import { authErrorMessage, useAuth } from "@/composables/useAuth";
+import { useFriendEmail } from "@/composables/useFriendEmail";
+import { useLanguage } from "@/composables/useLanguage";
+import { useTheme } from "@/composables/useTheme";
+import { useWorkoutPreferences } from "@/composables/useWorkoutPreferences";
+import { activeWorkoutSessionRef } from "@/stores/workoutCreator";
+import {
+  ChevronDown,
+  CircleHelp,
+  Gift,
+  LockKeyhole,
+  LogOut,
+  SlidersHorizontal,
+  UserRound,
+} from "@lucide/vue";
+import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 const { t, locale } = useI18n();
+const showSurprise = ref(false);
 
 const { startTour, isTourRunning, tourError } = useAppTour();
 const { themePreference } = useTheme();
 const themeOptions = computed(() => [
-  { id: 'auto', label: t('account.auto') },
-  { id: 'light', label: t('account.light') },
-  { id: 'dark', label: t('account.dark') },
+  { id: "auto", label: t("account.auto") },
+  { id: "light", label: t("account.light") },
+  { id: "dark", label: t("account.dark") },
 ]);
 const languageOptions = [
-  { id: 'it', label: 'Italiano' },
-  { id: 'en', label: 'English' },
+  { id: "it", label: "Italiano" },
+  { id: "en", label: "English" },
 ];
 function setTheme(value?: string) {
-  if (value === 'auto' || value === 'light' || value === 'dark') themePreference.value = value;
+  if (value === "auto" || value === "light" || value === "dark")
+    themePreference.value = value;
 }
-const { isLanguageReady, isSavingLanguage, languageError, changeLanguage } = useLanguage();
-const { timerSounds, timerVibration, keepScreenAwake } = useWorkoutPreferences();
-const { changePassword, deleteAccount, currentUser, signOut, updateDisplayName } = useAuth();
+const { isLanguageReady, isSavingLanguage, languageError, changeLanguage } =
+  useLanguage();
+const { timerSounds, timerVibration, keepScreenAwake } =
+  useWorkoutPreferences();
+const {
+  changePassword,
+  deleteAccount,
+  currentUser,
+  signOut,
+  updateDisplayName,
+} = useAuth();
 const router = useRouter();
-const displayName = ref(currentUser.value?.displayName ?? '');
+const friendEmail = useFriendEmail();
+const displayName = ref(currentUser.value?.displayName ?? "");
 const isSavingName = ref(false);
-const nameError = ref('');
+const nameError = ref("");
 
 watch(currentUser, (user) => {
-  displayName.value = user?.displayName ?? '';
+  displayName.value = user?.displayName ?? "";
 });
 
 async function saveName() {
@@ -318,45 +491,45 @@ async function saveName() {
   if (!name || isSavingName.value) return;
 
   isSavingName.value = true;
-  nameError.value = '';
+  nameError.value = "";
   try {
     await updateDisplayName(name);
     displayName.value = name;
-    showToast({ title: t('account.nameSaved') });
+    showToast({ title: t("account.nameSaved") });
   } catch {
-    nameError.value = t('account.nameError');
+    nameError.value = t("account.nameError");
   } finally {
     isSavingName.value = false;
   }
 }
 
-const currentPassword = ref('');
-const newPassword = ref('');
-const confirmPassword = ref('');
-const passwordError = ref('');
+const currentPassword = ref("");
+const newPassword = ref("");
+const confirmPassword = ref("");
+const passwordError = ref("");
 const isChangingPassword = ref(false);
 const showDeleteConfirmation = ref(false);
-const deletePassword = ref('');
+const deletePassword = ref("");
 const deleteConfirmed = ref(false);
-const deleteError = ref('');
+const deleteError = ref("");
 const isDeletingAccount = ref(false);
 
 async function savePassword() {
   if (isChangingPassword.value || isDeletingAccount.value) return;
-  passwordError.value = '';
+  passwordError.value = "";
   if (newPassword.value !== confirmPassword.value) {
-    passwordError.value = t('ui.passwords_do_not_match');
+    passwordError.value = t("ui.passwords_do_not_match");
     return;
   }
   if (newPassword.value.length < 6) {
-    passwordError.value = t('ui.password_must_contain_at_least_6_characters');
+    passwordError.value = t("ui.password_must_contain_at_least_6_characters");
     return;
   }
   isChangingPassword.value = true;
   try {
     await changePassword(currentPassword.value, newPassword.value);
-    currentPassword.value = newPassword.value = confirmPassword.value = '';
-    showToast({ title: t('account.passwordSaved') });
+    currentPassword.value = newPassword.value = confirmPassword.value = "";
+    showToast({ title: t("account.passwordSaved") });
   } catch (error) {
     passwordError.value = authErrorMessage(error);
   } finally {
@@ -366,9 +539,9 @@ async function savePassword() {
 
 function cancelDelete() {
   showDeleteConfirmation.value = false;
-  deletePassword.value = '';
+  deletePassword.value = "";
   deleteConfirmed.value = false;
-  deleteError.value = '';
+  deleteError.value = "";
 }
 
 async function confirmDeleteAccount() {
@@ -380,25 +553,43 @@ async function confirmDeleteAccount() {
   )
     return;
   isDeletingAccount.value = true;
-  deleteError.value = '';
+  deleteError.value = "";
   try {
     await deleteAccount(deletePassword.value);
-    await router.replace({ name: 'login' });
+    await router.replace({ name: "login" });
   } catch (error) {
     deleteError.value = authErrorMessage(error);
   } finally {
-    deletePassword.value = '';
+    deletePassword.value = "";
     isDeletingAccount.value = false;
   }
 }
 
 async function logout() {
   await signOut();
-  await router.replace({ name: 'login' });
+  await router.replace({ name: "login" });
 }
 </script>
 
 <style scoped>
+/* Hallmark · macrostructure: profile / grouped preferences
+ * existing training system · pre-emit critique: P4 H5 E4 S4 R5 V4 */
+.account-page h1,
+.account-page h2,
+.account-page h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.account-page :deep(.btn) {
+  min-height: var(--size-ui-control);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-card-chevron {
+    transition: none;
+  }
+}
+
 .account-card-summary {
   list-style: none;
 }

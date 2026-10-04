@@ -1,7 +1,13 @@
 <template>
-  <div class="app-layout flex h-dvh flex-col overflow-hidden">
+  <div
+    class="app-layout flex h-dvh flex-col overflow-hidden"
+    :class="{ 'app-layout--nav-expanded': isNavExpanded }"
+  >
     <div class="app-content flex min-h-0 min-w-0 flex-1 flex-col">
-      <div v-if="activeWorkout && !isWorkoutPlayerOpenRef" class="shrink-0 px-4 pt-4">
+      <div
+        v-if="activeWorkout && !isWorkoutPlayerOpenRef"
+        class="shrink-0 px-4 pt-4"
+      >
         <div
           class="aura aura-lg mx-auto block w-full max-w-2xl bg-primary/10 text-primary"
           :class="{ 'aura-dual': !workoutPlayerStatusRef?.paused }"
@@ -9,7 +15,8 @@
           <div
             class="flex w-full items-center gap-1 rounded-box bg-base-100 pr-2 text-base-content shadow-sm"
           >
-            <GttButton unstyled
+            <GttButton
+              unstyled
               class="flex min-w-0 flex-1 items-center justify-between gap-2 py-2 pl-3 text-left"
               type="button"
               :aria-label="tr('ui.reopen_current_workout')"
@@ -22,7 +29,9 @@
                   <Dumbbell class="size-4" aria-hidden="true" />
                 </span>
                 <span class="min-w-0">
-                  <span class="block truncate text-sm font-semibold">{{ activeWorkout.name }}</span>
+                  <span class="block truncate text-sm font-semibold">{{
+                    activeWorkout.name
+                  }}</span>
                   <span
                     v-if="workoutPlayerStatusRef"
                     class="block truncate text-xs font-semibold"
@@ -40,19 +49,35 @@
                 {{ workoutPlayerStatusRef.counter }}
               </span>
             </GttButton>
-            <GttButton shape="square" mode="ghost" size="sm"
+            <GttButton
+              shape="square"
+              mode="ghost"
+              size="sm"
               class="shrink-0 text-primary"
               type="button"
               :aria-label="
-                workoutPlayerStatusRef?.paused ? tr('ui.resume_workout') : tr('ui.pause_workout')
+                workoutPlayerStatusRef?.paused
+                  ? tr('ui.resume_workout')
+                  : tr('ui.pause_workout')
               "
-              :title="workoutPlayerStatusRef?.paused ? tr('ui.resume') : tr('ui.pause')"
+              :title="
+                workoutPlayerStatusRef?.paused
+                  ? tr('ui.resume')
+                  : tr('ui.pause')
+              "
               @click="toggleWorkoutPlayerPause"
             >
-              <Play v-if="workoutPlayerStatusRef?.paused" class="size-5" aria-hidden="true" />
+              <Play
+                v-if="workoutPlayerStatusRef?.paused"
+                class="size-5"
+                aria-hidden="true"
+              />
               <Pause v-else class="size-5" aria-hidden="true" />
             </GttButton>
-            <GttButton shape="square" mode="ghost" size="sm"
+            <GttButton
+              shape="square"
+              mode="ghost"
+              size="sm"
               class="shrink-0 text-error"
               type="button"
               :aria-label="tr('ui.stop_workout')"
@@ -75,7 +100,9 @@
         <div
           class="pt-3"
           :class="
-            ['workouts', 'calendar'].includes(String(route.name)) ? 'h-full min-h-0' : 'min-h-full'
+            ['workouts', 'calendar'].includes(String(route.name))
+              ? 'h-full min-h-0'
+              : 'min-h-full'
           "
         >
           <router-view />
@@ -97,7 +124,7 @@
         :title="tr('ui.dashboard')"
         :class="{ 'dock-active': route.name === 'home' }"
       >
-        <House />
+        <House /><span class="app-nav-label">{{ tr("visual.home") }}</span>
       </router-link>
 
       <router-link
@@ -107,7 +134,9 @@
         :title="tr('ui.calendar')"
         :class="{ 'dock-active': route.name === 'calendar' }"
       >
-        <CalendarDays />
+        <CalendarDays /><span class="app-nav-label">{{
+          tr("visual.calendar")
+        }}</span>
       </router-link>
 
       <router-link
@@ -117,12 +146,18 @@
         :title="tr('ui.workout')"
         :class="{ 'dock-active': route.name === 'workouts' }"
       >
-        <Dumbbell />
+        <Dumbbell /><span class="app-nav-label">{{
+          tr("visual.workouts")
+        }}</span>
       </router-link>
 
       <router-link
         to="/friends"
-        :aria-label="pendingFriendsCount ? tr('friends.pendingIndicator', { count: pendingFriendsCount }) : tr('friends.title')"
+        :aria-label="
+          pendingFriendsCount
+            ? tr('friends.pendingIndicator', { count: pendingFriendsCount })
+            : tr('friends.title')
+        "
         :title="tr('friends.title')"
         :class="{ 'dock-active': route.name === 'friends' }"
       >
@@ -131,9 +166,11 @@
             v-if="pendingFriendsCount"
             class="indicator-item badge badge-primary badge-xs min-w-4 px-1 text-primary-content"
             aria-hidden="true"
-          >{{ pendingFriendsCount > 9 ? '9+' : pendingFriendsCount }}</span>
+            >{{ pendingFriendsCount > 9 ? "9+" : pendingFriendsCount }}</span
+          >
           <UsersRound />
         </span>
+        <span class="app-nav-label">{{ tr("visual.friends") }}</span>
       </router-link>
 
       <router-link
@@ -143,7 +180,9 @@
         :title="tr('ui.history')"
         :class="{ 'dock-active': route.name === 'history' }"
       >
-        <RotateCcwClock />
+        <RotateCcwClock /><span class="app-nav-label">{{
+          tr("visual.history")
+        }}</span>
       </router-link>
 
       <router-link
@@ -164,15 +203,68 @@
           />
           <UserRound v-else class="size-5" aria-hidden="true" />
         </div>
+        <span class="app-nav-label">{{ tr("visual.account") }}</span>
       </router-link>
+      <GttButton
+        mode="ghost"
+        shape="square"
+        class="app-nav-expand"
+        :aria-label="
+          tr(isNavExpanded ? 'visual.navCollapse' : 'visual.navExpand')
+        "
+        :aria-expanded="isNavExpanded"
+        @click="isNavExpanded = !isNavExpanded"
+      >
+        <PanelLeftClose v-if="isNavExpanded" :size="20" /><PanelLeftOpen
+          v-else
+          :size="20"
+        />
+      </GttButton>
     </nav>
+    <GttModal
+      v-model="showSessionReceipt"
+      :title="tr('playerDesign.completed')"
+    >
+      <div v-if="sessionReceipt">
+        <h3 class="text-xl font-bold wrap-break-word">
+          {{ sessionReceipt.name }}
+        </h3>
+        <dl class="mt-5 grid grid-cols-2 gap-4 border-y border-base-300 py-4">
+          <div>
+            <dt class="text-sm text-base-content/65">
+              {{ tr("playerDesign.sessionDuration") }}
+            </dt>
+            <dd class="mt-1 text-2xl font-bold tabular-nums">
+              {{ sessionReceipt.duration }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-base-content/65">
+              {{ tr("playerDesign.sequenceSteps") }}
+            </dt>
+            <dd class="mt-1 text-2xl font-bold tabular-nums">
+              {{ sessionReceipt.steps }}
+            </dd>
+          </div>
+        </dl>
+        <p class="mt-4 text-sm text-base-content/65">
+          {{ tr("playerDesign.saved") }}
+        </p>
+        <GttButton
+          color="primary"
+          class="mt-5 w-full"
+          @click="showSessionReceipt = false"
+          >{{ tr("playerDesign.done") }}</GttButton
+        >
+      </div>
+    </GttModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '@/composables/useAuth';
-import { tr } from '@/localization';
-import { listenFriendships, listenSharedWorkouts } from '@/services/friends';
+import { useAuth } from "@/composables/useAuth";
+import { tr } from "@/localization";
+import { listenFriendships, listenSharedWorkouts } from "@/services/friends";
 import {
   abandonWorkoutSession,
   activeWorkoutSessionRef,
@@ -181,9 +273,12 @@ import {
   toggleWorkoutPlayerPause,
   workoutPlayerStatusRef,
   workoutsRef,
-} from '@/stores/workoutCreator';
+  workoutSessionsRef,
+} from "@/stores/workoutCreator";
 import {
   CalendarDays,
+  PanelLeftClose,
+  PanelLeftOpen,
   Dumbbell,
   House,
   Pause,
@@ -192,15 +287,45 @@ import {
   Square,
   UserRound,
   UsersRound,
-} from '@lucide/vue';
-import { computed, onUnmounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+} from "@lucide/vue";
+import { computed, onUnmounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
+const showSessionReceipt = ref(false);
+const sessionReceipt = ref<{ name: string; duration: string; steps: number }>();
+watch(activeWorkoutSessionRef, (current, previous) => {
+  if (current || !previous) return;
+  const completed = workoutSessionsRef.value.find(
+    (session) => session.id === previous.id && session.completedAt,
+  );
+  if (!completed) return;
+  const workout = workoutsRef.value.find(
+    (item) => item.id === completed.workoutId,
+  );
+  const seconds = Math.max(
+    0,
+    Math.round(
+      (Date.parse(completed.completedAt!) - Date.parse(completed.startedAt)) /
+        1000,
+    ),
+  );
+  sessionReceipt.value = {
+    name: workout?.name ?? tr("ui.deleted_workout"),
+    duration: `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
+    steps:
+      workout?.steps.filter((step) => step.type !== "SETPAUSE").length ??
+      completed.completedStepIndexes.length,
+  };
+  showSessionReceipt.value = true;
+});
+const isNavExpanded = ref(false);
 const { currentUser, profilePhoto } = useAuth();
 const pendingRequestsCount = ref(0);
 const sharedWorkoutsCount = ref(0);
-const pendingFriendsCount = computed(() => pendingRequestsCount.value + sharedWorkoutsCount.value);
+const pendingFriendsCount = computed(
+  () => pendingRequestsCount.value + sharedWorkoutsCount.value,
+);
 let stopFriendListeners: (() => void)[] = [];
 watch(
   () => currentUser.value?.uid,
@@ -214,14 +339,17 @@ watch(
       listenFriendships(
         (friends) => {
           pendingRequestsCount.value = friends.filter(
-            (friend) => friend.status === 'pending' && friend.recipient === userId,
+            (friend) =>
+              friend.status === "pending" && friend.recipient === userId,
           ).length;
         },
-        (error) => console.error('Unable to load friend requests', error),
+        (error) => console.error("Unable to load friend requests", error),
       ),
       listenSharedWorkouts(
-        (workouts) => { sharedWorkoutsCount.value = workouts.length; },
-        (error) => console.error('Unable to load shared workouts', error),
+        (workouts) => {
+          sharedWorkoutsCount.value = workouts.length;
+        },
+        (error) => console.error("Unable to load shared workouts", error),
       ),
     ];
   },
@@ -229,6 +357,8 @@ watch(
 );
 onUnmounted(() => stopFriendListeners.forEach((stop) => stop()));
 const activeWorkout = computed(() =>
-  workoutsRef.value.find((workout) => workout.id === activeWorkoutSessionRef.value?.workoutId),
+  workoutsRef.value.find(
+    (workout) => workout.id === activeWorkoutSessionRef.value?.workoutId,
+  ),
 );
 </script>

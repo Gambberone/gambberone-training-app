@@ -1,5 +1,5 @@
 <template>
-  <section class="mx-auto w-full max-w-7xl">
+  <section class="mx-auto w-full max-w-7xl home-page">
     <header class="mb-7">
       <p class="mb-1 text-sm font-semibold text-primary">{{ todayLabel }}</p>
       <h1 class="text-3xl font-bold tracking-tight text-base-content">
@@ -12,7 +12,7 @@
       <div class="flex min-w-0 flex-col">
         <div
           v-if="todayWorkouts.length"
-          class="card border border-base-300/50 bg-base-100 p-5 shadow-sm space-y-3"
+          class="home-today card border border-primary/30 bg-base-100 p-5 space-y-3"
         >
           <div class="flex items-center justify-between gap-3">
             <h2 class="text-lg font-bold text-base-content">
@@ -28,7 +28,7 @@
           >
             <span
               v-if="scheduledWorkout.time"
-              class="badge badge-primary badge-outline absolute top-4 right-0 h-auto gap-1.5 px-3 py-2 text-base font-semibold"
+              class="home-workout-time badge badge-primary badge-outline h-auto gap-1.5 px-3 py-2 text-sm font-semibold"
             >
               <Clock3 :size="18" />
               {{ scheduledWorkout.time
@@ -75,51 +75,53 @@
           </article>
         </div>
 
-        <article
-          v-else
-          class="card overflow-hidden border border-base-300/50 bg-base-100 shadow-sm"
-        >
-          <div class="card-body items-center px-6 py-6 text-center lg:items-start lg:text-left">
-            <div class="grid size-16 place-items-center rounded-full bg-success/15 text-success">
-              <FaceGrinning :size="31" />
+        <article v-else class="home-rest card border border-base-300/50 bg-base-100 p-5">
+          <div class="flex items-start gap-3">
+            <div class="grid size-11 shrink-0 place-items-center rounded-box bg-base-200 text-primary">
+              <FaceGrinning :size="24" />
             </div>
-            <h2 class="mt-3 text-xl font-bold text-base-content">{{ t('home.rest') }}</h2>
-            <p class="max-w-sm text-base-content/65">
-              {{ t('home.restDescription') }}
-            </p>
-            <RouterLink class="btn btn-primary mt-3" to="/calendar">
-              <CalendarPlus :size="18" />
-              {{ t('home.schedule') }}
-            </RouterLink>
+            <div class="min-w-0">
+              <h2 class="text-xl font-bold">{{ t('home.rest') }}</h2>
+              <p class="mt-1 text-sm text-base-content/65">{{ t('home.recoveryDescription') }}</p>
+            </div>
           </div>
+          <div v-if="nextWorkout" class="home-next mt-5 border-t border-base-300/50 pt-4">
+            <p class="text-xs font-semibold text-base-content/65">{{ t('home.nextWorkout') }}</p>
+            <h3 class="mt-1 text-lg font-bold wrap-break-word">{{ workoutName(nextWorkout.workoutId) }}</h3>
+            <p class="mt-1 text-sm text-primary">{{ nextWorkoutDate }}<span v-if="nextWorkout.time"> · {{ nextWorkout.time }}</span></p>
+            <p class="mt-1 text-sm text-base-content/65">{{ workoutDetails(nextWorkout.workoutId) }}</p>
+          </div>
+          <RouterLink class="btn btn-outline mt-5 self-start" to="/calendar">
+            <CalendarPlus :size="18" />{{ t(nextWorkout ? 'home.calendar' : 'home.schedule') }}
+          </RouterLink>
         </article>
       </div>
       <aside
         class="flex min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-stretch"
       >
         <section
-          class="card flex-1 border border-base-300/50 bg-base-100 p-5 shadow-sm"
+          class="home-summary flex-1 p-5"
           aria-labelledby="summary-heading"
         >
           <h2 id="summary-heading" class="text-lg font-bold">{{ t('home.summary') }}</h2>
           <p class="mt-1 text-sm text-base-content/60">{{ t('home.period') }}</p>
           <dl class="mt-6 grid grid-cols-2 gap-4">
             <div>
-              <dd class="text-5xl font-bold text-primary">{{ weekSessions.length }}</dd>
+              <dd class="text-4xl font-bold tabular-nums">{{ weekSessions.length }}</dd>
               <dt class="mt-1 text-sm text-base-content/65">{{ t('home.completedWorkouts') }}</dt>
             </div>
             <div>
-              <dd class="text-5xl font-bold">
+              <dd class="text-4xl font-bold tabular-nums">
                 {{ weeklyMinutes }}<span class="ml-1 text-sm font-normal">min</span>
               </dd>
               <dt class="mt-1 text-sm text-base-content/65">{{ t('home.sessionTime') }}</dt>
             </div>
           </dl>
-          <WorkoutTrend class="lg:mt-auto lg:flex lg:min-h-64 lg:h-1/2 lg:flex-none lg:flex-col" />
+          <WorkoutTrend class="lg:mt-6" />
         </section>
       </aside>
       <section
-        class="card border border-base-300/50 bg-base-100 p-5 shadow-sm lg:col-start-1 lg:row-start-2"
+        class="home-agenda lg:col-start-1 lg:row-start-2"
         aria-labelledby="week-heading"
       >
         <div class="mb-4 flex items-center justify-between gap-3">
@@ -146,10 +148,10 @@
                 completed: day.completed.length,
               })
             "
-            class="flex h-72 min-w-0 flex-col rounded-box border text-left"
+            class="home-agenda-day flex min-w-0 flex-col rounded-box border text-left"
             :class="[
               day.key === todayKey
-                ? 'gap-3 border-primary bg-primary/10 p-4 text-primary '
+                ? 'home-agenda-day--today gap-3 border-primary bg-base-100 p-4 '
                 : 'gap-2 border-base-300/50 bg-base-100 p-3',
             ]"
           >
@@ -201,7 +203,7 @@
             </span>
             <span
               v-if="!day.completed.length && !day.scheduled.length"
-              class="text-sm text-base-content/45"
+              class="text-sm text-base-content/65"
               >{{ t(day.key > todayKey ? 'home.emptyFuture' : 'home.empty') }}</span
             >
           </GttButton>
@@ -316,6 +318,11 @@ const userName = computed(() => {
   const emailName = currentUser.value.email?.split('@')[0] ?? '';
   return emailName.replace(/[._-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 });
+
+const nextWorkout = computed(() => pendingWorkouts.value.find(item => item.date > todayKey));
+const nextWorkoutDate = computed(() => nextWorkout.value
+  ? new Intl.DateTimeFormat(locale.value, { weekday: 'long', day: 'numeric', month: 'long' })
+      .format(new Date(`${nextWorkout.value.date}T12:00:00`)) : '');
 
 const todayWorkouts = computed(() =>
   pendingWorkouts.value.filter((scheduledWorkout) => scheduledWorkout.date === todayKey),
