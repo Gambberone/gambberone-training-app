@@ -1,9 +1,0 @@
-{
-  "date": "2026-10-04",
-  "framework": "Vue 3 / Vite",
-  "fonts": "Tailwind system sans; preserved",
-  "palette": "existing training-light/training-dark emerald and slate tokens in src/style.css:14",
-  "motion": "motion-cut",
-  "spacing": "Tailwind 4-point scale",
-  "scope": "auth pages"
-}
