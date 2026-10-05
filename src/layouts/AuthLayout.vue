@@ -14,7 +14,7 @@
           <div class="auth-track-lane auth-track-lane--outer"></div>
           <div class="auth-track-lane auth-track-lane--middle"></div>
           <div class="auth-track-lane auth-track-lane--inner"></div>
-          <div class="auth-track-core"><Activity :size="38" :stroke-width="1.5" /></div>
+          <div class="auth-track-core"><Timer :size="38" :stroke-width="1.5" /></div>
           <span class="auth-track-dot"></span>
           <span class="auth-track-marker"></span>
         </div>
@@ -37,6 +37,6 @@
 
 <script setup lang="ts">
 import { tr } from '@/localization';
-import { Activity, Dumbbell } from '@lucide/vue';
+import { Timer, Dumbbell } from '@lucide/vue';
 import '@/styles/auth.css';
 </script>

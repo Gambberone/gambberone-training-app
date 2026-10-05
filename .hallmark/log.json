@@ -1,5 +1,15 @@
 [
   {
+    "date": "2026-10-05",
+    "scope": "app refinements",
+    "macrostructure": "existing application layouts",
+    "theme": "existing training system",
+    "enrichment": "restrained CSS track",
+    "brief": "Collection search and sorting, larger mobile nav labels, locally served Barlow headings, reduced auth glow",
+    "nav": "N3 desktop rail / mobile dock",
+    "footer": "none"
+  },
+  {
     "date": "2026-10-04",
     "scope": "app refinements",
     "macrostructure": "existing application layouts",

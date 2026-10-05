@@ -263,17 +263,16 @@
 
 <script setup lang="ts">
 import { useAuth } from '@/composables/useAuth';
-import type { WorkoutSession } from '@/constants';
-import { isAgendaWorkoutExpired, pendingAgendaWorkouts } from '@/domain/agenda';
+import { useWorkoutInsights } from '@/composables/useWorkoutInsights';
+import { sessionMinutes } from '@/domain/workoutInsights';
+import { isAgendaWorkoutExpired } from '@/domain/agenda';
 import {
-  scheduledWorkoutsRef,
   startWorkoutSession,
   workoutEstimatedDuration,
-  workoutSessionsRef,
   workoutsRef,
 } from '@/stores/workoutCreator';
 import { ArrowRight, CalendarPlus, Clock3, Dumbbell, FaceGrinning, Play } from '@lucide/vue';
-import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const WorkoutTrend = defineAsyncComponent(() => import('@/components/home/WorkoutTrend.vue'));
@@ -282,30 +281,20 @@ const { t, locale } = useI18n();
 const { currentUser } = useAuth();
 
 const pad = (value: number) => String(value).padStart(2, '0');
-const currentTime = ref(Date.now());
-let agendaClock: ReturnType<typeof setInterval>;
-onMounted(() => {
-  agendaClock = setInterval(() => {
-    currentTime.value = Date.now();
-  }, 15000);
-});
-onUnmounted(() => clearInterval(agendaClock));
-const now = new Date();
-const pendingWorkouts = computed(() =>
-  pendingAgendaWorkouts(scheduledWorkoutsRef.value, workoutSessionsRef.value),
-);
-const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+const { currentTime, pendingWorkouts, completedSessions, statistics } = useWorkoutInsights();
+const now = computed(() => new Date(currentTime.value));
+const todayKey = computed(() => localKey(now.value));
 
 const todayLabel = computed(() =>
   new Intl.DateTimeFormat(locale.value, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  }).format(now),
+  }).format(now.value),
 );
 
 const greeting = computed(() => {
-  const hour = new Date().getHours();
+  const hour = now.value.getHours();
   if (hour < 12) return t('home.morning');
   if (hour < 18) return t('home.afternoon');
   return t('home.evening');
@@ -319,13 +308,13 @@ const userName = computed(() => {
   return emailName.replace(/[._-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 });
 
-const nextWorkout = computed(() => pendingWorkouts.value.find(item => item.date > todayKey));
+const nextWorkout = computed(() => pendingWorkouts.value.find(item => item.date > todayKey.value));
 const nextWorkoutDate = computed(() => nextWorkout.value
   ? new Intl.DateTimeFormat(locale.value, { weekday: 'long', day: 'numeric', month: 'long' })
       .format(new Date(`${nextWorkout.value.date}T12:00:00`)) : '');
 
 const todayWorkouts = computed(() =>
-  pendingWorkouts.value.filter((scheduledWorkout) => scheduledWorkout.date === todayKey),
+  pendingWorkouts.value.filter((scheduledWorkout) => scheduledWorkout.date === todayKey.value),
 );
 
 function workoutName(workoutId: string) {
@@ -344,18 +333,16 @@ function workoutDetails(workoutId: string) {
 
 const localKey = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
 const weekDays = computed(() =>
   Array.from({ length: 4 }, (_, index) => {
-    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const date = new Date(now.value.getFullYear(), now.value.getMonth(), now.value.getDate());
     date.setDate(date.getDate() + index);
     const key = localKey(date);
     return {
       key,
       number: date.getDate(),
       label: new Intl.DateTimeFormat(locale.value, { weekday: 'short' }).format(date),
-      completed: workoutSessionsRef.value.filter(
+      completed: completedSessions.value.filter(
         (session) => session.completedAt && localKey(new Date(session.completedAt)) === key,
       ),
       scheduled: pendingWorkouts.value
@@ -387,26 +374,8 @@ function openAgendaDay(date: string) {
   isAgendaDayOpen.value = true;
 }
 
-const weekSessions = computed(() =>
-  workoutSessionsRef.value.filter(
-    (session) =>
-      session.completedAt &&
-      Date.parse(session.completedAt) >= weekStart.getTime() &&
-      Date.parse(session.completedAt) <= Date.now(),
-  ),
-);
-function sessionMinutes(session: WorkoutSession) {
-  return Math.max(
-    0,
-    Math.round(
-      (Date.parse(session.completedAt ?? session.startedAt) - Date.parse(session.startedAt)) /
-        60000,
-    ),
-  );
-}
-const weeklyMinutes = computed(() =>
-  weekSessions.value.reduce((total, session) => total + sessionMinutes(session), 0),
-);
+const weekSessions = computed(() => statistics.value.weekSessions);
+const weeklyMinutes = computed(() => statistics.value.weeklyMinutes);
 function workoutLabel(index: number) {
   return index === 0 ? t('home.focus') : t('home.number', { number: index + 1 });
 }

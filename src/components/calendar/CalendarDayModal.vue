@@ -42,6 +42,7 @@
           :options="workoutOptions"
           :placeholder="tr('ui.choose_a_workout')"
           split-action
+          :split-action-disabled="validationErrors.length > 0"
           :split-action-label="tr('ui.add_workout_to_this_day')"
           @action="addWorkoutToDay"
         >
@@ -68,7 +69,9 @@ import {
   scheduledWorkoutsRef,
   workoutsRef,
 } from '@/stores/workoutCreator';
-import { scheduleValidationErrors } from '@/wavebinder/schedule';
+import { useWaveBinderValue } from '@/composables/useWaveBinderNode';
+import { wb } from '@/wavebinder';
+import type { SingleNode } from 'wave-binder';
 import { Clock3, Dumbbell, Plus, Trash2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
@@ -76,7 +79,21 @@ const props = defineProps<{ date?: string; preselectedWorkoutId?: string }>();
 const isOpen = defineModel<boolean>({ default: false });
 const workoutToSchedule = ref<string | undefined>();
 const scheduledTime = ref('');
-const scheduleError = ref('');
+const errors = useWaveBinderValue<string[] | null>(
+  wb.getNodeByName('scheduleValidationErrors') as SingleNode,
+);
+const validationErrors = computed(() => errors.value ?? ['messages.scheduleRequired']);
+const scheduleError = computed(() => workoutToSchedule.value ? validationErrors.value[0] : undefined);
+
+watch(() => ({
+  open: isOpen.value,
+  date: props.date,
+  workoutId: workoutToSchedule.value,
+  time: scheduledTime.value || undefined,
+  scheduled: scheduledWorkoutsRef.value,
+}), (input) => {
+  if (isOpen.value) wb.getNodeByName('scheduleInput').next(input);
+}, { deep: true, immediate: true, flush: 'sync' });
 
 const dayLabel = computed(() =>
   props.date
@@ -98,7 +115,6 @@ watch(isOpen, (open) => {
   if (open) {
     workoutToSchedule.value = props.preselectedWorkoutId;
     scheduledTime.value = '';
-    scheduleError.value = '';
   }
 });
 
@@ -109,19 +125,9 @@ function workoutName(workoutId: string) {
 }
 function addWorkoutToDay() {
   if (!props.date || !workoutToSchedule.value) return;
-  const errors = scheduleValidationErrors({
-    date: props.date,
-    workoutId: workoutToSchedule.value,
-    time: scheduledTime.value || undefined,
-    scheduled: scheduledWorkoutsRef.value,
-  });
-  if (errors.length) {
-    scheduleError.value = errors[0];
-    return;
-  }
+  if (validationErrors.value.length) return;
   scheduleWorkout(workoutToSchedule.value, props.date, scheduledTime.value || undefined);
   workoutToSchedule.value = undefined;
   scheduledTime.value = '';
-  scheduleError.value = '';
 }
 </script>

@@ -196,10 +196,11 @@
               </time>
               <div class="min-w-0">
                 <p class="history-workout font-semibold leading-snug">
-                  {{ workoutName(session.workoutId) }}
+                  {{ session.workoutName ?? workoutName(session.workoutId) }}
                 </p>
                 <p class="mt-0.5 text-xs text-base-content/60">
                   {{ timeLabel(session.completedAt!) }}
+                  <span v-if="session.trainedWith"> · {{ t("together.with", { name: session.trainedWith }) }}</span>
                 </p>
               </div>
               <span
@@ -218,7 +219,9 @@
 
 <script setup lang="ts">
 import type { WorkoutSession } from "@/constants";
-import { workoutSessionsRef, workoutsRef } from "@/stores/workoutCreator";
+import { useWorkoutInsights, useWorkoutHistoryFilter } from "@/composables/useWorkoutInsights";
+import { sessionMinutes } from "@/domain/workoutInsights";
+import { workoutsRef } from "@/stores/workoutCreator";
 import { CalendarCheck2 } from "@lucide/vue";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -229,61 +232,20 @@ const selectedWorkout = ref("all");
 const hasFilters = computed(
   () => period.value !== "all" || selectedWorkout.value !== "all",
 );
-const now = new Date();
-const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+const { completedSessions, statistics } = useWorkoutInsights();
 const monthFormatter = (date: Date) =>
   new Intl.DateTimeFormat(locale.value, {
     month: "long",
     year: "numeric",
   }).format(date);
-const currentMonthLabel = computed(() => monthFormatter(currentMonthStart));
-const previousMonthLabel = computed(() => monthFormatter(previousMonthStart));
-const completedSessions = computed(() =>
-  workoutSessionsRef.value
-    .filter(
-      (session) =>
-        session.completedAt && Number.isFinite(Date.parse(session.completedAt)),
-    )
-    .sort((a, b) => Date.parse(b.completedAt!) - Date.parse(a.completedAt!)),
-);
-const currentMonthSessions = computed(() =>
-  completedSessions.value.filter(
-    (session) =>
-      Date.parse(session.completedAt!) >= currentMonthStart.getTime(),
-  ),
-);
-const previousMonthSessions = computed(() =>
-  completedSessions.value.filter((session) => {
-    const completed = Date.parse(session.completedAt!);
-    return (
-      completed >= previousMonthStart.getTime() &&
-      completed < currentMonthStart.getTime()
-    );
-  }),
-);
-function sessionMinutes(session: WorkoutSession) {
-  const elapsed =
-    Date.parse(session.completedAt ?? "") - Date.parse(session.startedAt);
-  return Number.isFinite(elapsed)
-    ? Math.max(0, Math.round(elapsed / 60000))
-    : 0;
-}
-const currentMonthMinutes = computed(() =>
-  currentMonthSessions.value.reduce(
-    (total, session) => total + sessionMinutes(session),
-    0,
-  ),
-);
-const previousMonthMinutes = computed(() =>
-  previousMonthSessions.value.reduce(
-    (total, session) => total + sessionMinutes(session),
-    0,
-  ),
-);
+const currentMonthLabel = computed(() => monthFormatter(new Date(statistics.value.currentMonthStart)));
+const previousMonthLabel = computed(() => monthFormatter(new Date(statistics.value.previousMonthStart)));
+const currentMonthSessions = computed(() => statistics.value.currentMonthSessions);
+const previousMonthSessions = computed(() => statistics.value.previousMonthSessions);
+const currentMonthMinutes = computed(() => statistics.value.currentMonthMinutes);
+const previousMonthMinutes = computed(() => statistics.value.previousMonthMinutes);
 const sessionDifferenceLabel = computed(() => {
-  const difference =
-    currentMonthSessions.value.length - previousMonthSessions.value.length;
+  const difference = statistics.value.monthDifference;
   return difference > 0 ? `+${difference}` : String(difference);
 });
 function shortMonthLabel(value: string) {
@@ -296,19 +258,9 @@ const sessionWorkouts = computed(() =>
     .map((id) => ({ id, name: workoutName(id) }))
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 );
-const filteredSessions = computed(() =>
-  completedSessions.value.filter((session) => {
-    if (
-      selectedWorkout.value !== "all" &&
-      session.workoutId !== selectedWorkout.value
-    )
-      return false;
-    if (period.value === "all") return true;
-    const cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    cutoff.setDate(cutoff.getDate() - Number(period.value) + 1);
-    return Date.parse(session.completedAt!) >= cutoff.getTime();
-  }),
-);
+const filteredSessions = useWorkoutHistoryFilter(() => ({
+  period: period.value, workoutId: selectedWorkout.value,
+}));
 const groupedSessions = computed(() => {
   const groups = new Map<
     string,
@@ -326,6 +278,7 @@ const groupedSessions = computed(() => {
 function workoutName(id: string) {
   return (
     workoutsRef.value.find((workout) => workout.id === id)?.name ??
+    completedSessions.value.find(session => session.workoutId === id)?.workoutName ??
     t("ui.deleted_workout")
   );
 }

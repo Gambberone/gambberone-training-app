@@ -88,24 +88,20 @@ const selectStep = (action: WorkoutCreatorStepAction) => {
 <style scoped>
 .creator-reveal-enter-active,
 .creator-reveal-leave-active {
-  overflow: hidden;
   transition:
-    max-height 300ms ease,
-    transform 300ms ease,
-    opacity 250ms ease;
+    transform var(--dur-ui-short) var(--ease-ui-out),
+    opacity var(--dur-ui-short) var(--ease-ui-out);
 }
 
 .creator-reveal-enter-from,
 .creator-reveal-leave-to {
-  max-height: 0;
-  transform: scale(0.6);
+  transform: translateY(0.25rem);
   opacity: 0;
 }
 
 .creator-reveal-enter-to,
 .creator-reveal-leave-from {
-  max-height: 45rem;
-  transform: scale(1);
+  transform: translateY(0);
   opacity: 1;
 }
 

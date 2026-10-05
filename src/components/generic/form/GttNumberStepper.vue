@@ -38,7 +38,7 @@
         />
         <span
           v-if="unit"
-          class="pointer-events-none shrink-0 pr-1 text-xs text-base-content/50"
+          class="pointer-events-none shrink-0 pr-1 text-xs text-[var(--color-ui-muted)]"
           aria-hidden="true"
           >{{ unit }}</span
         >

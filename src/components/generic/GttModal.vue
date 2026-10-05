@@ -122,10 +122,12 @@ const isOpen = defineModel<boolean>({ default: false });
 const dialog = ref<HTMLDialogElement | null>(null);
 const isFullScreen = ref(false);
 
-watch(isOpen, (open) => {
-  if (open && !dialog.value?.open) dialog.value?.showModal();
-  if (!open && dialog.value?.open) dialog.value.close();
-});
+// A conditional modal can mount with its model already true. Wait for the
+// native element as well as model changes so that first opening is applied.
+watch([isOpen, dialog], ([open, element]) => {
+  if (open && element && !element.open) element.showModal();
+  if (!open && element?.open) element.close();
+}, { flush: 'post' });
 
 const closeModal = () => {
   if (props.beforeClose?.() === false) return;

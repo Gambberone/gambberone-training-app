@@ -7,7 +7,7 @@
     @mouseenter="scheduleShow"
     @mouseleave="hideUnlessPinned"
     @focus="show"
-    @blur="hide"
+    @blur="hideUnlessPinned"
     @click="toggle"
     @keydown.esc.stop="hide"
   >
@@ -19,6 +19,8 @@
       :id="tooltipId"
       popover="manual"
       role="tooltip"
+      @mouseenter="cancelHide"
+      @mouseleave="hideUnlessPinned"
       class="gtt-floating-tooltip"
       :style="{ left: `${left}px`, top: `${top}px`, color: textColor }"
     >
@@ -38,9 +40,12 @@ const visible = ref(false);
 const left = ref(0);
 const top = ref(0);
 let pinned = false;
+let hideTimer: ReturnType<typeof setTimeout> | undefined;
+function cancelHide() { clearTimeout(hideTimer); hideTimer = undefined; }
 let hoverTimer: ReturnType<typeof setTimeout> | undefined;
 function cancelHover() { clearTimeout(hoverTimer); hoverTimer = undefined; }
 function scheduleShow(event: MouseEvent) {
+  cancelHide();
   cancelHover();
   if (pinned || visible.value) return;
   const target = event.currentTarget as HTMLElement;
@@ -48,6 +53,7 @@ function scheduleShow(event: MouseEvent) {
 }
 let anchor: HTMLElement | undefined;
 async function show(event: Event) {
+  cancelHide();
   cancelHover();
   return showAt(event.currentTarget as HTMLElement);
 }
@@ -71,6 +77,7 @@ async function showAt(target: HTMLElement) {
       : Math.min(rect.bottom + padding, window.innerHeight - tip.height - padding);
 }
 function hide() {
+  cancelHide();
   cancelHover();
   pinned = false;
   visible.value = false;
@@ -78,7 +85,12 @@ function hide() {
 }
 function hideUnlessPinned() {
   cancelHover();
-  if (!pinned) hide();
+  cancelHide();
+  if (!pinned) {
+    hideTimer = setTimeout(() => {
+      if (document.activeElement !== anchor) hide();
+    }, 150);
+  }
 }
 function toggle(event: Event) {
   if (pinned) hide();
@@ -86,6 +98,9 @@ function toggle(event: Event) {
     pinned = true;
     void show(event);
   }
+}
+function dismissOnEscape(event: KeyboardEvent) {
+  if (visible.value && event.key === 'Escape') hide();
 }
 function outside(event: PointerEvent) {
   if (
@@ -98,11 +113,13 @@ function outside(event: PointerEvent) {
 }
 onMounted(() => {
   document.addEventListener('pointerdown', outside);
+  document.addEventListener('keydown', dismissOnEscape);
   window.addEventListener('scroll', hide, true);
   window.addEventListener('resize', hide);
 });
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', outside);
+  document.removeEventListener('keydown', dismissOnEscape);
   window.removeEventListener('scroll', hide, true);
   window.removeEventListener('resize', hide);
   hide();

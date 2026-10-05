@@ -15,7 +15,7 @@
         :disabled="props.disabled"
         :required="props.required"
         :aria-invalid="Boolean(props.error)"
-        :aria-describedby="props.error ? `${props.id}_error` : undefined"
+        :aria-describedby="[props.hint && `${props.id}_hint`, props.error && `${props.id}_error`].filter(Boolean).join(' ') || undefined"
       >
         <option v-if="props.placeholder" disabled value="">{{ props.placeholder }}</option>
         <option v-for="option in props.options" :value="option.id" :key="option.id">
@@ -26,7 +26,7 @@
         v-if="props.splitAction"
         class="join-item"
         type="button"
-        :disabled="!modelValue || props.disabled"
+        :disabled="!modelValue || props.disabled || props.splitActionDisabled"
         :aria-label="props.splitActionLabel"
         @click="emit('action')"
       >
@@ -53,6 +53,7 @@ interface SelectFieldProps extends FieldProps {
   error?: string;
   splitAction?: boolean;
   splitActionLabel?: string;
+  splitActionDisabled?: boolean;
 }
 
 const props = withDefaults(defineProps<SelectFieldProps>(), {

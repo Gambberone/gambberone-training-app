@@ -1,14 +1,16 @@
 /* Auth tokens extend the existing training-light / training-dark system. */
 :root {
-  --font-auth-display: var(--font-sans);
+  --font-ui-display: "Barlow", var(--font-sans);
+  --text-ui-nav: 0.6875rem;
+  --font-auth-display: var(--font-ui-display);
   --font-auth-body: var(--font-sans);
   --color-auth-story: oklch(20.8% 0.042 265.755);
   --color-auth-story-ink: oklch(96.8% 0.007 247.896);
   --color-auth-story-muted: oklch(80% 0.025 255);
   --color-auth-story-rule: oklch(37.2% 0.044 257.287);
   --color-auth-story-accent: oklch(76.5% 0.177 163.223);
-  --color-auth-track-glow: color-mix(in oklch, var(--color-auth-story-accent) 30%, transparent);
-  --color-auth-track-halo: color-mix(in oklch, var(--color-auth-story-accent) 12%, transparent);
+  --color-auth-track-glow: color-mix(in oklch, var(--color-auth-story-accent) 14%, transparent);
+  --color-auth-track-halo: color-mix(in oklch, var(--color-auth-story-accent) 5%, transparent);
   --color-auth-story-accent-ink: oklch(26.2% 0.051 172.552);
   --color-auth-action: color-mix(in oklch, var(--color-primary) 85%, var(--color-base-content));
   --color-auth-action-ink: var(--color-primary-content);

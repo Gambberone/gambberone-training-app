@@ -5,7 +5,7 @@
     <p v-if="error" :id="`${id}_error`" class="label text-error" role="alert">
       {{ error }}
     </p>
-    <p v-if="hint" class="label">{{ hint }}</p>
+    <p v-if="hint" :id="`${id}_hint`" class="label">{{ hint }}</p>
   </div>
 </template>
 

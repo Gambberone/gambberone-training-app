@@ -31,7 +31,7 @@
         :placeholder="props.placeholder"
         :type="props.type"
         :aria-invalid="Boolean(props.error)"
-        :aria-describedby="props.error ? `${props.id}_error` : undefined"
+        :aria-describedby="[props.hint && `${props.id}_hint`, props.error && `${props.id}_error`].filter(Boolean).join(' ') || undefined"
       />
       <slot name="suffix" />
     </div>

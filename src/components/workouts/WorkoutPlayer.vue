@@ -65,6 +65,52 @@
         </div>
       </div>
 
+      <div
+        v-if="isSharedPlayback"
+        class="player-together"
+      >
+        <GttButton v-if="!sharedHostLeft" mode="ghost" size="sm" class="player-together-trigger" aria-haspopup="dialog" @click="sharedOptionsOpen = true">
+          <Users :size="16" aria-hidden="true" />
+          <span class="truncate">{{ tr('together.withLive', { name: sharedPartner || activeWorkoutSessionRef?.trainedWith || '' }) }}</span>
+          <ChevronDown :size="14" class="shrink-0" aria-hidden="true" />
+        </GttButton>
+        <GttModal v-model="sharedOptionsOpen" :title="tr('together.sessionControls')">
+          <div class="shared-session-heading">
+            <I18nT keypath="together.withLive" scope="global" tag="p" class="font-semibold wrap-break-word">
+              <template #name><span class="text-primary">{{ sharedPartner || activeWorkoutSessionRef?.trainedWith || '' }}</span></template>
+            </I18nT>
+            <GttButton mode="ghost" shape="circle" size="sm" :aria-label="tr('together.info')" :aria-expanded="sharedInfoOpen" aria-controls="shared-session-info" @click="sharedInfoOpen = !sharedInfoOpen">
+              <Info :size="18" aria-hidden="true" />
+            </GttButton>
+          </div>
+          <p v-if="sharedInfoOpen" id="shared-session-info" class="mb-4 text-sm text-base-content/65">{{ tr('together.controlsHint') }}</p>
+          <div class="shared-session-actions">
+            <GttButton mode="ghost" :disabled="sharedBusy" @click="continueSolo">
+              <UserRound :size="18" aria-hidden="true" />{{ tr('together.continueSolo') }}
+            </GttButton>
+          </div>
+          <p v-if="sharedError" role="alert" class="mt-3 text-sm text-error">{{ tr('together.error') }}</p>
+        </GttModal>
+        <div
+          v-if="!sharedConnected || partnerUnavailable || sharedRoom?.status === 'cancelled'"
+          class="player-session-warning"
+          role="status"
+        >
+          <WifiOff :size="20" aria-hidden="true" />
+          <p>{{ tr(!sharedConnected ? 'together.reconnecting' : sharedRoom?.status === 'cancelled' ? 'together.ended' : 'together.partnerOffline') }}</p>
+          <GttButton v-if="partnerUnavailable || sharedHostLeft || sharedRoom?.status === 'cancelled'" color="warning" size="sm" :disabled="sharedBusy" @click="continueSolo">
+            <UserRound :size="18" aria-hidden="true" />{{ tr('together.continueSolo') }}
+          </GttButton>
+        </div>
+        <div v-if="isSharedHost && pauseRequested && !isPaused" class="player-pause-request" role="status">
+          <Pause :size="20" aria-hidden="true" class="shrink-0" />
+          <p>{{ tr('together.pauseRequested') }}</p>
+          <GttButton color="warning" size="sm" :disabled="sharedBusy || !sharedCanControl" @click="togglePause">{{ tr('ui.pause') }}</GttButton>
+        </div>
+        <p v-if="sharedError" role="alert" class="mt-2 text-sm text-error">
+          {{ tr("together.error") }}
+        </p>
+      </div>
       <div class="player-progress h-2 overflow-hidden rounded-full bg-base-200">
         <div
           class="player-progress-fill h-full origin-left bg-primary"
@@ -189,13 +235,14 @@
         <GttButton
           color="primary"
           class="player-focus-pause"
-          :aria-pressed="isPaused"
-          @click="togglePause"
-          ><Play v-if="isPaused" :size="22" aria-hidden="true" /><Pause
+          :aria-pressed="isSharedGuest ? pauseRequested : isPaused"
+          :disabled="isSharedGuest ? sharedBusy || !sharedConnected || sharedHostLeft : !sharedCanControl"
+          @click="handlePauseButton"
+          ><Play v-if="isPaused && !isSharedGuest" :size="22" aria-hidden="true" /><Pause
             v-else
             :size="22"
             aria-hidden="true"
-          />{{ isPaused ? tr("ui.resume") : tr("ui.pause") }}</GttButton
+          />{{ pauseButtonLabel }}</GttButton
         >
       </div>
       <div class="player-sidebar flex flex-col gap-4">
@@ -204,7 +251,7 @@
         >
           <p
             class="player-next-label text-left text-xs font-semibold"
-            :class="upcomingSegment ? 'text-base-content/55' : 'text-success'"
+            :class="upcomingSegment ? 'text-[var(--color-ui-muted)]' : 'text-success'"
           >
             {{ upcomingSegment ? tr("ui.next_step") : tr("ui.last_step") }}
           </p>
@@ -217,7 +264,7 @@
               size="sm"
               class="shrink-0 text-primary hover:bg-base-200"
               type="button"
-              :disabled="isStarting || !previousSegment"
+              :disabled="!sharedCanControl || isStarting || !previousSegment"
               :aria-label="
                 previousSegment
                   ? tr('messages.previousNamed', { name: previousSegment.name })
@@ -248,7 +295,7 @@
               shape="circle"
               mode="ghost"
               size="sm"
-              :disabled="isStarting || !upcomingSegment"
+              :disabled="!sharedCanControl || isStarting || !upcomingSegment"
               class="shrink-0 text-primary hover:bg-base-200"
               type="button"
               :aria-label="
@@ -270,6 +317,7 @@
             class="player-reset px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
             :aria-label="tr('ui.restart_the_current_segment')"
+            :disabled="!sharedCanControl"
             @click="resetCurrentSegment"
           >
             <RotateCcw class="size-4 sm:size-5" aria-hidden="true" />
@@ -280,19 +328,20 @@
             size="sm"
             class="player-pause px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
-            :aria-pressed="isPaused"
-            @click="togglePause"
+            :aria-pressed="isSharedGuest ? pauseRequested : isPaused"
+            :disabled="isSharedGuest ? sharedBusy || !sharedConnected || sharedHostLeft : !sharedCanControl"
+            @click="handlePauseButton"
           >
-            <Play v-if="isPaused" class="size-4 sm:size-5" aria-hidden="true" />
+            <Play v-if="isPaused && !isSharedGuest" class="size-4 sm:size-5" aria-hidden="true" />
             <Pause v-else class="size-4 sm:size-5" aria-hidden="true" />
-            {{ isPaused ? tr("ui.resume") : tr("ui.pause") }}
+            {{ pauseButtonLabel }}
           </GttButton>
           <GttButton
             mode="ghost"
             size="sm"
             class="player-abandon text-error px-1 text-xs sm:btn-md sm:px-4 sm:text-sm"
             type="button"
-            @click="abandonWorkoutSession"
+            @click="stopWorkout"
           >
             <Square class="size-4 sm:size-5" aria-hidden="true" />
             {{ tr("ui.abandon") }}
@@ -304,6 +353,7 @@
 </template>
 
 <script setup lang="ts">
+import { I18nT } from 'vue-i18n';
 import { tr, localizedExerciseName } from "@/localization";
 import {
   computed,
@@ -315,6 +365,11 @@ import {
   watchEffect,
 } from "vue";
 import {
+  WifiOff,
+  Users,
+  UserRound,
+  Info,
+  ChevronDown,
   Maximize,
   Minimize,
   Minimize2,
@@ -343,6 +398,24 @@ import {
 } from "@/stores/workoutCreator";
 import { exercisesRef } from "@/stores/exercises";
 import { useWorkoutPreferences } from "@/composables/useWorkoutPreferences";
+import { sharedPosition } from "@/domain/sharedPlayback";
+import {
+  commandSharedRoom,
+  isSharedHost,
+  isSharedPlayback,
+  leaveSharedRoom,
+  partnerUnavailable,
+  requestSharedPause,
+  roomElapsed,
+  sharedAction,
+  sharedBusy,
+  sharedCanControl,
+  sharedConnected,
+  sharedError,
+  sharedMembers,
+  sharedPartner,
+  sharedRoom,
+} from "@/services/sharedWorkout";
 import { signalTimer } from "@/services/workoutFeedback";
 
 type PlayerSegment = {
@@ -372,6 +445,24 @@ const playerElement = ref<HTMLElement>();
 const progressCircle = ref<SVGCircleElement>();
 let ringFrame: number | undefined;
 const isFullscreen = ref(false);
+const isSharedGuest = computed(() => isSharedPlayback.value && !isSharedHost.value);
+const sharedHostLeft = computed(() => isSharedGuest.value && (
+  sharedRoom.value?.status === 'cancelled' ||
+  !!sharedMembers.value[sharedRoom.value?.hostId ?? '']?.left
+));
+watch(sharedHostLeft, (left) => { if (left) sharedOptionsOpen.value = false; });
+const pauseRequested = computed(() => !!sharedMembers.value[sharedRoom.value?.guestId ?? '']?.pauseRequested);
+const pauseButtonLabel = computed(() => isSharedGuest.value
+  ? tr(pauseRequested.value ? 'together.cancelPause' : 'together.askPause')
+  : tr(isPaused.value ? 'ui.resume' : 'ui.pause'));
+function handlePauseButton() {
+  if (isSharedGuest.value) void sharedAction(requestSharedPause);
+  else togglePause();
+}
+const sharedOptionsOpen = ref(false);
+const sharedInfoOpen = ref(false);
+watch(sharedOptionsOpen, () => { sharedInfoOpen.value = false; });
+watch(isSharedPlayback, () => { sharedOptionsOpen.value = false; });
 const { keepScreenAwake } = useWorkoutPreferences();
 let wakeLock: WakeLockSentinel | undefined;
 let isUnmounted = false;
@@ -383,6 +474,8 @@ let lastTotalTickAt = 0;
 let lastCheckpointAt = 0;
 
 const exerciseName = (id?: string) => {
+  if (id && activeWorkoutSessionRef.value?.sharedWorkout?.exerciseNames[id])
+    return activeWorkoutSessionRef.value.sharedWorkout.exerciseNames[id]!;
   const exercise = exercisesRef.value.find((item) => item.id === id);
   return exercise ? localizedExerciseName(exercise) : tr("ui.exercise");
 };
@@ -641,6 +734,10 @@ function restorePlayback() {
 }
 
 function checkpointAtExit() {
+  if (isSharedPlayback.value) {
+    savePlayback();
+    return;
+  }
   if (!sessionId || activeWorkoutSessionRef.value?.id !== sessionId) return;
   if (isPaused.value) savePlayback();
   else {
@@ -750,6 +847,82 @@ function runCountdown() {
   }, 1000);
 }
 
+const segmentDurations = computed(() =>
+  segments.value.map(
+    (segment) =>
+      segment.target *
+      (segment.mode === "repetitions"
+        ? segment.repetitionIntervalSeconds ||
+          DEFAULT_REPETITION_INTERVAL_SECONDS
+        : 1) *
+      1000,
+  ),
+);
+function tickShared() {
+  const room = sharedRoom.value;
+  if (!isSharedPlayback.value || !room || !room.anchor) return;
+  const elapsed = roomElapsed(room);
+  const position = sharedPosition(segmentDurations.value, elapsed);
+  const oldIndex = currentSegmentIndex.value;
+  const oldStarting = isStarting.value;
+  const oldCountdown = startCountdown.value;
+  currentSegmentIndex.value = position.index;
+  elapsedMilliseconds.value = position.elapsed;
+  totalElapsedMilliseconds.value = Math.max(0, elapsed);
+  isStarting.value = position.countdown > 0;
+  startCountdown.value = Math.max(0, position.countdown - 1);
+  isPaused.value = room.status !== "running";
+  segmentStartedAt = Date.now() - position.elapsed;
+  updateWorkoutSessionStep(currentSegment.value.sourceStepIndex);
+  // Keep a usable solo checkpoint even when the remote session stops.
+  if (Date.now() - lastCheckpointAt >= 1000) savePlayback();
+  if (oldIndex !== position.index || (oldStarting && !isStarting.value))
+    signalTimer(true, false);
+  if (
+    isStarting.value &&
+    oldCountdown > 0 &&
+    startCountdown.value === 0 &&
+    room.status === "running"
+  )
+    signalTimer(true, true, "go");
+  const remaining = isStarting.value
+    ? startCountdown.value
+    : isRepetitions.value
+      ? currentSegment.value.target - currentRepetition.value + 1
+      : Math.ceil(
+          (segmentDurationMilliseconds.value - position.elapsed) / 1000,
+        );
+  if (remaining !== lastRemainingCount) {
+    lastRemainingCount = remaining;
+    if (room.status === "running" && remaining > 0 && remaining <= 3)
+      signalTimer();
+  }
+  if (position.done && room.status !== "cancelled") {
+    stopTimer();
+    completeWorkoutSession();
+  }
+}
+async function continueSolo() {
+  savePlayback();
+  await sharedAction(() => leaveSharedRoom(true));
+  // Let the shared-to-solo watcher stop the shared timer before resuming locally.
+  await nextTick();
+  if (!isSharedPlayback.value && activeWorkoutSessionRef.value?.id === sessionId)
+    setPaused(false);
+}
+function stopWorkout() {
+  if (isSharedPlayback.value) void sharedAction(() => leaveSharedRoom());
+  else abandonWorkoutSession();
+}
+watch(isSharedPlayback, (shared, previous) => {
+  if (shared || !previous || activeWorkoutSessionRef.value?.id !== sessionId)
+    return;
+  stopTimer();
+  stopCountdown();
+  isPaused.value = true;
+  savePlayback();
+});
+
 async function syncWakeLock() {
   if (
     !keepScreenAwake.value ||
@@ -809,6 +982,15 @@ function setPaused(paused: boolean, syncSession = true) {
 }
 
 function togglePause() {
+  if (isSharedPlayback.value) {
+    if (sharedCanControl.value)
+      void sharedAction(() =>
+        commandSharedRoom(
+          sharedRoom.value?.status === "paused" ? "resume" : "pause",
+        ),
+      );
+    return;
+  }
   setPaused(!isPaused.value);
 }
 
@@ -858,6 +1040,20 @@ function publishSegmentChange(
   starting: boolean,
   action: "reset" | "skip",
 ) {
+  if (isSharedPlayback.value) {
+    if (sharedCanControl.value)
+      void sharedAction(() =>
+        commandSharedRoom(
+          "seek",
+          starting
+            ? -4000
+            : segmentDurations.value
+                .slice(0, segmentIndex)
+                .reduce((sum, duration) => sum + duration, 0),
+        ),
+      );
+    return;
+  }
   const session = activeWorkoutSessionRef.value;
   const segment = segments.value[segmentIndex];
   if (!session || session.id !== sessionId || !segment) return;
@@ -889,6 +1085,7 @@ watch(
   () => activeWorkoutSessionRef.value?.isPaused,
   (paused) => {
     if (
+      !isSharedPlayback.value &&
       activeWorkoutSessionRef.value?.id === sessionId &&
       typeof paused === "boolean"
     ) {
@@ -922,7 +1119,7 @@ async function toggleFullscreen() {
     ?.focus();
 }
 function handleFocusKeys(event: KeyboardEvent) {
-  if (!isFullscreen.value) return;
+  if (sharedOptionsOpen.value || !isFullscreen.value) return;
   if (event.key === "Escape") {
     event.preventDefault();
     void toggleFullscreen();
@@ -980,6 +1177,12 @@ onMounted(() => {
   window.addEventListener("pageshow", resumeAfterBackground);
   window.addEventListener("focus", resumeAfterBackground);
   if (!segments.value.length) return completeWorkoutSession();
+  if (isSharedPlayback.value) {
+    restorePlayback();
+    tickShared();
+    timer = window.setInterval(tickShared, 100);
+    return;
+  }
   if (restorePlayback()) {
     applySegmentReset();
     if (pausedForBackground) resumeAfterBackground();
@@ -1248,12 +1451,132 @@ watch(
   }
 }
 @media (max-width: 63.9375rem) and (orientation: portrait) {
-  .workout-player--focus .player-stage { gap: var(--space-ui-md); }
-  .workout-player--focus .player-stage > p { flex: 0 0 auto; }
-  .workout-player--focus .player-step-name { margin: 0; font-size: 1.25rem; }
+  .workout-player--focus .player-stage {
+    gap: var(--space-ui-md);
+  }
+  .workout-player--focus .player-stage > p {
+    flex: 0 0 auto;
+  }
+  .workout-player--focus .player-step-name {
+    margin: 0;
+    font-size: 1.25rem;
+  }
   .workout-player--focus .player-ring {
     width: min(calc(100vw - 2 * var(--space-ui-md)), calc(100dvh - 16rem));
     margin-top: 0;
+  }
+}
+/* Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4
+ * Component: shared session control · training theme · utilitarian.
+ * One compact trigger; actions and information disclosed in a dialog. */
+.workout-player:not(.workout-player--focus) .player-together {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.player-session-warning { width: 100%; }
+.player-together-trigger {
+  max-width: 100%;
+  min-width: 0;
+  border-radius: var(--radius-selector);
+  background: var(--color-base-200);
+  color: var(--color-base-content);
+}
+.player-together-trigger > span { min-width: 0; }
+.player-together-trigger > svg { flex-shrink: 0; }
+.shared-session-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-ui-sm);
+  margin-bottom: var(--space-ui-md);
+}
+.shared-session-heading > p { min-width: 0; }
+.shared-session-heading > button { flex-shrink: 0; }
+.shared-session-actions {
+  display: grid;
+  gap: var(--space-ui-xs);
+}
+.player-pause-request,
+.player-session-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-ui-sm);
+  margin-top: var(--space-ui-sm);
+  padding: var(--space-ui-md);
+  border: 2px solid var(--color-warning);
+  border-radius: var(--radius-field);
+  background: var(--color-base-200);
+  color: var(--color-base-content);
+}
+.player-pause-request > svg,
+.player-session-warning > svg { color: var(--color-warning); flex-shrink: 0; }
+.player-pause-request > p,
+.player-session-warning > p { flex: 1; min-width: 0; font-weight: 600; }
+@media (min-width: 64rem) and (min-height: 32.0625rem) {
+  .workout-player--focus .player-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 20rem);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: var(--space-ui-sm) var(--space-ui-lg);
+  }
+  .workout-player--focus .player-focus-top {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .workout-player--focus .player-together {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+  }
+  .workout-player--focus .player-stage {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    min-width: 0;
+  }
+  .workout-player--focus .player-together:has(.player-session-warning) {
+    grid-column: 1 / -1;
+  }
+  .workout-player--focus .player-body:has(.player-session-warning) .player-stage {
+    grid-row: 3;
+  }
+  .workout-player--focus .player-body:has(.player-session-warning) .player-ring {
+    width: min(100%, calc(100dvh - 18rem));
+  }
+  .workout-player--focus .player-focus-controls {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: center;
+    align-items: stretch;
+    min-width: 0;
+    gap: var(--space-ui-md);
+    padding-bottom: 0;
+  }
+  .workout-player--focus .player-focus-next {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: left;
+  }
+  .workout-player--focus .player-focus-pause {
+    width: 100%;
+    min-height: 4rem;
+    font-size: 1.125rem;
+  }
+  .workout-player--focus .player-ring,
+  .workout-player--focus:fullscreen .player-ring {
+    width: min(100%, calc(100dvh - 8rem));
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 63.9375rem) {
+  .player-session-warning {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+  .player-session-warning > button {
+    grid-column: 1 / -1;
+    justify-self: end;
   }
 }
 </style>

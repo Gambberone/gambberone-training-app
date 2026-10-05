@@ -32,6 +32,10 @@ import GttInputField from '@/components/generic/form/GttInputField.vue';
 import GttSelectField from '@/components/generic/form/GttSelectField.vue';
 import { muscleGroups, type Exercise, type MuscleGroupType } from '@/domain/exercises.ts';
 import { tr } from '@/localization';
+import { useWaveBinderNode, useWaveBinderValue } from '@/composables/useWaveBinderNode';
+import type { ExerciseEditorErrors } from '@/domain/exerciseValidation';
+import { wb } from '@/wavebinder';
+import type { SingleNode } from 'wave-binder';
 import { exercisesRef } from '@/stores/exercises';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -47,41 +51,39 @@ const localizedMuscleGroups = computed(() =>
 const isOpen = defineModel<boolean>({ default: false });
 const props = defineProps<ExerciseCreatorEditorProps>();
 
-const exerciseName = ref('');
-const exerciseNameError = ref<string | undefined>(undefined);
-const selectedMuscleGroup = ref<MuscleGroupType | undefined>(undefined);
-const muscleGroupError = ref<string | undefined>(undefined);
-
-watch(isOpen, () => {
-  if (isOpen) {
-    exerciseNameError.value = undefined;
-    muscleGroupError.value = undefined;
-    if (props.exercise) {
-      selectedMuscleGroup.value = props.exercise.muscleGroupId;
-      exerciseName.value = props.exercise.name;
-    } else {
-      exerciseName.value = '';
-      selectedMuscleGroup.value = undefined;
-    }
-  }
+const exerciseName = useWaveBinderNode<string>(wb.getNodeByName('catalogExerciseName') as SingleNode);
+const muscleGroup = useWaveBinderNode<MuscleGroupType | null>(
+  wb.getNodeByName('catalogExerciseMuscleGroup') as SingleNode,
+);
+const selectedMuscleGroup = computed({
+  get: () => muscleGroup.value ?? undefined,
+  set: (value: MuscleGroupType | undefined) => { muscleGroup.value = value ?? null; },
 });
+const errors = useWaveBinderValue<ExerciseEditorErrors | null>(
+  wb.getNodeByName('catalogExerciseErrors') as SingleNode,
+);
+const canSave = useWaveBinderValue<boolean>(wb.getNodeByName('catalogExerciseCanSave') as SingleNode);
+const showErrors = ref(false);
+let initializing = false;
+const exerciseNameError = computed(() => showErrors.value && errors.value?.name ? tr(errors.value.name) : undefined);
+const muscleGroupError = computed(() => showErrors.value && errors.value?.muscleGroup ? tr(errors.value.muscleGroup) : undefined);
 
-watch(exerciseName, (name) => {
-  if (name.trim()) {
-    exerciseNameError.value = undefined;
-  }
-});
-
-watch(selectedMuscleGroup, (muscleGroupId) => {
-  if (muscleGroupId) {
-    muscleGroupError.value = undefined;
-  }
-});
+watch(isOpen, (open) => {
+  if (!open) return;
+  initializing = true;
+  showErrors.value = false;
+  exerciseName.value = props.exercise?.name ?? '';
+  selectedMuscleGroup.value = props.exercise?.muscleGroupId;
+  initializing = false;
+}, { immediate: true, flush: 'sync' });
+watch([exerciseName, selectedMuscleGroup], () => {
+  if (!initializing && isOpen.value) showErrors.value = true;
+}, { flush: 'sync' });
 
 const modalActions = computed(() => {
   return props.exercise
-    ? [{ id: 'save', label: tr('ui.save'), color: 'primary' }]
-    : [{ id: 'create', label: tr('ui.create'), color: 'primary' }];
+    ? [{ id: 'save', label: tr('ui.save'), color: 'primary', disabled: !canSave.value }]
+    : [{ id: 'create', label: tr('ui.create'), color: 'primary', disabled: !canSave.value }];
 });
 
 const modalTitle = computed(() =>
@@ -96,12 +98,8 @@ const handleAction = (actionId: string) => {
   const name = exerciseName.value.trim();
   const muscleGroupId = selectedMuscleGroup.value;
 
-  exerciseNameError.value = name ? undefined : tr('ui.exercise_name_is_required');
-  muscleGroupError.value = muscleGroupId ? undefined : tr('ui.muscle_group_is_required');
-
-  if (!name || !muscleGroupId) {
-    return;
-  }
+  showErrors.value = true;
+  if (!canSave.value || !muscleGroupId) return;
 
   if (actionId === 'create') {
     const exercise: Exercise = {

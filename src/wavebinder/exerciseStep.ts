@@ -1,7 +1,6 @@
 import type { ExerciseModeType, WorkoutCreatorStep } from '@/constants';
 import { DEFAULT_REPETITION_INTERVAL_SECONDS } from '@/constants/workout';
 import type { Exercise } from '@/domain/exercises';
-import { validateExerciseStep } from '@/domain/workoutValidation';
 import { ListNode, MultiNode, SingleNode } from 'wave-binder';
 import { wb } from './index';
 
@@ -48,15 +47,7 @@ export const resetExerciseStep = () => {
 export const exerciseStepIsValid = () => Boolean(getExerciseStepNode('isStepValid').getNodeValue());
 
 export const exerciseStepValidationErrors = () =>
-  validateExerciseStep(
-    selectedExerciseNode().getNodeValue() as Exercise | null,
-    getExerciseStepNode('exerciseMode').getNodeValue() as ExerciseModeType,
-    Number(getExerciseStepNode('exerciseValue').getNodeValue()),
-    Number(getExerciseStepNode('repetitionIntervalSeconds').getNodeValue()),
-    Number(getExerciseStepNode('sets').getNodeValue()),
-    Boolean(getExerciseStepNode('hasSetPause').getNodeValue()),
-    Number(getExerciseStepNode('pauseBetweenSetsDuration').getNodeValue()),
-  );
+  (getExerciseStepNode('validationErrors').getNodeValue() as string[] | null) ?? ['messages.enterExercise'];
 
 export const exerciseStepToDraftChanges = (): Partial<WorkoutCreatorStep> => {
   const exercise = selectedExerciseNode().getNodeValue() as Exercise | null;

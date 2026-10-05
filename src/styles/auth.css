@@ -134,7 +134,14 @@ html, body { overflow-x: clip; }
   .auth-track-lane--outer { inset: 0; }
   .auth-track-lane--middle { inset: 20px; border-color: var(--color-auth-story-accent); }
   .auth-track-lane--inner { inset: 40px; }
-  .auth-track-marker { display: none; }
+  .auth-track-marker {
+    position: absolute;
+    inset-inline-start: 35%;
+    bottom: 0;
+    height: 2.5rem;
+    width: 1px;
+    background: var(--color-auth-story-muted);
+  }
   .auth-track-core {
     position: absolute;
     inset: 0;
@@ -146,10 +153,10 @@ html, body { overflow-x: clip; }
   .auth-track-core svg { width: 28px; height: 28px; }
   .auth-track-dot {
     position: absolute;
-    left: 36px;
-    top: 32px;
-    width: 8px;
-    height: 8px;
+    left: 34px;
+    top: 30px;
+    width: 0.75rem;
+    height: 0.75rem;
     border-radius: var(--radius-auth-pill);
     background: var(--color-auth-story-accent);
   }
@@ -173,7 +180,6 @@ html, body { overflow-x: clip; }
 
 /* A restrained glow follows the emerald lane without filling the cover. */
 .auth-track-lane--middle {
-  box-shadow: 0 0 8px var(--color-auth-track-glow),
-    0 0 20px var(--color-auth-track-halo),
-    inset 0 0 8px var(--color-auth-track-glow);
+  box-shadow: 0 0 4px var(--color-auth-track-glow),
+    0 0 10px var(--color-auth-track-halo);
 }

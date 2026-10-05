@@ -332,7 +332,7 @@ import {
   startWorkoutCreatorStep,
   workoutCreatorDraft,
 } from "@/stores/workoutCreator";
-import { estimateWorkoutDuration } from "@/wavebinder/duration";
+import { estimateWorkoutDuration } from "@/domain/workoutDuration";
 import {
   ArrowDown,
   ArrowUp,

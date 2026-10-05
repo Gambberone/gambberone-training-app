@@ -4,6 +4,7 @@
     :class="{ 'app-layout--nav-expanded': isNavExpanded }"
   >
     <div class="app-content flex min-h-0 min-w-0 flex-1 flex-col">
+      <SharedWorkoutPanel />
       <div
         v-if="activeWorkout && !isWorkoutPlayerOpenRef"
         class="shrink-0 px-4 pt-4"
@@ -65,6 +66,7 @@
                   ? tr('ui.resume')
                   : tr('ui.pause')
               "
+              :disabled="!sharedCanControl"
               @click="toggleWorkoutPlayerPause"
             >
               <Play
@@ -82,7 +84,11 @@
               type="button"
               :aria-label="tr('ui.stop_workout')"
               :title="tr('ui.stop_workout')"
-              @click="abandonWorkoutSession"
+              @click="
+                isSharedPlayback
+                  ? sharedAction(() => leaveSharedRoom())
+                  : abandonWorkoutSession()
+              "
             >
               <Square class="size-5" aria-hidden="true" />
             </GttButton>
@@ -262,6 +268,13 @@
 </template>
 
 <script setup lang="ts">
+import SharedWorkoutPanel from "@/components/workouts/SharedWorkoutPanel.vue";
+import {
+  sharedCanControl,
+  sharedAction,
+  isSharedPlayback,
+  leaveSharedRoom,
+} from "@/services/sharedWorkout";
 import { useAuth } from "@/composables/useAuth";
 import { tr } from "@/localization";
 import { listenFriendships, listenSharedWorkouts } from "@/services/friends";
@@ -300,7 +313,7 @@ watch(activeWorkoutSessionRef, (current, previous) => {
     (session) => session.id === previous.id && session.completedAt,
   );
   if (!completed) return;
-  const workout = workoutsRef.value.find(
+  const workout = previous.sharedWorkout ?? workoutsRef.value.find(
     (item) => item.id === completed.workoutId,
   );
   const seconds = Math.max(
@@ -311,7 +324,7 @@ watch(activeWorkoutSessionRef, (current, previous) => {
     ),
   );
   sessionReceipt.value = {
-    name: workout?.name ?? tr("ui.deleted_workout"),
+    name: completed.workoutName ?? workout?.name ?? tr("ui.deleted_workout"),
     duration: `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
     steps:
       workout?.steps.filter((step) => step.type !== "SETPAUSE").length ??
@@ -356,9 +369,11 @@ watch(
   { immediate: true },
 );
 onUnmounted(() => stopFriendListeners.forEach((stop) => stop()));
-const activeWorkout = computed(() =>
-  workoutsRef.value.find(
-    (workout) => workout.id === activeWorkoutSessionRef.value?.workoutId,
-  ),
+const activeWorkout = computed(
+  () =>
+    activeWorkoutSessionRef.value?.sharedWorkout ??
+    workoutsRef.value.find(
+      (workout) => workout.id === activeWorkoutSessionRef.value?.workoutId,
+    ),
 );
 </script>

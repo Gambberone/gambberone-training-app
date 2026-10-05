@@ -85,8 +85,8 @@
                 day.date.getDate()
               }}</time>
               <span
-                v-if="entriesForDate(day.key).length"
                 class="calendar-day-count"
+                :class="{ invisible: !entriesForDate(day.key).length }"
                 aria-hidden="true"
                 >{{ entriesForDate(day.key).length }}</span
               >
@@ -184,15 +184,22 @@
         class="calendar-day-detail planner-detail"
         aria-labelledby="calendar-day-detail-title"
       >
-        <p class="text-xs font-semibold text-base-content/65">
+        <p class="planner-detail-eyebrow text-xs font-semibold text-base-content/65">
           {{ tr("visual.dayDetails") }}
         </p>
         <h2
           id="calendar-day-detail-title"
           class="mt-1 text-xl font-bold capitalize"
         >
-          {{ selectedDayLabel }}
+          <span class="planner-detail-date">{{ selectedDayLabel }}</span>
+          <span class="planner-detail-mobile-title">{{ tr("visual.dayDetails") }}</span>
         </h2>
+        <GttButton
+          color="primary"
+          class="planner-desktop-action w-full mt-4"
+          @click="openDay(selectedMonthDay)"
+          ><Plus :size="18" aria-hidden="true" />{{ tr("visual.planDay") }}</GttButton
+        >
         <ul v-if="selectedDayWorkouts.length" class="planner-detail-list">
           <li
             v-for="entry in selectedDayWorkouts"
@@ -247,19 +254,25 @@
           </li>
         </ul>
         <div v-else class="planner-empty">
-          <Dumbbell :size="28" class="text-base-content/50" />
-          <p class="mt-3 font-semibold">{{ tr("visual.emptyDay") }}</p>
-          <p class="mt-1 text-sm text-base-content/65">
-            {{ tr("planner.emptyHint") }}
-          </p>
+          <Dumbbell :size="28" class="planner-empty-icon text-base-content/50" aria-hidden="true" />
+          <div>
+            <p class="planner-empty-title font-semibold">{{ tr("visual.emptyDay") }}</p>
+            <p class="mt-1 text-sm text-base-content/65">
+              {{ tr("planner.emptyHint") }}
+            </p>
+          </div>
         </div>
-        <GttButton
-          color="primary"
-          class="w-full mt-5"
-          @click="openDay(selectedMonthDay)"
-          ><Plus :size="18" />{{ tr("visual.planDay") }}</GttButton
-        >
+
       </section>
+    </div>
+    <div class="planner-mobile-action">
+      <time :datetime="selectedMonthDay" class="planner-action-date">{{ selectedDayLabel }}</time>
+      <GttButton
+        color="primary"
+        :aria-label="`${tr('visual.planDay')}: ${selectedDayLabel}`"
+        @click="openDay(selectedMonthDay)"
+        ><Plus :size="18" aria-hidden="true" />{{ tr("visual.planDay") }}</GttButton
+      >
     </div>
     <CalendarDayModal
       v-model="isDayModalOpen"
@@ -274,9 +287,7 @@
 import CalendarDayModal from "@/components/calendar/CalendarDayModal.vue";
 import { appLocale, tr } from "@/localization";
 import {
-  scheduledWorkoutsRef,
   workoutsRef,
-  workoutSessionsRef,
   workoutEstimatedDuration,
 } from "@/stores/workoutCreator";
 import {
@@ -290,7 +301,8 @@ import {
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { pendingAgendaWorkouts } from "@/domain/agenda";
+import { useWorkoutInsights } from "@/composables/useWorkoutInsights";
+import { sessionMinutes } from "@/domain/workoutInsights";
 
 type CalendarDay = {
   date: Date;
@@ -424,9 +436,7 @@ const weekDays = computed<CalendarDay[]>(() => {
   });
 });
 
-const pending = computed(() =>
-  pendingAgendaWorkouts(scheduledWorkoutsRef.value, workoutSessionsRef.value),
-);
+const { pendingWorkouts: pending, completedSessions } = useWorkoutInsights();
 function estimatedMinutes(id: string) {
   const workout = workoutsRef.value.find((item) => item.id === id);
   return workout ? Math.ceil(workoutEstimatedDuration(workout) / 60) : 0;
@@ -442,7 +452,7 @@ function entriesForDate(date: string) {
       completed: false,
       minutes: estimatedMinutes(item.workoutId),
     }));
-  const completed = workoutSessionsRef.value
+  const completed = completedSessions.value
     .filter(
       (session) =>
         session.completedAt && dateKey(new Date(session.completedAt)) === date,
@@ -456,13 +466,7 @@ function entriesForDate(date: string) {
         hour: "2-digit",
         minute: "2-digit",
       }).format(new Date(session.startedAt)),
-      minutes: Math.max(
-        0,
-        Math.round(
-          (Date.parse(session.completedAt!) - Date.parse(session.startedAt)) /
-            60000,
-        ),
-      ),
+      minutes: sessionMinutes(session),
     }));
   return [...planned, ...completed].sort((a, b) =>
     (a.sortTime || "24:00").localeCompare(b.sortTime || "24:00"),
@@ -511,7 +515,36 @@ function onDayModalUpdate(isOpen: boolean) {
 
 <style scoped>
 /* Hallmark · pre-emit critique: P4 H5 E4 S5 R5 V4
- * Training planner: month overview + day inspector, neutral agenda. */
+ * Training planner: month overview + day inspector, persistent mobile action.
+ * Existing training theme and shared button states preserved. */
+.planner-header {
+  flex-shrink: 0;
+}
+.planner-mobile-action {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-ui-sm);
+  padding-top: var(--space-ui-sm);
+  margin-top: var(--space-ui-sm);
+  border-top: 1px solid var(--color-ui-rule);
+  background: var(--color-base-100);
+}
+.planner-action-date {
+  min-width: 0;
+  font-size: var(--text-ui-small);
+  font-weight: 600;
+  text-transform: capitalize;
+  overflow-wrap: anywhere;
+}
+.planner-mobile-action .btn {
+  flex-shrink: 0;
+}
+.planner-desktop-action,
+.planner-detail-mobile-title {
+  display: none;
+}
 .planner-header {
   display: flex;
   flex-wrap: wrap;
@@ -727,7 +760,10 @@ function onDayModalUpdate(isOpen: boolean) {
   font-weight: 600;
 }
 .planner-empty {
-  padding-block: var(--space-ui-xl);
+  padding-block: var(--space-ui-md);
+}
+.planner-empty-title {
+  margin-top: var(--space-ui-sm);
 }
 .calendar-day:hover,
 .week-day-row:hover {
@@ -738,12 +774,52 @@ function onDayModalUpdate(isOpen: boolean) {
   outline-offset: 3px;
 }
 @media (max-width: 63.9375rem) {
+  .calendar-page .planner-detail {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  .planner-detail-eyebrow,
+  .planner-detail-date {
+    display: none;
+  }
+  .planner-detail-mobile-title {
+    display: inline;
+    text-transform: none;
+  }
+  .calendar-page .planner-detail h2 {
+    margin-top: 0;
+    font-size: var(--text-ui-small);
+  }
+  .planner-detail-list {
+    margin-top: var(--space-ui-xs);
+  }
+  .planner-empty {
+    display: flex;
+    align-items: start;
+    gap: var(--space-ui-sm);
+    padding-block: var(--space-ui-sm);
+  }
+  .planner-empty-icon {
+    width: var(--space-ui-lg);
+    height: var(--space-ui-lg);
+    flex-shrink: 0;
+  }
+  .planner-empty-title {
+    margin-top: 0;
+  }
   .calendar-page .week-day-row {
     min-height: 4rem;
     padding: var(--space-ui-sm);
   }
 }
 @media (min-width: 64rem) {
+  .planner-mobile-action {
+    display: none;
+  }
+  .planner-desktop-action {
+    display: inline-flex;
+  }
   .calendar-page .planner-body {
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 19rem);
   }

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { waveBinderStatus } from './wavebinder';
 import { useRoute } from 'vue-router';
 import GttToast from './components/generic/GttToast.vue';
 import WorkoutPlayer from './components/workouts/WorkoutPlayer.vue';
@@ -17,9 +19,11 @@ initializeAppTour();
 useTheme();
 useAppUpdateNotice();
 
+const { t } = useI18n();
+const reloadApp = () => window.location.reload();
 const route = useRoute();
 const activeWorkout = computed(() =>
-  workoutsRef.value.find((workout) => workout.id === activeWorkoutSessionRef.value?.workoutId),
+  activeWorkoutSessionRef.value?.sharedWorkout ?? workoutsRef.value.find((workout) => workout.id === activeWorkoutSessionRef.value?.workoutId),
 );
 const isAppRoute = computed(() => route.matched.some((record) => record.meta.requiresAuth));
 
@@ -30,7 +34,20 @@ watch(
 </script>
 
 <template>
-  <router-view />
+  <router-view v-if="!isAppRoute || waveBinderStatus === 'ready'" />
+  <main v-else class="grid min-h-dvh place-items-center bg-base-100 p-6">
+    <div class="max-w-md space-y-4 text-center" :role="waveBinderStatus === 'loading' ? 'status' : 'alert'">
+      <template v-if="waveBinderStatus === 'loading'">
+        <span class="loading loading-spinner loading-lg" aria-hidden="true" />
+        <p>{{ t('runtime.loading') }}</p>
+      </template>
+      <template v-else>
+        <h1 class="text-xl font-bold">{{ t('runtime.unavailableTitle') }}</h1>
+        <p>{{ t('runtime.unavailableMessage') }}</p>
+        <GttButton @click="reloadApp">{{ t('runtime.retry') }}</GttButton>
+      </template>
+    </div>
+  </main>
   <div
     v-if="isAppRoute && activeWorkout && activeWorkoutSessionRef"
     v-show="isWorkoutPlayerOpenRef"

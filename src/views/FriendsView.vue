@@ -130,7 +130,7 @@
           <section v-for="group in requestGroups" :key="group.key">
             <h2 class="mb-3 font-bold">
               {{ group.title }}
-              <span class="ml-1 text-sm font-normal text-base-content/50">{{
+              <span class="ml-1 text-sm font-normal text-[var(--color-ui-muted)]">{{
                 group.items.length
               }}</span>
             </h2>

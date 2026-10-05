@@ -257,6 +257,7 @@ import GttToggleField from "@/components/generic/form/GttToggleField.vue";
 import {
   useWaveBinderMultiNode,
   useWaveBinderNode,
+  useWaveBinderValue,
 } from "@/composables/useWaveBinderNode";
 import { DEFAULT_REPETITION_INTERVAL_SECONDS } from "@/constants";
 import { muscleGroups, type Exercise } from "@/domain/exercises";
@@ -327,7 +328,7 @@ const hasSetPause = useWaveBinderNode<boolean>(
 const pauseDurationNumber = useWaveBinderNode<number>(
   getExerciseStepNode("pauseBetweenSetsDuration"),
 );
-const isPauseAvailable = useWaveBinderNode<boolean>(
+const isPauseAvailable = useWaveBinderValue<boolean>(
   getExerciseStepNode("isPauseAvailable"),
 );
 

@@ -7,19 +7,17 @@ import {
   type WorkoutCreatorStep,
   type WorkoutCreatorStepAction,
   type WorkoutSession,
-} from '@/constants';
+} from '@/constants/workout';
 import { wb } from '@/wavebinder';
-import { estimateWorkoutDuration } from '@/wavebinder/duration';
+import { estimateWorkoutDuration } from '@/domain/workoutDuration';
 import {
-  collectionValidationErrors,
   exerciseStepToDraftChanges,
-  exerciseStepValidationErrors,
   getExerciseStepNode,
   resetExerciseStep,
   selectedExerciseNode,
   setCollectionValue,
 } from '@/wavebinder/exerciseStep';
-import { ref } from 'vue';
+import { ref, shallowRef, watch } from 'vue';
 import { exercisesRef } from './exercises';
 
 export interface WorkoutCreatorDraft {
@@ -93,6 +91,7 @@ export const workoutPlayerStatusRef = ref<{
   paused: boolean;
 } | null>(null);
 export const workoutPlayerPauseRequestRef = ref(0);
+export const sharedWorkoutPendingRef = ref(false);
 
 export type WorkoutPlaybackCheckpoint = {
   sessionId: string;
@@ -187,25 +186,40 @@ export const updateCurrentWorkoutCreatorStep = (changes: Partial<WorkoutCreatorS
   Object.assign(currentWorkoutCreatorStep.value, changes);
 };
 
-export const currentWorkoutCreatorStepValidationErrors = () => {
-  const step = currentWorkoutCreatorStep.value;
-  if (!step) return [];
-
-  if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) return exerciseStepValidationErrors();
-
-  if (step.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE) {
-    const durationNode = wb.getNodeByName('pauseDuration');
-    durationNode.next(step.pauseDuration ?? 0);
-    return (wb.getNodeByName('pauseValidationErrors').getNodeValue() as string[] | null) ?? [];
-  }
-
-  if (step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP) {
+// Keep collection and pause inputs current as the draft changes, including nested row edits.
+watch(currentWorkoutCreatorStep, (step) => {
+  if (step?.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE)
+    wb.getNodeByName('pauseDuration').next(step.pauseDuration ?? 0);
+  if (step?.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP)
     setCollectionValue('warmupExercises', step.warmupExercises ?? []);
-    return collectionValidationErrors('warmupValidationErrors');
-  }
+  if (step?.type === WORKOUT_CREATOR_STEP_ACTION.STRETCHING)
+    setCollectionValue('stretchingExercises', step.stretchingExercises ?? []);
+}, { deep: true, flush: 'sync' });
 
-  setCollectionValue('stretchingExercises', step.stretchingExercises ?? []);
-  return collectionValidationErrors('stretchingValidationErrors');
+// Store subscriptions live for the app lifetime, like the creator draft itself.
+const stepErrors = Object.fromEntries([
+  'validationErrors', 'pauseValidationErrors', 'warmupValidationErrors', 'stretchingValidationErrors',
+].map((name) => {
+  const node = wb.getNodeByName(name);
+  const errors = shallowRef<string[] | null>(node.getNodeValue() ?? null);
+  node.subscribe(() => { errors.value = node.getNodeValue() ?? null; });
+  return [name, errors];
+}));
+
+export const currentWorkoutCreatorStepValidationErrors = () => {
+  const type = currentWorkoutCreatorStep.value?.type;
+  if (!type) return [];
+  const nodeName = {
+    EXERCISE: 'validationErrors', PAUSE: 'pauseValidationErrors',
+    WARMUP: 'warmupValidationErrors', STRETCHING: 'stretchingValidationErrors',
+    SETPAUSE: 'pauseValidationErrors',
+  }[type];
+  const pendingError = {
+    EXERCISE: 'messages.enterExercise', PAUSE: 'messages.pausePositive',
+    WARMUP: 'messages.warmupRequired', STRETCHING: 'messages.stretchRequired',
+    SETPAUSE: 'messages.pausePositive',
+  }[type];
+  return stepErrors[nodeName]!.value ?? [pendingError];
 };
 
 export const isCurrentWorkoutCreatorStepValid = () =>
@@ -343,6 +357,7 @@ export const workoutEstimatedDuration = (workout: Workout) =>
   estimateWorkoutDuration(workout.steps);
 
 export const startWorkoutSession = (workoutId: string, scheduledWorkoutId?: string) => {
+  if (activeWorkoutSessionRef.value || sharedWorkoutPendingRef.value) return;
   const workout = workoutsRef.value.find((item) => item.id === workoutId);
   if (!workout) return;
   clearWorkoutPlaybackCheckpoint();
@@ -368,7 +383,7 @@ export const minimizeWorkoutPlayer = () => {
 
 export const advanceWorkoutSession = () => {
   const session = activeWorkoutSessionRef.value;
-  const workout = session && workoutsRef.value.find((item) => item.id === session.workoutId);
+  const workout = session && (session.sharedWorkout ?? workoutsRef.value.find((item) => item.id === session.workoutId));
   if (!session || !workout) return;
   if (!session.completedStepIndexes.includes(session.currentStepIndex)) {
     session.completedStepIndexes.push(session.currentStepIndex);
@@ -391,7 +406,7 @@ export const updateWorkoutSessionStep = (stepIndex: number) => {
 
 export const completeWorkoutSession = () => {
   const session = activeWorkoutSessionRef.value;
-  const workout = session && workoutsRef.value.find((item) => item.id === session.workoutId);
+  const workout = session && (session.sharedWorkout ?? workoutsRef.value.find((item) => item.id === session.workoutId));
   if (!session || !workout) return;
   const completed = {
     ...session,

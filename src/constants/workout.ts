@@ -45,6 +45,10 @@ export interface WorkoutCreatorStep {
 }
 
 export type WorkoutSession = {
+  sharedRoomId?: string;
+  workoutName?: string;
+  trainedWith?: string;
+  sharedWorkout?: import("@/services/sharedWorkout").SharedWorkout;
   scheduledWorkoutId?: string;
   id: string;
   workoutId: string;

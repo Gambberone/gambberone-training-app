@@ -10,6 +10,68 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/friendships/$(pairId(a, b)))
         && get(/databases/$(database)/documents/friendships/$(pairId(a, b))).data.status == 'accepted';
     }
+    match /workoutRooms/{roomId} {
+      function member() { return signedIn() && request.auth.uid in resource.data.participants; }
+      function validRoom(data) {
+        return data.keys().hasOnly(['hostId', 'guestId', 'participants', 'names', 'workout', 'status', 'elapsedMs', 'anchor', 'createdAt'])
+          && data.hostId is string && data.guestId is string && data.hostId != data.guestId
+          && data.participants == [data.hostId, data.guestId]
+          && data.names.keys().hasOnly([data.hostId, data.guestId])
+          && data.names[data.hostId] is string && data.names[data.guestId] is string
+          && data.workout.keys().hasOnly(['id', 'name', 'steps', 'exerciseNames'])
+          && data.workout.id is string && data.workout.name is string
+          && data.workout.steps is list && data.workout.steps.size() > 0
+          && data.workout.exerciseNames is map
+          && data.elapsedMs is number && data.elapsedMs >= -4000 && data.elapsedMs <= 1000000000000
+          && data.anchor is timestamp && data.createdAt is timestamp;
+      }
+      function ready(uid) {
+        let data = get(/databases/$(database)/documents/workoutRooms/$(roomId)/members/$(uid)).data;
+        return data.accepted && data.ready && !data.left
+          && data.updatedAt > request.time - duration.value(65, 's');
+      }
+      allow read: if member();
+      allow create: if signedIn() && validRoom(request.resource.data)
+        && request.resource.data.hostId == request.auth.uid
+        && areFriends(request.auth.uid, request.resource.data.guestId)
+        && request.resource.data.status == 'waiting' && request.resource.data.elapsedMs == -4000
+        && request.resource.data.anchor == request.time && request.resource.data.createdAt == request.time;
+      allow update: if member() && request.auth.uid == resource.data.hostId
+        && validRoom(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'elapsedMs', 'anchor'])
+        && request.resource.data.anchor == request.time
+        && (
+          (resource.data.status == 'waiting' && request.resource.data.status == 'running'
+            && resource.data.createdAt > request.time - duration.value(1, 'h')
+            && ready(resource.data.hostId) && ready(resource.data.guestId)
+            && request.resource.data.elapsedMs == -4000)
+          || (resource.data.status in ['running', 'paused'] && request.resource.data.status in ['running', 'paused', 'completed', 'cancelled'])
+          || (resource.data.status == 'waiting' && request.resource.data.status == 'cancelled')
+        );
+      match /members/{userId} {
+        function room() { return get(/databases/$(database)/documents/workoutRooms/$(roomId)).data; }
+        function roomAfter() { return getAfter(/databases/$(database)/documents/workoutRooms/$(roomId)).data; }
+        function validMember() {
+          let data = request.resource.data;
+          return data.keys().hasOnly(['accepted', 'ready', 'left', 'pauseRequested', 'updatedAt'])
+            && data.accepted is bool && data.ready is bool && data.left is bool && data.pauseRequested is bool
+            && data.updatedAt == request.time
+            && (!data.ready || (data.accepted && !data.left));
+        }
+        allow read: if signedIn() && request.auth.uid in room().participants;
+        allow create: if signedIn() && request.auth.uid == userId
+          && request.auth.uid in roomAfter().participants && validMember()
+          && roomAfter().status == 'waiting'
+          && roomAfter().createdAt > request.time - duration.value(1, 'h')
+          && request.resource.data.ready == false && request.resource.data.pauseRequested == false;
+        allow update: if signedIn() && request.auth.uid == userId
+          && request.auth.uid in room().participants && validMember()
+          && (room().status == 'waiting' ||
+            (request.resource.data.accepted == resource.data.accepted
+              && (!resource.data.left || request.resource.data.left)
+              && (request.resource.data.ready == resource.data.ready || request.resource.data.ready == false)));
+      }
+    }
     match /publicProfiles/{userId} {
       allow read: if signedIn();
       allow create, update: if signedIn() && request.auth.uid == userId

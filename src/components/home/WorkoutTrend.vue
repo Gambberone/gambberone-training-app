@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { workoutSessionsRef } from '@/stores/workoutCreator';
+import { useWorkoutInsights } from '@/composables/useWorkoutInsights';
 import {
   CategoryScale,
   Chart as ChartJS,
@@ -74,36 +74,18 @@ onUnmounted(() => {
   themeObserver?.disconnect();
   motionQuery?.removeEventListener('change', updateMotion);
 });
-const weeks = computed(() => {
-  const today = new Date();
-  const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-  return Array.from({ length: 8 }, (_, index) => {
-    const start = new Date(monday);
-    start.setDate(start.getDate() - (7 - index) * 7);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 7);
-    const count = workoutSessionsRef.value.filter((session) => {
-      const completed = Date.parse(session.completedAt ?? '');
-      return (
-        completed >= start.getTime() && completed < end.getTime() && completed <= today.getTime()
-      );
-    }).length;
-    return {
-      label: new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'short' }).format(
-        start,
-      ),
-      count,
-    };
-  });
-});
+const { statistics } = useWorkoutInsights();
+const weeks = computed(() => statistics.value.weeks.map((week) => ({
+  count: week.count,
+  label: new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'short' }).format(week.start),
+})));
 // Compare the two most recent complete weeks, avoiding a partial-week comparison.
 const comparison = computed(() => {
   const previous = weeks.value[5]?.count ?? 0;
   const latest = weeks.value[6]?.count ?? 0;
   if (!previous && !latest) return '';
-  return latest === previous ? t('home.trend.same', { count: latest })
-    : t(latest > previous ? 'home.trend.more' : 'home.trend.less', { count: Math.abs(latest - previous) });
+  return statistics.value.weekDifference === 0 ? t('home.trend.same', { count: latest })
+    : t(statistics.value.weekDifference > 0 ? 'home.trend.more' : 'home.trend.less', { count: Math.abs(statistics.value.weekDifference) });
 });
 const hasActivity = computed(() => weeks.value.some((week) => week.count > 0));
 const chartDescription = computed(

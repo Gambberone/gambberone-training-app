@@ -24,9 +24,11 @@
         <span>{{ stepLabel(step.type) }}</span>
       </li>
       <li class="flex w-full max-w-md justify-center gap-3">
-        <GttButton shape="square" mode="outline" color="error"
+        <GttButton
+          shape="square"
+          mode="outline"
+          color="error"
           v-if="!hasWarmup"
-          
           type="button"
           :aria-label="tr('ui.add_warm_up')"
           :title="tr('ui.add_warm_up')"
@@ -34,8 +36,10 @@
         >
           <Flame :size="28" />
         </GttButton>
-        <GttButton shape="square" mode="outline" color="info"
-          
+        <GttButton
+          shape="square"
+          mode="outline"
+          color="info"
           type="button"
           :aria-label="tr('ui.add_exercise')"
           :title="tr('ui.add_exercise')"
@@ -43,8 +47,10 @@
         >
           <Dumbbell :size="28" />
         </GttButton>
-        <GttButton shape="square" mode="outline" color="primary"
-          
+        <GttButton
+          shape="square"
+          mode="outline"
+          color="primary"
           type="button"
           :aria-label="tr('ui.add_rest')"
           :title="tr('ui.add_rest')"
@@ -52,8 +58,10 @@
         >
           <Pause :size="28" />
         </GttButton>
-        <GttButton shape="square" mode="outline" color="warning"
-          
+        <GttButton
+          shape="square"
+          mode="outline"
+          color="warning"
           type="button"
           :aria-label="tr('ui.add_stretching')"
           :title="tr('ui.add_stretching')"
@@ -77,7 +85,7 @@ import {
   startWorkoutCreatorStep,
   workoutCreatorDraft,
 } from '@/stores/workoutCreator';
-import { estimateWorkoutDuration } from '@/wavebinder/duration';
+import { estimateWorkoutDuration } from '@/domain/workoutDuration';
 import { Dumbbell, Flame, LineSquiggle, Pause } from '@lucide/vue';
 import { computed } from 'vue';
 import WorkoutCreatorFirstStep from './creator/WorkoutCreatorFirstStep.vue';

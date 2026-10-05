@@ -1,5 +1,15 @@
 [
   {
+    "name": "exerciseCatalog",
+    "path": "/exerciseCatalog",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": [],
+    "la": {
+      "type": "USER_SELECTION"
+    }
+  },
+  {
     "name": "selectedMuscleGroupId",
     "path": "/selectedMuscleGroupId",
     "type": "SINGLE",
@@ -13,6 +23,13 @@
     "path": "/availableExercises",
     "type": "MULTI",
     "dep": [
+      {
+        "nodeName": "exerciseCatalog",
+        "parameterName": "exercises",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
       {
         "nodeName": "selectedMuscleGroupId",
         "parameterName": "selectedMuscleGroupId",
@@ -144,7 +161,7 @@
       {
         "nodeName": "selectedExercise",
         "parameterName": "selectedExercise",
-        "isOptional": false,
+        "isOptional": true,
         "onUpdate": true,
         "type": "BODY"
       },
@@ -342,8 +359,71 @@
     }
   },
   {
-    "name": "workoutDurationSteps",
-    "path": "/workoutDurationSteps",
+    "name": "catalogExerciseName",
+    "path": "/catalogExerciseName",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": "",
+    "la": {
+      "type": "USER_SELECTION"
+    }
+  },
+  {
+    "name": "catalogExerciseMuscleGroup",
+    "path": "/catalogExerciseMuscleGroup",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": null,
+    "la": {
+      "type": "USER_SELECTION"
+    }
+  },
+  {
+    "name": "catalogExerciseErrors",
+    "path": "/catalogExerciseErrors",
+    "type": "SINGLE",
+    "dep": [
+      {
+        "nodeName": "catalogExerciseName",
+        "parameterName": "name",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "catalogExerciseMuscleGroup",
+        "parameterName": "muscleGroupId",
+        "isOptional": true,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "validateExerciseEditor"
+    }
+  },
+  {
+    "name": "catalogExerciseCanSave",
+    "path": "/catalogExerciseCanSave",
+    "type": "SINGLE",
+    "dep": [
+      {
+        "nodeName": "catalogExerciseErrors",
+        "parameterName": "errors",
+        "isOptional": true,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "exerciseEditorCanSave"
+    }
+  },
+  {
+    "name": "insightSessions",
+    "path": "/insightSessions",
     "type": "SINGLE",
     "dep": [],
     "defaultValue": [],
@@ -352,40 +432,53 @@
     }
   },
   {
-    "name": "workoutEstimatedDuration",
-    "path": "/workoutEstimatedDuration",
-    "type": "SINGLE",
-    "dep": [
-      {
-        "nodeName": "workoutDurationSteps",
-        "parameterName": "steps",
-        "isOptional": false,
-        "onUpdate": true,
-        "type": "BODY"
-      }
-    ],
-    "la": {
-      "type": "CUSTOM_FUNCTION",
-      "functionName": "estimateWorkoutDuration"
-    }
-  },
-  {
-    "name": "sessionInput",
-    "path": "/sessionInput",
+    "name": "insightScheduled",
+    "path": "/insightScheduled",
     "type": "SINGLE",
     "dep": [],
+    "defaultValue": [],
     "la": {
       "type": "USER_SELECTION"
     }
   },
   {
-    "name": "sessionProgress",
-    "path": "/sessionProgress",
+    "name": "insightNow",
+    "path": "/insightNow",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": 0,
+    "la": {
+      "type": "USER_SELECTION"
+    }
+  },
+  {
+    "name": "historyFilter",
+    "path": "/historyFilter",
+    "type": "SINGLE",
+    "dep": [],
+    "defaultValue": {
+      "period": "all",
+      "workoutId": "all"
+    },
+    "la": {
+      "type": "USER_SELECTION"
+    }
+  },
+  {
+    "name": "completedWorkoutSessions",
+    "path": "/completedWorkoutSessions",
     "type": "SINGLE",
     "dep": [
       {
-        "nodeName": "sessionInput",
-        "parameterName": "input",
+        "nodeName": "insightSessions",
+        "parameterName": "sessions",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "insightNow",
+        "parameterName": "now",
         "isOptional": false,
         "onUpdate": true,
         "type": "BODY"
@@ -393,7 +486,89 @@
     ],
     "la": {
       "type": "CUSTOM_FUNCTION",
-      "functionName": "getSessionProgress"
+      "functionName": "completedWorkoutSessions"
+    }
+  },
+  {
+    "name": "workoutStatistics",
+    "path": "/workoutStatistics",
+    "type": "SINGLE",
+    "dep": [
+      {
+        "nodeName": "completedWorkoutSessions",
+        "parameterName": "sessions",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "insightNow",
+        "parameterName": "now",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "workoutStatistics"
+    }
+  },
+  {
+    "name": "filteredWorkoutHistory",
+    "path": "/filteredWorkoutHistory",
+    "type": "SINGLE",
+    "dep": [
+      {
+        "nodeName": "completedWorkoutSessions",
+        "parameterName": "sessions",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "insightNow",
+        "parameterName": "now",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "historyFilter",
+        "parameterName": "filter",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "filterWorkoutHistory"
+    }
+  },
+  {
+    "name": "pendingAgendaWorkouts",
+    "path": "/pendingAgendaWorkouts",
+    "type": "SINGLE",
+    "dep": [
+      {
+        "nodeName": "insightScheduled",
+        "parameterName": "scheduled",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      },
+      {
+        "nodeName": "completedWorkoutSessions",
+        "parameterName": "sessions",
+        "isOptional": false,
+        "onUpdate": true,
+        "type": "BODY"
+      }
+    ],
+    "la": {
+      "type": "CUSTOM_FUNCTION",
+      "functionName": "pendingAgendaWorkouts"
     }
   }
 ]

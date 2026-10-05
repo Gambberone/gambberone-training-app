@@ -4,13 +4,15 @@ import './crypto-compat';
 
 import {
   DEFAULT_REPETITION_INTERVAL_SECONDS,
-  WORKOUT_CREATOR_STEP_ACTION,
   type StretchingExercise,
   type WarmupExercise,
-  type WorkoutCreatorStep,
-  type WorkoutSession,
-} from '@/constants';
+} from '@/constants/workout';
+import { pendingAgendaWorkouts } from '@/domain/agenda';
+import { validateExerciseEditor, exerciseEditorCanSave } from '@/domain/exerciseValidation';
+import { completedWorkoutSessions, workoutStatistics, filterWorkoutHistory } from '@/domain/workoutInsights';
 import { validateExerciseStep } from '@/domain/workoutValidation';
+import { getExercisesForMuscleGroup } from '@/domain/exerciseChoices';
+import { createRuntimeStatus } from './runtime';
 import { exercisesRef } from '@/stores/exercises';
 import EXT_API_CONFIG from './extapi.json';
 import LICENSE from './license.json';
@@ -29,15 +31,30 @@ const extApis = new Map();
 
 extApis.set('api', EXT_API_CONFIG);
 
-export const wb = new WaveBinder(
+const runtime = createRuntimeStatus();
+export const waveBinderStatus = runtime.status;
+
+class AppWaveBinder extends WaveBinder {
+  override nukeNodes() {
+    runtime.invalidate();
+    super.nukeNodes();
+  }
+}
+
+export const wb = new AppWaveBinder(
   LICENSE,
   PROTO_NODES as ConstructorParameters<typeof WaveBinder>[1],
   extApis,
   [
+    { name: 'validateExerciseEditor', implementation: validateExerciseEditor },
+    { name: 'exerciseEditorCanSave', implementation: exerciseEditorCanSave },
+    { name: 'completedWorkoutSessions', implementation: completedWorkoutSessions },
+    { name: 'workoutStatistics', implementation: workoutStatistics },
+    { name: 'filterWorkoutHistory', implementation: filterWorkoutHistory },
+    { name: 'pendingAgendaWorkouts', implementation: pendingAgendaWorkouts },
     {
       name: 'getExercisesForMuscleGroup',
-      implementation: (selectedMuscleGroupId: string | null) =>
-        exercisesRef.value.filter((exercise) => exercise.muscleGroupId === selectedMuscleGroupId),
+      implementation: getExercisesForMuscleGroup,
     },
     {
       name: 'isPauseAvailable',
@@ -107,75 +124,14 @@ export const wb = new WaveBinder(
       implementation: (duration: number) =>
         Number(duration) > 0 ? [] : ['messages.pausePositive'],
     },
-    {
-      name: 'estimateWorkoutDuration',
-      implementation: (steps: WorkoutCreatorStep[] | null) =>
-        (steps ?? []).reduce((total, step) => {
-          if (step.type === WORKOUT_CREATOR_STEP_ACTION.SETPAUSE) return total;
-          if (step.type === WORKOUT_CREATOR_STEP_ACTION.PAUSE)
-            return total + Number(step.pauseDuration ?? 0);
-          if (step.type === WORKOUT_CREATOR_STEP_ACTION.EXERCISE) {
-            const value =
-              step.exerciseModeType === 'duration'
-                ? Number(step.exerciseDuration ?? 0)
-                : Number(step.exerciseRepetitions ?? 0) *
-                  (step.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS);
-            const sets = Number(step.sets ?? 1);
-            return (
-              total +
-              value * sets +
-              Number(step.pauseBetweenSetsDuration ?? 0) * Math.max(0, sets - 1)
-            );
-          }
-          if (step.type === WORKOUT_CREATOR_STEP_ACTION.WARMUP) {
-            return (
-              total +
-              (step.warmupExercises ?? []).reduce(
-                (sum, exercise) =>
-                  sum +
-                  (exercise.modeType === 'repetitions'
-                    ? Number(exercise.repetitions ?? 0) *
-                      (exercise.repetitionIntervalSeconds ?? DEFAULT_REPETITION_INTERVAL_SECONDS)
-                    : Number(exercise.duration ?? 0)),
-                0,
-              )
-            );
-          }
-          return (
-            total +
-            (step.stretchingExercises ?? []).reduce(
-              (sum, exercise) => sum + Number(exercise.duration ?? 0),
-              0,
-            )
-          );
-        }, 0),
-    },
-    {
-      name: 'getSessionProgress',
-      implementation: (
-        input: { session?: WorkoutSession; steps?: WorkoutCreatorStep[] } | null,
-      ) => {
-        const session = input?.session;
-        const steps = input?.steps ?? [];
-        const total = steps.filter((step) => step.type !== 'SETPAUSE').length;
-        const completed =
-          session?.completedStepIndexes.filter((index) => steps[index]?.type !== 'SETPAUSE')
-            .length ?? 0;
-        return { total, completed, isComplete: Boolean(session?.completedAt) };
-      },
-    },
   ],
 );
 
 wb.tangleNodes();
 
-// The catalog is persisted outside WaveBinder. Re-emitting the source value keeps its dependent
-// choices current after an exercise is created, edited, or removed.
-watch(
-  exercisesRef,
-  () => {
-    const muscleGroupNode = wb.getNodeByName('selectedMuscleGroupId');
-    muscleGroupNode.next(muscleGroupNode.getNodeValue());
-  },
-  { deep: true },
-);
+void runtime.initialize(wb);
+
+// Persisted catalog changes are an explicit input to the selection graph.
+watch(exercisesRef, (exercises) => {
+  wb.getNodeByName('exerciseCatalog')?.next(exercises);
+}, { deep: true, immediate: true, flush: 'sync' });

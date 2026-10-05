@@ -87,11 +87,26 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  scrollbar-width: none;
 }
 
-*::-webkit-scrollbar {
-  display: none;
+/* Keep scrollable content discoverable with a mouse, discreet on touch. */
+@media (hover: hover) and (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ui-muted) transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: var(--radius-box);
+    background: var(--color-ui-muted);
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-track { background: transparent; }
+}
+@media (hover: none) and (pointer: coarse) {
+  * { scrollbar-width: none; }
+  *::-webkit-scrollbar { display: none; }
 }
 
 html,
@@ -336,7 +351,7 @@ html, body { overflow-x: clip; }
 .app-nav-expand { display: none; }
 .app-dock { height: auto; min-height: 4rem; padding-bottom: env(safe-area-inset-bottom); }
 .app-dock > a { min-height: 3.75rem; gap: 0.25rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.app-nav-label { display: block; font-size: 0.625rem; line-height: 1; white-space: nowrap; color: var(--color-base-content); }
+.app-nav-label { display: block; font-size: var(--text-ui-nav); line-height: 1; white-space: nowrap; color: var(--color-base-content); }
 .app-dock > a.dock-active .app-nav-label { font-weight: 800; }
 .app-dock > a.dock-active { background: color-mix(in srgb, var(--color-primary) 12%, var(--color-base-100)); border-radius: var(--radius-field); }
 .gtt-modal .modal-box { border: 1px solid var(--color-ui-rule); border-radius: var(--radius-box); }
@@ -428,4 +443,21 @@ html, body { overflow-x: clip; }
 .home-page .home-summary { display: flex; flex-direction: column; }
 @media (min-width: 64rem) {
   .home-page .home-agenda-day { min-height: 12rem; }
+}
+
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R5 V4
+ * Existing training system · restrained sporting display typography. */
+.app-layout h1, .app-layout h2, .gtt-modal h2 {
+  font-family: var(--font-ui-display);
+  font-style: normal;
+}
+
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R5 V4
+ * Respect reduced motion for the active workout indicator. */
+@media (prefers-reduced-motion: reduce) {
+  .app-layout .aura,
+  .app-layout .aura::before,
+  .app-layout .aura::after {
+    animation: none;
+  }
 }

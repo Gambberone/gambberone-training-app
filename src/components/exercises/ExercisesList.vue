@@ -1,4 +1,12 @@
 <template>
+  <div class="mb-4">
+    <GttInputField :id="searchId" v-model="search" type="search" :label="tr('collection.searchExercises')" :placeholder="tr('collection.searchExercises')" compact />
+    <p v-if="search.trim()" role="status" class="mt-2 text-sm text-[var(--color-ui-muted)]">{{ tr('collection.results', { count: filteredExercises.length }) }}</p>
+  </div>
+  <div v-if="search.trim() && !filteredExercises.length" class="py-8">
+    <p class="font-semibold">{{ tr('collection.noResults') }}</p>
+    <GttButton mode="outline" class="mt-3" @click="search = ''">{{ tr('collection.clearSearch') }}</GttButton>
+  </div>
   <div class="grid items-start gap-3 md:grid-cols-2">
     <div
       v-for="(column, index) in exerciseColumns"
@@ -14,13 +22,13 @@
       >
         <div
           class="collapse collapse-arrow"
-          :class="{ 'collapse-open': expandedMuscleGroupId === muscleGroup.id }"
+          :class="{ 'collapse-open': Boolean(search.trim()) || expandedMuscleGroupId === muscleGroup.id }"
         >
           <GttButton unstyled
             type="button"
             class="collapse-title flex w-full items-center justify-between gap-3 text-left font-semibold"
             :class="textClass"
-            :aria-expanded="expandedMuscleGroupId === muscleGroup.id"
+            :aria-expanded="Boolean(search.trim()) || expandedMuscleGroupId === muscleGroup.id"
             @click="toggleMuscleGroup(muscleGroup.id)"
           >
             <span>{{ t(`muscleGroups.${muscleGroup.id}`) }}</span>
@@ -106,6 +114,7 @@
 </template>
 
 <script setup lang="ts">
+import GttInputField from '@/components/generic/form/GttInputField.vue';
 import GttBottomAction from '@/components/generic/GttBottomAction.vue';
 import {
   MUSCLE_GROUPS,
@@ -116,11 +125,18 @@ import {
 import { localizedExerciseName, tr } from '@/localization';
 import { exercisesRef } from '@/stores/exercises.ts';
 import { Dumbbell, Pencil, Trash } from '@lucide/vue';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, useId } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ExerciseCreatorModal from './ExerciseCreatorModal.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const searchId = useId();
+const search = ref('');
+const filteredExercises = computed(() => {
+  const normalize = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase(locale.value).trim();
+  const query = normalize(search.value);
+  return exercisesRef.value.filter(exercise => normalize(localizedExerciseName(exercise)).includes(query));
+});
 const isExercisesCreatorEditorModalOpen = ref(false);
 const expandedMuscleGroupId = ref<MuscleGroup['id'] | null>(null);
 
@@ -170,17 +186,20 @@ onMounted(() => {
   columnMediaQuery.addEventListener('change', updateColumnLayout);
 });
 onUnmounted(() => columnMediaQuery?.removeEventListener('change', updateColumnLayout));
+const matchingCards = computed(() => search.value.trim()
+  ? exerciseCards.filter(card => exercisesForMuscleGroup(card.muscleGroup.id).length)
+  : exerciseCards);
 const exerciseColumns = computed(() =>
   isTwoColumnLayout.value
     ? [
-        exerciseCards.filter((_, index) => index % 2 === 0),
-        exerciseCards.filter((_, index) => index % 2 === 1),
+        matchingCards.value.filter((_, index) => index % 2 === 0),
+        matchingCards.value.filter((_, index) => index % 2 === 1),
       ]
-    : [exerciseCards],
+    : [matchingCards.value],
 );
 
 function exercisesForMuscleGroup(muscleGroupId: MuscleGroup['id']) {
-  return exercisesRef.value.filter((exercise) => exercise.muscleGroupId === muscleGroupId);
+  return filteredExercises.value.filter((exercise) => exercise.muscleGroupId === muscleGroupId);
 }
 
 const selectedExerciseForEdit = ref<Exercise | null>(null);

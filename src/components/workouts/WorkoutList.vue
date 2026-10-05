@@ -29,8 +29,22 @@
         >
       </div>
     </header>
+    <div class="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.45fr)]">
+      <GttInputField :id="searchId" v-model="search" type="search" :label="tr('collection.searchWorkouts')" :placeholder="tr('collection.searchWorkouts')" compact />
+      <GttSelectField :id="sortId" v-model="sortOrder" :label="tr('collection.sort')" :options="sortOptions" compact />
+    </div>
+    <p class="mb-3 text-sm text-[var(--color-ui-muted)]" role="status" v-if="search.trim()">
+      {{ tr('collection.results', { count: visibleWorkouts.length }) }}
+    </p>
+    <div v-if="!visibleWorkouts.length" class="py-8">
+      <p class="font-semibold">{{ tr('collection.noResults') }}</p>
+      <GttButton mode="outline" class="mt-3" @click="search = ''">{{ tr('collection.clearSearch') }}</GttButton>
+    </div>
+    <p v-if="startBlocked" :id="startBlockedId" class="mb-4 text-sm text-[var(--color-ui-muted)]" role="status">
+      {{ tr("workoutCards.startBlocked") }}
+    </p>
     <ul class="workout-list" :class="{ 'workout-list--compact': compact }">
-      <li v-for="workout in workoutsRef" :key="workout.id" class="workout-card">
+      <li v-for="workout in visibleWorkouts" :key="workout.id" class="workout-card">
         <header class="workout-card-header">
           <GttButton
             unstyled
@@ -87,11 +101,23 @@
           <GttButton
             color="primary"
             class="workout-start"
+            :disabled="startBlocked"
+            :aria-describedby="startBlocked ? startBlockedId : undefined"
             :aria-label="tr('messages.startNamed', { name: workout.name })"
             @click="startWorkout(workout.id)"
             ><Play :size="17" aria-hidden="true" />{{
               tr("workoutCards.start")
             }}</GttButton
+          >
+          <GttButton
+            mode="ghost"
+            :disabled="!!activeWorkoutSessionRef || !!sharedRoomId"
+            :aria-label="tr('together.title')"
+            @click="selectedTogetherWorkout = workout"
+            ><UsersRound :size="17" aria-hidden="true" /><span
+              class="hidden sm:inline"
+              >{{ tr("together.together") }}</span
+            ></GttButton
           >
           <GttButton
             mode="ghost"
@@ -157,8 +183,14 @@
 </template>
 
 <script setup lang="ts">
+import {
+  selectedTogetherWorkout,
+  sharedRoomId,
+} from "@/services/sharedWorkout";
+import { activeWorkoutSessionRef } from "@/stores/workoutCreator";
 import { tr, appLocale, localizedExerciseName } from "@/localization";
 import {
+  UsersRound,
   Dumbbell,
   Play,
   Trash2,
@@ -168,8 +200,8 @@ import {
   Clock3,
   Plus,
 } from "@lucide/vue";
-import { ref } from "vue";
-import { estimateWorkoutDuration } from "@/wavebinder/duration";
+import { computed, ref, useId } from "vue";
+import { estimateWorkoutDuration } from "@/domain/workoutDuration";
 import { WORKOUT_CREATOR_STEP_ACTION } from "@/constants";
 import {
   removeWorkout,
@@ -180,10 +212,38 @@ import {
   workoutSessionsRef,
 } from "@/stores/workoutCreator.ts";
 import { exercisesRef } from "@/stores/exercises";
+import GttInputField from '@/components/generic/form/GttInputField.vue';
+import GttSelectField from '@/components/generic/form/GttSelectField.vue';
 import GttTooltip from "@/components/generic/GttTooltip.vue";
 import GttBottomAction from "@/components/generic/GttBottomAction.vue";
 import WorkoutCreatorModal from "./creator/WorkoutCreatorModal.vue";
 
+const startBlockedId = useId();
+const startBlocked = computed(() => !!activeWorkoutSessionRef.value || !!sharedRoomId.value);
+const searchId = useId();
+const sortId = useId();
+const search = ref('');
+const sortOrder = ref('original');
+const normalizeSearch = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase(appLocale()).trim();
+const sortOptions = computed(() => [
+  { id: 'original', label: tr('collection.original') },
+  { id: 'recent', label: tr('collection.recent') },
+  { id: 'name', label: tr('collection.byName') },
+]);
+const visibleWorkouts = computed(() => {
+  const query = normalizeSearch(search.value);
+  const items = workoutsRef.value.filter(workout => normalizeSearch(workout.name).includes(query));
+  if (sortOrder.value === 'name') items.sort((a, b) => a.name.localeCompare(b.name, appLocale(), { sensitivity: 'base', numeric: true }));
+  if (sortOrder.value === 'recent') {
+    const completed = new Map<string, number>();
+    for (const session of workoutSessionsRef.value) {
+      const timestamp = Date.parse(session.completedAt ?? '');
+      if (Number.isFinite(timestamp) && timestamp <= Date.now()) completed.set(session.workoutId, Math.max(completed.get(session.workoutId) ?? 0, timestamp));
+    }
+    items.sort((a, b) => (completed.get(b.id) ?? 0) - (completed.get(a.id) ?? 0));
+  }
+  return items;
+});
 const compact = ref(false);
 const showWorkoutCreatorModal = ref(false);
 function createWorkout() {
@@ -312,6 +372,7 @@ const openWorkout = (workout: Workout) => {
 };
 
 const startWorkout = (workoutId: string) => {
+  if (activeWorkoutSessionRef.value || sharedRoomId.value) return;
   startWorkoutSession(workoutId);
 };
 
@@ -448,7 +509,9 @@ const handleWorkoutElimination = (actionId: string) => {
     gap: var(--space-ui-lg);
     padding: var(--space-ui-md);
   }
-  .workout-list--compact .workout-card-header { padding-inline-end: 0; }
+  .workout-list--compact .workout-card-header {
+    padding-inline-end: 0;
+  }
   .workout-list--compact .workout-delete {
     position: static;
     opacity: 1;
