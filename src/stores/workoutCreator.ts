@@ -1,4 +1,4 @@
-import { localRef } from '@/composables/localRef';
+import { localRef, localStorageKey } from '@/composables/localRef';
 import {
   DEFAULT_REPETITION_INTERVAL_SECONDS,
   WORKOUT_CREATOR_STEP_ACTION,
@@ -110,7 +110,7 @@ export const getWorkoutPlaybackCheckpoint = (
   sessionId: string,
 ): WorkoutPlaybackCheckpoint | null => {
   try {
-    const saved = localStorage.getItem(workoutPlaybackKey);
+    const saved = localStorage.getItem(localStorageKey(workoutPlaybackKey));
     if (!saved) return null;
     const checkpoint = JSON.parse(saved) as WorkoutPlaybackCheckpoint;
     return checkpoint.sessionId === sessionId ? checkpoint : null;
@@ -120,11 +120,11 @@ export const getWorkoutPlaybackCheckpoint = (
 };
 
 export const saveWorkoutPlaybackCheckpoint = (checkpoint: WorkoutPlaybackCheckpoint) => {
-  localStorage.setItem(workoutPlaybackKey, JSON.stringify(checkpoint));
+  localStorage.setItem(localStorageKey(workoutPlaybackKey), JSON.stringify(checkpoint));
 };
 
 export const clearWorkoutPlaybackCheckpoint = () => {
-  localStorage.removeItem(workoutPlaybackKey);
+  localStorage.removeItem(localStorageKey(workoutPlaybackKey));
 };
 
 export const toggleWorkoutPlayerPause = () => {

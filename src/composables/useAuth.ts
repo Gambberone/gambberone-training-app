@@ -1,3 +1,4 @@
+import { selectLocalDataOwner } from "./localRef";
 import { auth, db } from "@/firebase";
 import { tr } from "@/localization";
 import {
@@ -60,6 +61,7 @@ export const authReady = new Promise<void>((resolve) => {
   onAuthStateChanged(auth, (user) => {
     stopProfilePhotoListener?.();
     profilePhoto.value = null;
+    selectLocalDataOwner(user?.uid ?? null);
     currentUser.value = user;
     isAuthReady.value = true;
     resolve();
@@ -110,7 +112,8 @@ export function useAuth() {
       const user = auth.currentUser;
       if (!user) throw new Error("No authenticated user");
       await updateProfile(user, { displayName });
-      currentUser.value = user;
+      selectLocalDataOwner(user?.uid ?? null);
+    currentUser.value = user;
       triggerRef(currentUser);
       await setDoc(
         doc(db, "publicProfiles", user.uid),
@@ -199,8 +202,8 @@ export function useAuth() {
       await deleteDoc(doc(db, "friendPresence", user.uid));
       await deleteDoc(doc(db, "friendContacts", user.uid));
       await deleteDoc(doc(db, "publicProfiles", user.uid));
-      await deleteUser(user);
       resetDeletedAccountData();
+      await deleteUser(user);
     },
     signOut: () => signOut(auth),
   };

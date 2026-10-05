@@ -1,4 +1,3 @@
-import { watch } from 'vue';
 import { WaveBinder } from 'wave-binder';
 import './crypto-compat';
 
@@ -13,6 +12,7 @@ import { completedWorkoutSessions, workoutStatistics, filterWorkoutHistory } fro
 import { validateExerciseStep } from '@/domain/workoutValidation';
 import { getExercisesForMuscleGroup } from '@/domain/exerciseChoices';
 import { createRuntimeStatus } from './runtime';
+import { bindExerciseCatalog } from './catalog';
 import { exercisesRef } from '@/stores/exercises';
 import EXT_API_CONFIG from './extapi.json';
 import LICENSE from './license.json';
@@ -131,7 +131,5 @@ wb.tangleNodes();
 
 void runtime.initialize(wb);
 
-// Persisted catalog changes are an explicit input to the selection graph.
-watch(exercisesRef, (exercises) => {
-  wb.getNodeByName('exerciseCatalog')?.next(exercises);
-}, { deep: true, immediate: true, flush: 'sync' });
+// Keep the local catalog available even when it loads before the runtime nodes.
+bindExerciseCatalog(exercisesRef, waveBinderStatus, () => wb.getNodeByName('exerciseCatalog'));

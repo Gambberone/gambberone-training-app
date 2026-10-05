@@ -32,7 +32,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: AppLayout,
-    meta: { requiresAuth: true },
+    meta: { appRoute: true },
     children: [
       {
         path: '',
@@ -61,7 +61,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'friends',
         name: 'friends',
-        meta: { title: 'Amici' },
+        meta: { title: 'Amici', requiresAuth: true },
         component: () => import('@/views/FriendsView.vue'),
       },
       {

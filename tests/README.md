@@ -39,3 +39,52 @@ clock rollover, invalid dates, empty states, and Vue subscription disposal.
 
 Also covers catalog updates and selection invalidation, pure duration calculations,
 and runtime readiness/failure/invalidation states with a simulated runtime.
+
+Local mode persistence and account isolation:
+
+```sh
+node tests/localData.test.mjs
+```
+
+Checks guest/account separation, reload persistence, playback checkpoints and
+one-time adoption of existing local caches. Guest data is never automatically
+imported into a connected account.
+
+First-time local onboarding timing:
+
+```sh
+node tests/appTour.test.mjs
+```
+
+Simulates delayed runtime readiness on a fresh guest visit and checks that the
+first step targets Home only after navigation mounts. Missing targets must not
+produce a centered fallback popover or mark onboarding complete.
+
+First-visit account/local choice:
+
+```sh
+node tests/entryChoice.test.mjs
+```
+
+Checks the initial login redirect, explicit local choice persisted across reloads,
+optional account connection, verified sessions and account-only social routes.
+
+Workout creator contextual guide:
+
+```sh
+node tests/creatorGuide.test.mjs
+```
+
+Covers context-dependent instructions for all step types, first-use offer,
+skip/replay, preserving the draft and removing highlights when the editor closes.
+Also checks the shared Driver.js popover style and that both popover and overlay
+are attached to the creator dialog so they remain visible in its native top layer.
+The guide preference is kept separately for each local/account archive.
+
+The Wavebinder test also covers local catalog loading before runtime readiness:
+selection must work once startup finishes without a Firebase snapshot, and local
+catalog edits must continue updating the available choices.
+
+Creator guide regression checks also verify that typing does not advance the
+name step, validation changes reuse the active popover, and modal transitions
+do not enable the fade animation.

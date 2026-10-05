@@ -56,6 +56,7 @@
         {{ tr(isSubmitting ? 'authDesign.signingIn' : 'ui.sign_in') }}
       </GttButton>
 
+      <GttButton mode="ghost" type="button" :disabled="isSubmitting" @click="continueWithoutAccount">{{ tr("localMode.continue") }}</GttButton>
       <p class="auth-switch">
         {{ tr('ui.don_t_have_an_account_yet') }}
         <RouterLink class="auth-link" to="/auth/register">
@@ -67,6 +68,7 @@
 </template>
 
 <script setup lang="ts">
+import { chooseLocalMode } from '@/composables/localMode';
 import GttInputField from '@/components/generic/form/GttInputField.vue';
 import { authErrorMessage, useAuth } from '@/composables/useAuth';
 import { tr } from '@/localization';
@@ -81,6 +83,11 @@ const isSubmitting = ref(false);
 const errorMessage = ref('');
 const router = useRouter();
 const { signIn } = useAuth();
+
+async function continueWithoutAccount() {
+  chooseLocalMode();
+  await router.replace({ name: 'home' });
+}
 
 async function submit() {
   isSubmitting.value = true;

@@ -39,7 +39,6 @@
     "previewSeconds": "{count} s",
     "previewRest": "Pausa tra le serie: {count} s",
     "previewUnnamed": "Nome esercizio non disponibile",
-
     "pendingRequests": "Richieste da gestire: {count}",
     "estimatedMinutes": "~{count} min stimati",
     "title": "Amici",
@@ -142,12 +141,10 @@
     "shareOnline": "Mostra quando sono online",
     "shareOnlineHint": "Solo gli amici accettati vedranno quando l’app è aperta e attiva. Disattivato per impostazione predefinita.",
     "presenceError": "Impossibile aggiornare lo stato online. Riprova.",
-
     "privacy": "Privacy",
     "appearance": "Aspetto e lingua",
     "playback": "Durante il workout",
     "security": "Sicurezza",
-
     "surprise": "Sorpresa",
     "viewPhoto": "Visualizza foto",
     "viewPhotoHint": "Tocca la foto per ingrandirla o modificarla.",
@@ -684,5 +681,61 @@
     "unavailableTitle": "App temporaneamente non disponibile",
     "unavailableMessage": "Non è stato possibile attivare le funzioni dell’app. Controlla la connessione e riprova.",
     "retry": "Riprova"
-}
+  },
+  "localMode": {
+    "title": "Modalità locale",
+    "settings": "Impostazioni",
+    "description": "I tuoi allenamenti restano su questo dispositivo. Nessuna sincronizzazione, amici o allenamento insieme. Cancellando i dati del browser perderai questo archivio.",
+    "connectHint": "Collegando un account userai un archivio separato. I dati locali non vengono caricati automaticamente e li ritroverai quando esci dall’account.",
+    "connect": "Collega un account",
+    "continue": "Continua senza account"
+  },
+  "creatorGuide": {
+    "title": "Ti accompagno nella prima scheda?",
+    "intro": "Una guida pratica mentre costruisci il workout. Puoi interromperla in qualsiasi momento senza perdere le modifiche.",
+    "start": "Inizia",
+    "skip": "Salta",
+    "replay": "Guida al workout creator",
+    "stop": "Chiudi guida",
+    "next": "Avanti",
+    "validation": "Completa i campi richiesti: il pulsante per aggiungere lo step si attiva quando i valori sono validi.",
+    "stages": {
+      "name": {
+        "title": "Dai un nome alla scheda",
+        "description": "Scrivi un nome riconoscibile, per esempio “Gambe A”. Quando hai finito, premi Avanti nella guida."
+      },
+      "add": {
+        "title": "Scegli il primo step",
+        "description": "Aggiungi un esercizio, una pausa, il riscaldamento o lo stretching. Per imparare serie e recuperi, parti da un esercizio."
+      },
+      "exercise": {
+        "title": "Scegli l’esercizio",
+        "description": "Cerca per nome oppure filtra per gruppo muscolare, poi seleziona un risultato."
+      },
+      "execution": {
+        "title": "Imposta come eseguirlo",
+        "description": "Scegli ripetizioni o durata, inserisci il valore e il numero di serie. Modifica i campi, poi premi Avanti nella guida."
+      },
+      "recovery": {
+        "title": "Decidi il recupero tra le serie",
+        "description": "Con più di una serie puoi attivare il recupero e indicarne i secondi. È diverso dallo step Pausa, che separa due attività. Poi premi Avanti."
+      },
+      "configure": {
+        "title": "Configura questo step",
+        "description": "Per una pausa imposta i secondi; per riscaldamento e stretching scegli gli esercizi e i relativi valori. Poi premi Avanti nella guida."
+      },
+      "commit": {
+        "title": "Aggiungi lo step alla sequenza",
+        "description": "Premi il pulsante evidenziato per confermare lo step. Il workout non è ancora salvato: puoi continuare ad aggiungere attività."
+      },
+      "sequence": {
+        "title": "Controlla l’ordine degli step",
+        "description": "Le frecce spostano gli step quando ce n’è più di uno. Puoi anche duplicarli, modificarli o eliminarli. Aggiungi altre attività se vuoi, poi premi Avanti nella guida."
+      },
+      "save": {
+        "title": "Salva la tua scheda",
+        "description": "Premi Salva workout per conservarla. La guida termina quando chiudi il creator; puoi riaprirla dal pulsante Guida senza modificare la scheda."
+      }
+    }
+  }
 }

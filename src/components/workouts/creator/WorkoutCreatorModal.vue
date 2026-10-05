@@ -15,6 +15,7 @@
     :enable-full-screen="isDesktop"
   >
     <WorkoutCreatorDesktop
+      :open="isOpen"
       :exercise-errors="exerciseValidationErrors ?? []"
       @save="handleAction('save-workout')"
       @cancel-step="requestGoBack"

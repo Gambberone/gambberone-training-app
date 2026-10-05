@@ -465,7 +465,7 @@ export function startSharedWorkouts() {
     stopInvites?.();
     authenticatedUid = user?.uid;
     sharedInvites.value = [];
-    if (startedForUser && startedForUser !== user?.uid)
+    if (!user || (startedForUser && startedForUser !== user.uid))
       sharedRoomId.value = null;
     startedForUser = user?.uid;
     bindRoom();

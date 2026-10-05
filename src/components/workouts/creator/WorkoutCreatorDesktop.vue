@@ -1,10 +1,11 @@
 <template>
-  <div class="desktop-creator flex h-full min-h-0 flex-col gap-3 lg:gap-5">
+  <div data-creator-guide-root class="desktop-creator flex h-full min-h-0 flex-col gap-3 lg:gap-5">
+    <WorkoutCreatorGuide :open="open" :can-commit="stepValid" />
     <header
       class="flex shrink-0 items-end gap-6 border-b border-base-300 pb-3 lg:pb-4"
       :class="{ 'max-lg:hidden': Boolean(currentWorkoutCreatorStep) }"
     >
-      <div class="min-w-0 flex-1 [&_.fieldset]:pb-0">
+      <div data-creator-guide="name" class="min-w-0 flex-1 [&_.fieldset]:pb-0">
         <GttInputField
           id="desktop-workout-name"
           v-model="workoutName"
@@ -24,6 +25,7 @@
         class="hidden h-10 shrink-0 lg:inline-flex"
         type="button"
         :disabled="!canSaveWorkout"
+        data-creator-guide="save"
         @click="saveWorkout"
       >
         {{ tr("ui.save_workout") }}
@@ -49,7 +51,7 @@
             <span>{{ estimatedDuration }}</span>
           </p>
         </div>
-        <div class="grid shrink-0 grid-cols-2 gap-2">
+        <div data-creator-guide="add" class="grid shrink-0 grid-cols-2 gap-2">
           <GttButton
             mode="outline"
             v-for="type in addTypes"
@@ -68,6 +70,7 @@
           </GttButton>
         </div>
         <ol
+          data-creator-guide="sequence"
           ref="stepList"
           class="creator-sequence min-h-0 flex-1 space-y-2 overflow-y-auto pr-1"
         >
@@ -207,7 +210,7 @@
               tr("creator.sequenceDuration", { duration: estimatedDuration })
             }}</span>
           </div>
-          <div class="min-h-0 flex-1 overflow-y-auto px-2 py-2 lg:p-5">
+          <div data-creator-guide="configure" class="min-h-0 flex-1 overflow-y-auto px-2 py-2 lg:p-5">
             <WorkoutCreatorExerciseAction
               v-if="currentWorkoutCreatorStep.type === 'EXERCISE'"
               :key="editorKey"
@@ -265,6 +268,7 @@
               class="min-w-0 flex-1 whitespace-nowrap lg:flex-none"
               type="button"
               :disabled="!stepValid"
+              data-creator-guide="commit"
               @click="commitStep"
             >
               <span class="lg:hidden">{{ tr("ui.save_step") }}</span
@@ -300,6 +304,7 @@
         class="w-full"
         type="button"
         :disabled="!canSaveWorkout"
+        data-creator-guide="save"
         @click="saveWorkout"
       >
         {{ tr("ui.save_workout") }}
@@ -309,6 +314,7 @@
 </template>
 
 <script setup lang="ts">
+import WorkoutCreatorGuide from "./WorkoutCreatorGuide.vue";
 import GttInputField from "@/components/generic/form/GttInputField.vue";
 import type { WorkoutCreatorStep } from "@/constants";
 import {
@@ -350,7 +356,7 @@ import WorkoutCreatorExerciseAction from "./WorkoutCreatorExerciseAction.vue";
 import WorkoutCreatorPauseAction from "./WorkoutCreatorPauseAction.vue";
 import WorkoutCreatorStretchingAction from "./WorkoutCreatorStretchingAction.vue";
 
-const props = defineProps<{ exerciseErrors: string[] }>();
+const props = defineProps<{ exerciseErrors: string[]; open: boolean }>();
 const emit = defineEmits<{ save: []; "cancel-step": [] }>();
 const showErrors = ref(false);
 const stepList = ref<HTMLOListElement>();

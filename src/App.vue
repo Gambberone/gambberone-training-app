@@ -25,7 +25,7 @@ const route = useRoute();
 const activeWorkout = computed(() =>
   activeWorkoutSessionRef.value?.sharedWorkout ?? workoutsRef.value.find((workout) => workout.id === activeWorkoutSessionRef.value?.workoutId),
 );
-const isAppRoute = computed(() => route.matched.some((record) => record.meta.requiresAuth));
+const isAppRoute = computed(() => route.matched.some((record) => record.meta.appRoute));
 
 watch(
   () => route.fullPath,

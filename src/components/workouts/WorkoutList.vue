@@ -112,6 +112,7 @@
           <GttButton
             mode="ghost"
             :disabled="!!activeWorkoutSessionRef || !!sharedRoomId"
+            v-if="currentUser?.emailVerified"
             :aria-label="tr('together.title')"
             @click="selectedTogetherWorkout = workout"
             ><UsersRound :size="17" aria-hidden="true" /><span
@@ -183,6 +184,8 @@
 </template>
 
 <script setup lang="ts">
+import { useAuth } from "@/composables/useAuth";
+const { currentUser } = useAuth();
 import {
   selectedTogetherWorkout,
   sharedRoomId,

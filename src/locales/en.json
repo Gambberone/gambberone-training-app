@@ -39,7 +39,6 @@
     "previewSeconds": "{count} s",
     "previewRest": "Rest between sets: {count} s",
     "previewUnnamed": "Exercise name unavailable",
-
     "pendingRequests": "Requests to review: {count}",
     "estimatedMinutes": "~{count} min estimated",
     "title": "Friends",
@@ -142,12 +141,10 @@
     "shareOnline": "Show when I am online",
     "shareOnlineHint": "Only accepted friends will see when the app is open and active. Off by default.",
     "presenceError": "Unable to update online visibility. Try again.",
-
     "privacy": "Privacy",
     "appearance": "Appearance and language",
     "playback": "During your workout",
     "security": "Security",
-
     "surprise": "Surprise",
     "viewPhoto": "View photo",
     "viewPhotoHint": "Tap the photo to enlarge or edit it.",
@@ -684,5 +681,61 @@
     "unavailableTitle": "App temporarily unavailable",
     "unavailableMessage": "The app’s features could not be activated. Check your connection and try again.",
     "retry": "Try again"
-}
+  },
+  "localMode": {
+    "title": "Local mode",
+    "settings": "Settings",
+    "description": "Your workouts stay on this device. No synchronization, friends or shared workouts. Clearing browser data deletes this archive.",
+    "connectHint": "Connecting an account uses a separate archive. Local data is not uploaded automatically and will be available again when you sign out.",
+    "connect": "Connect an account",
+    "continue": "Continue without an account"
+  },
+  "creatorGuide": {
+    "title": "Want help building your first workout?",
+    "intro": "A practical guide while you build your workout. Stop at any time without losing your edits.",
+    "start": "Start",
+    "skip": "Skip",
+    "replay": "Workout creator guide",
+    "stop": "Close guide",
+    "next": "Next",
+    "validation": "Complete the required fields. The add-step button becomes available when the values are valid.",
+    "stages": {
+      "name": {
+        "title": "Name your workout",
+        "description": "Enter a recognizable name, such as “Legs A”. When you are done, press Next in the guide."
+      },
+      "add": {
+        "title": "Choose your first step",
+        "description": "Add an exercise, rest, warm-up or stretching. Start with an exercise to learn about sets and recovery."
+      },
+      "exercise": {
+        "title": "Choose an exercise",
+        "description": "Search by name or filter by muscle group, then select a result."
+      },
+      "execution": {
+        "title": "Set up the exercise",
+        "description": "Choose repetitions or duration, enter the value and the number of sets. Edit the fields, then press Next in the guide."
+      },
+      "recovery": {
+        "title": "Choose recovery between sets",
+        "description": "With more than one set, you can enable recovery and set its duration. This differs from a Rest step, which separates activities. Then press Next."
+      },
+      "configure": {
+        "title": "Configure this step",
+        "description": "For rest, enter seconds. For warm-up and stretching, choose exercises and their values. Then press Next in the guide."
+      },
+      "commit": {
+        "title": "Add the step to your sequence",
+        "description": "Press the highlighted button to confirm the step. The workout is not saved yet; you can keep adding activities."
+      },
+      "sequence": {
+        "title": "Review the step order",
+        "description": "Arrows move steps when there is more than one. You can also duplicate, edit or delete them. Add more activities if you like, then press Next in the guide."
+      },
+      "save": {
+        "title": "Save your workout",
+        "description": "Press Save workout to keep it. The guide ends when you close the creator; reopen it with the Guide button without changing your workout."
+      }
+    }
+  }
 }

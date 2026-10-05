@@ -18,7 +18,7 @@
         {{ tr("creator.changeExercise") }}
       </GttButton>
     </div>
-    <div v-if="isPickerOpen || !selectedExercise" class="space-y-3">
+    <div data-creator-guide="exercise" v-if="isPickerOpen || !selectedExercise" class="space-y-3">
       <div
         class="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
       >
@@ -98,7 +98,7 @@
         </dd>
       </div>
     </dl>
-    <fieldset v-if="selectedExercise" class="space-y-3">
+    <fieldset data-creator-guide="execution" v-if="selectedExercise" class="space-y-3">
       <legend class="mb-2 text-sm font-medium">
         {{ tr("creator.execution") }}
       </legend>
@@ -144,6 +144,7 @@
       </div>
     </fieldset>
     <div
+      data-creator-guide="recovery"
       v-if="selectedExercise"
       class="grid grid-cols-1 items-end gap-3 border-t border-base-300 pt-4 sm:grid-cols-2"
     >

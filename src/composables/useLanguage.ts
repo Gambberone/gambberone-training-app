@@ -15,7 +15,7 @@ onAuthStateChanged(auth, (user) => {
   isLanguageReady.value = false;
   languageError.value = false;
   if (!user) {
-    i18n.global.locale.value = 'it';
+    isLanguageReady.value = true;
     return;
   }
   unsubscribe = onSnapshot(
@@ -35,6 +35,10 @@ onAuthStateChanged(auth, (user) => {
 
 async function changeLanguage(language: string) {
   const user = auth.currentUser;
+  if (!user && (language === 'it' || language === 'en')) {
+    i18n.global.locale.value = language;
+    return;
+  }
   if (
     !user ||
     !isLanguageReady.value ||

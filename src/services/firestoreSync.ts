@@ -1,3 +1,4 @@
+import { localDataOwner, localStorageKey } from '@/composables/localRef';
 import type { WorkoutSession } from '@/constants';
 import { MUSCLE_GROUPS, exercises as seedExercises } from '@/domain/exercises';
 import { auth, db } from '@/firebase';
@@ -40,7 +41,7 @@ const collectionDocument = (userId: string, name: string, id: string) =>
   doc(db, 'users', userId, name, id);
 
 async function syncCollection(name: string, state: Ref<Entity[]>) {
-  if (!activeUserId || applyingRemoteChange) return;
+  if (!activeUserId || localDataOwner() !== activeUserId || applyingRemoteChange) return;
 
   const userId = activeUserId;
   const previousIds = remoteIds.get(name) ?? new Set<string>();
@@ -57,7 +58,7 @@ async function syncCollection(name: string, state: Ref<Entity[]>) {
 }
 
 async function syncActiveSession() {
-  if (!activeUserId || applyingRemoteChange) return;
+  if (!activeUserId || localDataOwner() !== activeUserId || applyingRemoteChange) return;
   await setDoc(doc(userDocument(activeUserId), 'state', 'activeWorkoutSession'), {
     value: activeWorkoutSessionRef.value,
   });
@@ -117,6 +118,7 @@ function subscribeToUserData(userId: string) {
   collections.forEach(({ name, state }) => {
     unsubscribeCallbacks.push(
       onSnapshot(collection(userDocument(userId), name), (snapshot) => {
+        if (activeUserId !== userId || localDataOwner() !== userId) return;
         applyingRemoteChange = true;
         state.value = snapshot.docs.map((item) => item.data() as Entity);
         remoteIds.set(name, new Set(snapshot.docs.map((item) => item.id)));
@@ -127,6 +129,7 @@ function subscribeToUserData(userId: string) {
 
   unsubscribeCallbacks.push(
     onSnapshot(doc(userDocument(userId), 'state', 'activeWorkoutSession'), (snapshot) => {
+      if (activeUserId !== userId || localDataOwner() !== userId) return;
       applyingRemoteChange = true;
       activeWorkoutSessionRef.value =
         (snapshot.data()?.value as WorkoutSession | null | undefined) ?? null;
@@ -207,5 +210,5 @@ export function resetDeletedAccountData() {
     state.value = [];
   });
   activeWorkoutSessionRef.value = null;
-  localStorage.removeItem('gtt:workout-playback');
+  localStorage.removeItem(localStorageKey('gtt:workout-playback'));
 }

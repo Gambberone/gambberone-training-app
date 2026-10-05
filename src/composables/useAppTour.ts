@@ -1,6 +1,7 @@
 import { auth, db } from '@/firebase';
 import { i18n } from '@/i18n';
 import router from '@/router';
+import { waveBinderStatus } from '@/wavebinder';
 import { activeWorkoutSessionRef } from '@/stores/workoutCreator';
 import { driver, type Driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -8,6 +9,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { nextTick, readonly, ref, watch } from 'vue';
 import { useLanguage } from './useLanguage';
+import { localStorageKey } from './localRef';
 
 const running = ref(false);
 const error = ref(false);
@@ -27,6 +29,10 @@ const destinations = [
 ];
 
 async function persistSeen(uid: string) {
+  if (uid === 'guest') {
+    localStorage.setItem(localStorageKey('gtt:tour-seen'), '1');
+    return;
+  }
   try {
     await setDoc(
       preferenceDoc(uid),
@@ -40,10 +46,12 @@ async function persistSeen(uid: string) {
 
 async function startTour() {
   const user = auth.currentUser;
-  if (!user || running.value || activeWorkoutSessionRef.value) return;
+  if (waveBinderStatus.value !== 'ready' || running.value || activeWorkoutSessionRef.value) return;
+  const uid = user?.uid ?? 'guest';
   error.value = false;
   running.value = true;
   const t = i18n.global.t;
+  let displayed = false;
   async function goTo(index: number) {
     if (navigating || !running.value) return;
     if (index >= destinations.length) {
@@ -57,7 +65,12 @@ async function startTour() {
       await router.push({ name: destination.name, query: destination.query });
       await nextTick();
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      if (running.value && auth.currentUser?.uid === user!.uid) {
+      if (running.value && (auth.currentUser?.uid ?? 'guest') === uid) {
+        // Driver falls back to a centered popover when its target is absent.
+        if (waveBinderStatus.value !== 'ready' || !document.querySelector(destination.selector)) {
+          throw new Error('Tour target is not mounted');
+        }
+        displayed = true;
         if (tour?.isActive()) tour.moveTo(index);
         else tour?.drive(index);
       }
@@ -96,9 +109,9 @@ async function startTour() {
     onDestroyed: () => {
       running.value = false;
       tour = undefined;
-      if (auth.currentUser?.uid === user.uid) {
+      if (displayed && (auth.currentUser?.uid ?? 'guest') === uid) {
         seen.value = true;
-        void persistSeen(user.uid);
+        void persistSeen(uid);
       }
     },
     steps: destinations.map((destination, index) => ({
@@ -124,6 +137,8 @@ export function initializeAppTour() {
     if (!user) {
       tour?.destroy();
       offeredUser = undefined;
+      seen.value = localStorage.getItem(localStorageKey('gtt:tour-seen')) === '1';
+      ready.value = true;
       return;
     }
     stopListener = onSnapshot(
@@ -139,11 +154,12 @@ export function initializeAppTour() {
     );
   });
   watch(
-    [ready, seen, isLanguageReady, () => router.currentRoute.value.name, activeWorkoutSessionRef],
+    [ready, seen, isLanguageReady, waveBinderStatus, () => router.currentRoute.value.name, activeWorkoutSessionRef],
     () => {
       const user = auth.currentUser;
       if (
-        !user?.emailVerified ||
+        waveBinderStatus.value !== 'ready' ||
+        (user && !user.emailVerified) ||
         !ready.value ||
         seen.value ||
         !isLanguageReady.value ||
@@ -152,13 +168,14 @@ export function initializeAppTour() {
       )
         return;
       if (
-        !router.currentRoute.value.matched.some((record) => record.meta.requiresAuth) ||
-        offeredUser === user.uid
+        !router.currentRoute.value.matched.some((record) => record.meta.appRoute) ||
+        offeredUser === (user?.uid ?? 'guest')
       )
         return;
-      offeredUser = user.uid;
+      offeredUser = user?.uid ?? 'guest';
       void startTour();
     },
+    { flush: 'post' },
   );
 }
 

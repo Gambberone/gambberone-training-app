@@ -2,9 +2,9 @@
   <section class="account-page mx-auto w-full max-w-6xl space-y-6 pb-8">
     <header class="mb-7">
       <h1 class="text-3xl font-bold tracking-tight text-base-content">
-        {{ t("account.title") }}
+        {{ t(currentUser ? "account.title" : "localMode.settings") }}
       </h1>
-      <p class="mt-2 text-sm text-base-content/65">{{ t("account.intro") }}</p>
+      <p class="mt-2 text-sm text-base-content/65">{{ t(currentUser ? "account.intro" : "localMode.description") }}</p>
     </header>
 
     <GttModal
@@ -23,10 +23,16 @@
       />
     </GttModal>
 
+    <div v-if="!currentUser" class="rounded-box border border-base-300 p-5">
+      <h2 class="font-bold">{{ t("localMode.title") }}</h2>
+      <p class="mt-2 text-sm text-base-content/65">{{ t("localMode.description") }}</p>
+      <p class="mt-2 text-sm text-base-content/65">{{ t("localMode.connectHint") }}</p>
+      <RouterLink class="btn btn-primary mt-4" to="/auth/login" :class="{ 'btn-disabled': activeWorkoutSessionRef }">{{ t("localMode.connect") }}</RouterLink>
+    </div>
     <div
       class="grid items-start gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
     >
-      <div class="min-w-0 space-y-4">
+      <div v-if="currentUser" class="min-w-0 space-y-4">
         <details class="card border border-base-300/50 bg-base-100" open>
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
@@ -128,7 +134,7 @@
           </form>
         </details>
       </div>
-      <div class="min-w-0 space-y-4">
+      <div v-if="currentUser" class="min-w-0 space-y-4">
         <details class="card border border-base-300/50 bg-base-100" open>
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
@@ -195,10 +201,10 @@
             />
           </div>
         </details>
-        <h2 class="px-1 pt-3 text-sm font-bold text-base-content/65">
+        <h2 v-if="currentUser" class="px-1 pt-3 text-sm font-bold text-base-content/65">
           {{ t("account.security") }}
         </h2>
-        <details class="card border border-base-300/50 bg-base-100">
+        <details v-if="currentUser" class="card border border-base-300/50 bg-base-100">
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
@@ -267,7 +273,7 @@
             </GttButton>
           </form>
         </details>
-        <details class="card border border-base-300/50 bg-base-100">
+        <details v-if="currentUser" class="card border border-base-300/50 bg-base-100">
           <summary
             class="account-card-summary flex cursor-pointer items-center justify-between gap-4 rounded-2xl p-5 font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
@@ -397,7 +403,7 @@
         </details>
       </div>
     </div>
-    <footer
+    <footer v-if="currentUser"
       class="flex items-center justify-end border-t border-base-300/50 pt-4"
     >
       <GttButton
@@ -556,7 +562,7 @@ async function confirmDeleteAccount() {
   deleteError.value = "";
   try {
     await deleteAccount(deletePassword.value);
-    await router.replace({ name: "login" });
+    await router.replace({ name: "home" });
   } catch (error) {
     deleteError.value = authErrorMessage(error);
   } finally {
@@ -567,7 +573,7 @@ async function confirmDeleteAccount() {
 
 async function logout() {
   await signOut();
-  await router.replace({ name: "login" });
+  await router.replace({ name: "home" });
 }
 </script>
 

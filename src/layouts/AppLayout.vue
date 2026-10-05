@@ -4,7 +4,7 @@
     :class="{ 'app-layout--nav-expanded': isNavExpanded }"
   >
     <div class="app-content flex min-h-0 min-w-0 flex-1 flex-col">
-      <SharedWorkoutPanel />
+      <SharedWorkoutPanel v-if="currentUser?.emailVerified" />
       <div
         v-if="activeWorkout && !isWorkoutPlayerOpenRef"
         class="shrink-0 px-4 pt-4"
@@ -158,6 +158,7 @@
       </router-link>
 
       <router-link
+        v-if="currentUser?.emailVerified"
         to="/friends"
         :aria-label="
           pendingFriendsCount

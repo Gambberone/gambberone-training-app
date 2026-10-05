@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'vite';
-import { effectScope } from 'vue';
+import { effectScope, ref } from 'vue';
 import { NodeFactory } from '../node_modules/wave-binder/lib/wvb/node-factory.js';
 
 // Test real local nodes and application functions without starting the license/network runtime.
@@ -32,6 +32,23 @@ try {
     { id: 'push-up', name: 'Push-up', muscleGroupId: 'CHEST' },
     { id: 'squat', name: 'Squat', muscleGroupId: 'LEGS' },
   ];
+  // Fresh local mode: the catalog loads before runtime nodes exist and no remote
+  // account snapshot follows. Readiness must replay the latest local catalog.
+  const { bindExerciseCatalog } = await server.ssrLoadModule('/src/wavebinder/catalog.ts');
+  const localCatalog = ref(catalog);
+  const runtimeStatus = ref('loading');
+  const stopCatalogBinding = bindExerciseCatalog(localCatalog, runtimeStatus, () =>
+    runtimeStatus.value === 'ready' ? node('exerciseCatalog') : undefined,
+  );
+  assert.deepEqual(value('exerciseCatalog'), []);
+  runtimeStatus.value = 'ready';
+  assert.deepEqual(value('exerciseCatalog'), catalog);
+  node('selectedMuscleGroupId').next('CHEST');
+  node('selectedExercise').setSelection(0);
+  assert.equal(value('selectedExercise').id, 'push-up', 'Guest selection works without an account update');
+  localCatalog.value = [...catalog, { id: 'local-fly', name: 'Local fly', muscleGroupId: 'CHEST' }];
+  assert.deepEqual(node('selectedExercise').choices.map((exercise) => exercise.id), ['push-up', 'local-fly']);
+  stopCatalogBinding();
   node('exerciseCatalog').next(catalog);
   node('selectedMuscleGroupId').next('CHEST');
   assert.deepEqual(node('selectedExercise').choices.map((exercise) => exercise.id), ['push-up']);
